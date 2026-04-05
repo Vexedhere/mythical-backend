@@ -8,19 +8,18 @@ app.use(express.json());
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
-// --- THE FIX: Multi-User Session Map ---
+// Session Map to keep users private
 let activeSessions = new Map(); 
 
 app.post('/api/auth', (req, res) => {
     const { passcode, googleName } = req.body;
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     
-    const staff = {"C@MN26": "Chethan", "T@MN26": "Thaman", "M@MN26": "Maddy"};
+    const staff = {"C@MN26": "Chethan", "T@MN26": "Thaman", "P@MN26": "Pavan"};
     let authorizedName = googleName || staff[passcode];
 
     if (authorizedName) {
         activeSessions.set(clientIp, authorizedName); 
-        console.log(`🔐 Private Session: ${authorizedName} [${clientIp}]`);
         return res.json({ success: true, name: authorizedName });
     }
     res.status(401).json({ success: false, message: "Unauthorized" });
@@ -38,11 +37,12 @@ app.post('/api/chat', async (req, res) => {
             model: "llama-3.1-8b-instant",
             messages: req.body.messages
         }, {
-            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}` }
+            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}` },
+            timeout: 10000 // 10 second timeout
         });
         res.json(response.data);
     } catch (error) {
-        res.status(500).json({ error: "Neural Link Offline." });
+        res.status(500).json({ error: "Neural Link Timed Out." });
     }
 });
 
@@ -52,7 +52,8 @@ app.post('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
-app.get('/', (req, res) => res.send("Mythical AI Engine: Multi-User Core Online"));
+app.get('/api/health', (req, res) => res.json({ status: "ok" }));
+app.get('/', (req, res) => res.send("Mythical AI Engine: Online"));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server active on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
