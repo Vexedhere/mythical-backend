@@ -7,7 +7,6 @@
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Mythical AI">
     <link rel="apple-touch-icon" href="https://mythicalstudios.online/logo.png">
     <link rel="manifest" href="manifest.json">
 
@@ -23,6 +22,7 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .thinking-pulse { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .skeleton { background: #1a1a1a; position: relative; overflow: hidden; border-radius: 2.5rem; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
@@ -31,11 +31,13 @@
 
     <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
         <div class="glass p-12 rounded-[3.5rem] w-full max-w-md text-center shadow-2xl chat-animate">
-            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-purple-500/20">M</div>
-            <h1 class="text-3xl font-black mb-2 italic uppercase tracking-widest text-white">Mythical AI</h1>
+            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl">M</div>
+            <h1 class="text-3xl font-black mb-2 italic uppercase tracking-widest">Mythical AI</h1>
             <p class="text-[10px] text-slate-500 font-bold mb-10 tracking-[0.3em] uppercase">By Chethan</p>
+            
             <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
             <div class="g_id_signin mb-6 flex justify-center" data-type="standard"></div>
+
             <div class="h-[1px] bg-white/10 w-full mb-6"></div>
             <input type="password" id="staff-pass" placeholder="Security Passcode" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-purple-500 text-center font-bold text-purple-400">
             <button onclick="loginWithPasscode()" class="w-full py-4 rounded-2xl font-black bg-white text-black hover:opacity-90 active:scale-95 transition-all uppercase text-xs tracking-widest">Authorize Node</button>
@@ -64,18 +66,19 @@
         </header>
         <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-12 scroll-smooth"></div>
         <div class="p-10">
-            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center focus-within:border-purple-500/40 transition-all duration-500">
+            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center focus-within:border-purple-500/30 transition-all duration-500">
                 <input type="text" id="input-field" placeholder="Ask anything or '/imagine'..." class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white placeholder-slate-600">
                 <button id="send-btn" onclick="handleChat()" class="mythic-gradient w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
+            <p class="text-center text-[9px] text-slate-700 font-bold mt-4 uppercase tracking-[0.4em]">By Chethan • Mythical AI</p>
         </div>
     </main>
 
     <div id="download-popup" class="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md hidden items-center justify-center p-6">
         <div class="glass p-10 rounded-[3rem] max-w-sm w-full text-center chat-animate border-purple-500/20">
-            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-2xl font-black">M</div>
+            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-2xl font-black text-white">M</div>
             <h2 class="text-2xl font-black mb-2 text-white uppercase italic">Install Mythical</h2>
             <p id="download-text" class="text-slate-400 text-sm mb-8 leading-relaxed"></p>
             <button onclick="closeDownload()" class="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest">Close</button>
@@ -89,7 +92,6 @@
         let currentChatId = null;
         let deferredPrompt;
 
-        // --- AUTH & SETUP ---
         window.onload = () => {
             if (!sessionStorage.getItem('myth_auth')) window.location.hash = "/login";
             else enterApp(userName);
@@ -110,8 +112,8 @@
                     sessionStorage.setItem('myth_user', data.name);
                     userName = data.name;
                     enterApp(data.name);
-                } else { alert("Access Denied"); }
-            } catch (e) { alert("Server starting up..."); }
+                } else { alert("Unauthorized"); }
+            } catch (e) { alert("Server starting up... Please wait 30 seconds."); }
         }
 
         function handleGoogleLogin(res) { syncAuth({ googleName: JSON.parse(atob(res.credential.split('.')[1])).name }); }
@@ -129,7 +131,7 @@
             renderSidebar();
         }
 
-        // --- CHAT LOGIC ---
+        // --- AI LOGIC ---
         function generate23Id() { return Array.from({length: 23}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join(''); }
 
         async function handleChat() {
@@ -152,11 +154,15 @@
                     body: JSON.stringify({ messages: [{ role: "system", content: "You are Mythical AI by Chethan." }, ...chats[currentChatId], { role: "user", content: val }] })
                 });
                 const data = await res.json();
+                if (data.error) throw new Error(data.error);
                 aiMsg.innerText = data.choices[0].message.content;
                 chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: aiMsg.innerText });
                 localStorage.setItem(`myth_chats_${userName}`, JSON.stringify(chats));
                 renderSidebar();
-            } catch (e) { aiMsg.innerText = "Error Connecting to Cloud."; }
+            } catch (e) { 
+                aiMsg.innerText = e.message; 
+                if (e.message.includes("Session")) { sessionStorage.clear(); location.reload(); }
+            }
         }
 
         function triggerImageGen(p) {
