@@ -9,7 +9,6 @@ app.use(express.json());
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
 // --- THE FIX: Multi-User Session Map ---
-// This stores { "192.168.1.1": "Chethan", "1.2.3.4": "Maddy" }
 let activeSessions = new Map(); 
 
 app.post('/api/auth', (req, res) => {
@@ -20,9 +19,8 @@ app.post('/api/auth', (req, res) => {
     let authorizedName = googleName || staff[passcode];
 
     if (authorizedName) {
-        // We set the name specifically for THIS IP address
         activeSessions.set(clientIp, authorizedName); 
-        console.log(`🔐 Private Session Created: ${authorizedName} [${clientIp}]`);
+        console.log(`🔐 Private Session: ${authorizedName} [${clientIp}]`);
         return res.json({ success: true, name: authorizedName });
     }
     res.status(401).json({ success: false, message: "Unauthorized" });
@@ -31,7 +29,6 @@ app.post('/api/auth', (req, res) => {
 app.post('/api/chat', async (req, res) => {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     
-    // Check if THIS specific IP has a session
     if (!activeSessions.has(clientIp)) {
         return res.status(403).json({ error: "Session Expired. Please Re-login." });
     }
@@ -58,4 +55,4 @@ app.post('/api/logout', (req, res) => {
 app.get('/', (req, res) => res.send("Mythical AI Engine: Multi-User Core Online"));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Multi-User Server active on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server active on port ${PORT}`));
