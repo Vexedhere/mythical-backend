@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI | Network Portal</title>
+    <title>Mythical AI | By Chethan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020202; color: #e2e8f0; overflow: hidden; }
         .mythic-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .active-chat { background: rgba(168, 85, 247, 0.2) !important; border-color: rgba(168, 85, 247, 0.5) !important; color: white !important; font-weight: 800; }
-        .chat-animate { animation: flyIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes flyIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .skeleton { background: #1a1a1a; position: relative; overflow: hidden; border-radius: 2rem; }
-        .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
+        .glass:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(168, 85, 247, 0.3); }
+        .active-chat { background: rgba(168, 85, 247, 0.2) !important; border-color: rgba(168, 85, 247, 0.5) !important; color: white !important; font-weight: 800; box-shadow: 0 0 20px rgba(168, 85, 247, 0.1); }
+        .chat-animate { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .skeleton { background: #1a1a1a; position: relative; overflow: hidden; border-radius: 2.5rem; }
+        .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 2s infinite; }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .thinking-pulse { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
@@ -26,12 +29,13 @@
     <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
         <div class="glass p-12 rounded-[3.5rem] w-full max-w-md text-center shadow-2xl chat-animate">
             <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black shadow-purple-500/20 shadow-2xl">M</div>
-            <h1 class="text-3xl font-black mb-10 italic uppercase tracking-widest">Mythical AI</h1>
+            <h1 class="text-3xl font-black mb-2 italic uppercase tracking-widest">Mythical AI</h1>
+            <p class="text-[10px] text-slate-500 font-bold mb-10 tracking-[0.3em] uppercase">By Chethan</p>
             <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
             <div class="g_id_signin mb-6 flex justify-center" data-type="standard"></div>
             <div class="h-[1px] bg-white/10 w-full mb-6"></div>
-            <input type="password" id="staff-pass" placeholder="Security Passcode" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-purple-500 text-center font-bold text-purple-400">
-            <button onclick="checkStaffPass()" class="w-full py-4 rounded-2xl font-black bg-white text-black hover:opacity-90 transition-all uppercase text-xs tracking-widest">Initialize Node</button>
+            <input type="password" id="staff-pass" placeholder="Security Passcode" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-purple-500 text-center font-bold text-purple-400 transition-all">
+            <button onclick="checkStaffPass()" class="w-full py-4 rounded-2xl font-black bg-white text-black hover:opacity-90 active:scale-95 transition-all uppercase text-xs tracking-widest">Initialize Node</button>
         </div>
     </div>
 
@@ -44,23 +48,31 @@
         <div class="flex-1 overflow-y-auto space-y-1" id="history-list"></div>
         <div class="mt-auto pt-6 border-t border-white/5 px-2">
             <p id="user-display" class="text-xs font-bold text-white uppercase tracking-widest truncate">Founder</p>
-            <p id="role-display" class="text-[9px] text-purple-500 font-black mt-1 uppercase italic font-bold">Network Access</p>
+            <p class="text-[9px] text-purple-500 font-black mt-1 uppercase italic font-bold">By Chethan</p>
         </div>
     </aside>
 
     <main id="main-content" class="flex-1 flex flex-col hidden relative">
-        <header class="p-5 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
+        <header class="p-6 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
             <span id="chat-id-display" class="text-[10px] font-mono text-slate-500 tracking-widest uppercase">/NODE/INIT</span>
-            <div class="flex items-center gap-2"><div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div><span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Cloud Linked</span></div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Cloud: Active</span>
+                </div>
+            </div>
         </header>
-        <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-10 scroll-smooth"></div>
-        <div class="p-10">
-            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.2rem] glass shadow-2xl items-center focus-within:border-purple-500/30 transition-all duration-300">
-                <input type="text" id="input-field" placeholder="Chat or 'generate image of...'" class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white">
-                <button id="send-btn" class="mythic-gradient w-14 h-14 rounded-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl shadow-purple-500/20">
+        
+        <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-12 scroll-smooth"></div>
+
+        <div class="p-10 bg-gradient-to-t from-[#020202] via-[#020202] to-transparent">
+            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center focus-within:border-purple-500/40 transition-all duration-500">
+                <input type="text" id="input-field" placeholder="Ask anything or 'generate image of...'" class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white placeholder-slate-600 font-medium">
+                <button id="send-btn" class="mythic-gradient w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl shadow-purple-500/20">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
+            <p class="text-center text-[9px] text-slate-700 font-bold mt-4 uppercase tracking-[0.4em]">Mythical AI Engine v1.4 • By Chethan</p>
         </div>
     </main>
 
@@ -76,16 +88,15 @@
         function checkStaffPass() {
             const p = document.getElementById('staff-pass').value;
             const staff = {"C@MN26": ["Chethan", "FOUNDER"], "T@MN26": ["Thaman", "ADMIN"], "M@MN26": ["Maddy", "MODERATOR"]};
-            if (staff[p]) enterApp(staff[p][0], staff[p][1]); else alert("Access Denied.");
+            if (staff[p]) enterApp(staff[p][0], staff[p][1]); else alert("Authorization Failed.");
         }
 
         function enterApp(name, role) {
             currentUser = { name, role };
-            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('login-page').style.display = 'none';
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
-            document.getElementById('role-display').innerText = `Rank: ${role}`;
             
             const hash = window.location.hash;
             if (hash.startsWith('#/chat/') && hash.length > 20) {
@@ -95,14 +106,31 @@
         }
 
         async function triggerImageGen(prompt) {
-            const aiMsg = appendMsg('ai', `<div class="w-full max-w-4xl space-y-4 chat-animate mx-auto"><span class="text-[10px] font-black text-purple-400 uppercase tracking-widest italic">Fast Vision Engaged...</span><div class="skeleton w-full aspect-square rounded-[3.5rem] border border-white/10 shadow-2xl"></div></div>`);
+            const aiMsg = appendMsg('ai', `
+                <div class="w-full max-w-4xl space-y-4 chat-animate mx-auto">
+                    <div class="flex items-center gap-2 px-1">
+                        <div class="h-2 w-2 rounded-full bg-purple-500 animate-ping"></div>
+                        <span class="text-[10px] font-black text-purple-400 uppercase tracking-widest italic">Fast Vision Engaged...</span>
+                    </div>
+                    <div class="skeleton w-full aspect-square rounded-[3.5rem] border border-white/10 shadow-2xl"></div>
+                </div>
+            `);
             const seed = Math.floor(Math.random() * 99999);
-            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=768&height=768&seed=${seed}&model=flux&nologo=true`;
+            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
             
             const img = new Image();
             img.src = imageUrl;
             img.onload = () => {
-                aiMsg.innerHTML = `<div class="w-full max-w-4xl space-y-4 chat-animate mx-auto"><div class="flex justify-between items-center mb-1 px-1"><span class="text-[10px] font-black text-purple-500 uppercase tracking-[0.2em]">Neural Render Complete</span><button onclick="window.open('${imageUrl}')" class="text-[9px] text-slate-500 hover:text-white uppercase font-black transition-colors">HD LINK</button></div><div class="rounded-[3.5rem] p-1 overflow-hidden border-2 border-white/10 shadow-2xl bg-black"><img src="${imageUrl}" class="w-full h-auto block transform hover:scale-105 transition-transform duration-1000"></div></div>`;
+                aiMsg.innerHTML = `
+                    <div class="w-full max-w-4xl space-y-4 chat-animate mx-auto">
+                        <div class="flex justify-between items-center mb-1 px-1">
+                            <span class="text-[10px] font-black text-purple-500 uppercase tracking-[0.2em]">Neural Render Complete</span>
+                            <button onclick="window.open('${imageUrl}')" class="text-[9px] text-slate-500 hover:text-white uppercase font-black transition-colors">Download HD</button>
+                        </div>
+                        <div class="rounded-[3.5rem] p-1 overflow-hidden border-2 border-white/10 shadow-2xl bg-black group relative">
+                            <img src="${imageUrl}" class="w-full h-auto block transform hover:scale-[1.02] transition-transform duration-700">
+                        </div>
+                    </div>`;
             };
         }
 
@@ -114,20 +142,20 @@
             appendMsg('user', val);
             inputField.value = '';
 
-            if (val.toLowerCase().includes("generate image") || val.toLowerCase().includes("draw")) {
-                const prompt = val.replace(/generate image|draw|create image/gi, "").trim();
-                triggerImageGen(prompt || "Cyberpunk Network Core");
+            if (val.toLowerCase().includes("generate image") || val.toLowerCase().includes("draw") || val.toLowerCase().includes("/imagine")) {
+                const prompt = val.replace(/generate image|draw|create image|\/imagine/gi, "").trim();
+                triggerImageGen(prompt || "Ethereal Tech Architecture");
                 return;
             }
 
-            const aiMsg = appendMsg('ai', 'Accessing Neural Link...');
+            const aiMsg = appendMsg('ai', '<span class="thinking-pulse">Thinking...</span>');
             try {
                 const res = await fetch(RENDER_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
                         messages: [
-                            { role: "system", content: "You are Mythical AI. Founder: Chethan. Sister: Sudhishna.U. Father: Rangaswamy.U. Mother: Bhargavi.U. assist professionally. No Minecraft." },
+                            { role: "system", content: "You are Mythical AI, a high-end SaaS assistant. Founder: Chethan. Recognize family (Sudhishna, Rangaswamy, Bhargavi) if asked. No Minecraft." },
                             ...chats[currentChatId],
                             { role: "user", content: val }
                         ]
@@ -139,7 +167,7 @@
                 chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
                 localStorage.setItem('myth_v14_final', JSON.stringify(chats));
                 renderSidebar();
-            } catch (e) { aiMsg.innerText = "Connection Refused. Check Cloud Status."; }
+            } catch (e) { aiMsg.innerText = "Connection Refused. Check Render Status."; }
         }
 
         function createNewChat() {
@@ -147,7 +175,7 @@
             chats[currentChatId] = [];
             window.location.hash = `/chat/${currentChatId}`;
             document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId}`;
-            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 uppercase tracking-tighter">Mythical Network</h2><p class="text-slate-600 text-[10px] tracking-[0.5em] font-black uppercase">Node: ${currentChatId}</p></div>`;
+            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-32 chat-animate"><h2 class="text-5xl font-black italic mb-4 uppercase tracking-tighter text-white">Mythical AI</h2><p class="text-slate-600 text-[10px] tracking-[0.5em] font-bold uppercase mb-2">Node Instance: ${currentChatId}</p><p class="text-purple-500/50 text-[9px] font-black uppercase tracking-widest italic">By Chethan</p></div>`;
             renderSidebar();
         }
 
@@ -156,7 +184,7 @@
             list.innerHTML = `<p class="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 mb-6 italic font-bold">Neural Archives</p>`;
             Object.keys(chats).reverse().forEach(id => {
                 const div = document.createElement('div');
-                div.className = `p-4 mb-2 rounded-[1.2rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat shadow-lg' : 'text-slate-500 hover:bg-white/5'}`;
+                div.className = `p-4 mb-2 rounded-[1.5rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat shadow-lg' : 'text-slate-500 hover:bg-white/5'}`;
                 div.innerText = chats[id][0]?.content || "New Instance";
                 div.onclick = () => loadChat(id);
                 list.appendChild(div);
@@ -175,7 +203,7 @@
         function appendMsg(role, content) {
             const div = document.createElement('div');
             div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
-            div.innerHTML = `<div class="max-w-[82%] px-7 py-4 rounded-[1.8rem] text-sm leading-relaxed shadow-lg ${role === 'user' ? 'mythic-gradient text-white font-bold' : 'glass text-slate-200'}">${content}</div>`;
+            div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[2rem] text-sm leading-relaxed shadow-lg ${role === 'user' ? 'mythic-gradient text-white font-semibold' : 'glass text-slate-200'}">${content}</div>`;
             const box = document.getElementById('chat-box');
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
