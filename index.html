@@ -27,69 +27,62 @@
 
     <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
         <div class="glass p-12 rounded-[3.5rem] w-full max-w-md text-center shadow-2xl chat-animate">
-            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-purple-500/20">M</div>
+            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl">M</div>
             <h1 class="text-3xl font-black mb-2 italic uppercase tracking-widest">Mythical AI</h1>
             <p class="text-[10px] text-slate-500 font-bold mb-10 tracking-[0.3em] uppercase">By Chethan</p>
-            
             <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
             <div class="g_id_signin mb-6 flex justify-center" data-type="standard"></div>
-
             <div class="h-[1px] bg-white/10 w-full mb-6"></div>
-            <input type="password" id="staff-pass" placeholder="Security Passcode" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-purple-500 text-center font-bold text-purple-400">
-            <button onclick="loginWithPasscode()" class="w-full py-4 rounded-2xl font-black bg-white text-black hover:opacity-90 active:scale-95 transition-all uppercase text-xs tracking-widest">Authorize Node</button>
+            <input type="password" id="staff-pass" placeholder="Passcode" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-purple-500 text-center font-bold text-purple-400">
+            <button onclick="loginWithPasscode()" class="w-full py-4 rounded-2xl font-black bg-white text-black hover:opacity-90 transition-all uppercase text-xs tracking-widest">Login</button>
         </div>
     </div>
 
     <aside id="sidebar" class="w-80 bg-[#050505] border-r border-white/5 flex flex-col p-6 hidden">
         <div class="flex items-center gap-3 mb-10 px-2">
-            <div class="w-10 h-10 mythic-gradient rounded-xl flex items-center justify-center font-bold text-white shadow-lg">M</div>
+            <div class="w-10 h-10 mythic-gradient rounded-xl flex items-center justify-center font-bold text-white">M</div>
             <span class="font-black text-xl italic uppercase tracking-tighter">Mythical</span>
         </div>
         <button onclick="createNewChat()" class="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-all text-[10px] font-black mb-10 uppercase tracking-[0.2em]">+ NEW INSTANCE</button>
-        <div class="flex-1 overflow-y-auto space-y-1" id="history-list"></div>
-        
+        <div id="history-list" class="flex-1 overflow-y-auto space-y-1"></div>
         <div class="mt-auto pt-6 border-t border-white/5 px-2">
             <p id="user-display" class="text-xs font-bold text-white uppercase tracking-widest truncate">Founder</p>
             <p class="text-[9px] text-purple-500 font-black mt-1 uppercase italic font-bold mb-4">By Chethan</p>
-            <button onclick="logout()" class="w-full py-3 rounded-xl border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/10 transition-all">Logout</button>
+            <button onclick="logout()" class="w-full py-3 rounded-xl border border-red-500/20 text-red-500 text-[10px] font-black uppercase transition-all">Logout</button>
         </div>
     </aside>
 
     <main id="main-content" class="flex-1 flex flex-col hidden relative">
         <header class="p-6 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
             <span id="chat-id-display" class="text-[10px] font-mono text-slate-500 tracking-widest uppercase">/NODE/INIT</span>
-            <div class="flex items-center gap-2">
-                <div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
-                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">IP Secured</span>
-            </div>
+            <div class="flex items-center gap-2"><div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div><span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">IP Secured</span></div>
         </header>
-        
         <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-12 scroll-smooth"></div>
-
-        <div class="p-10 bg-gradient-to-t from-[#020202] to-transparent">
-            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center focus-within:border-purple-500/30 transition-all duration-500">
+        <div class="p-10">
+            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center">
                 <input type="text" id="input-field" placeholder="Ask anything..." class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white">
-                <button id="send-btn" class="mythic-gradient w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+                <button id="send-btn" onclick="handleChat()" class="mythic-gradient w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
-            <p class="text-center text-[9px] text-slate-700 font-bold mt-4 uppercase tracking-[0.4em]">By Chethan • April 20 Launch Ready</p>
+            <p class="text-center text-[9px] text-slate-700 font-bold mt-4 uppercase tracking-[0.4em]">By Chethan • Mythical AI</p>
         </div>
     </main>
 
     <script>
         const API_BASE = "https://mythical-ai-engine.onrender.com/api";
         let userName = sessionStorage.getItem('myth_user') || 'Guest';
-        let chats = JSON.parse(localStorage.getItem(`myth_chats_${userName}`) || '{}');
+        let chats = {};
         let currentChatId = null;
 
-        window.addEventListener('load', () => {
+        // AUTH CHECK
+        window.onload = () => {
             if (!sessionStorage.getItem('myth_auth')) {
                 window.location.hash = "/login";
             } else {
                 enterApp(userName);
             }
-        });
+        };
 
         async function syncAuth(payload) {
             try {
@@ -102,54 +95,31 @@
                 if (data.success) {
                     sessionStorage.setItem('myth_auth', 'true');
                     sessionStorage.setItem('myth_user', data.name);
-                    userName = data.name; // Update local variable
-                    chats = JSON.parse(localStorage.getItem(`myth_chats_${userName}`) || '{}'); // Load PRIVATE chats
+                    userName = data.name;
                     enterApp(data.name);
-                } else { alert("Unauthorized"); }
-            } catch (e) { alert("Server starting up... Try again in 10 seconds."); }
+                } else { alert("Unauthorized Access"); }
+            } catch (e) { alert("Server warming up... Wait 10s and try again."); }
         }
 
-        function handleGoogleLogin(res) {
-            const data = JSON.parse(atob(res.credential.split('.')[1]));
-            syncAuth({ googleName: data.name });
-        }
-
-        function loginWithPasscode() {
-            const pass = document.getElementById('staff-pass').value;
-            syncAuth({ passcode: pass });
-        }
-
-        function logout() {
-            fetch(`${API_BASE}/logout`, { method: "POST" });
-            sessionStorage.clear();
-            location.reload();
-        }
+        function handleGoogleLogin(res) { syncAuth({ googleName: JSON.parse(atob(res.credential.split('.')[1])).name }); }
+        function loginWithPasscode() { syncAuth({ passcode: document.getElementById('staff-pass').value }); }
+        function logout() { sessionStorage.clear(); location.reload(); }
 
         function enterApp(name) {
             document.getElementById('login-page').style.display = 'none';
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
+            chats = JSON.parse(localStorage.getItem(`myth_chats_${name}`) || '{}');
             
             const hash = window.location.hash;
-            if (hash.startsWith('#/chat/') && hash.length > 20) {
-                loadChat(hash.split('/chat/')[1]);
-            } else { createNewChat(); }
+            if (hash.startsWith('#/chat/') && hash.length > 20) loadChat(hash.split('/chat/')[1]);
+            else createNewChat();
             renderSidebar();
         }
 
+        // CHAT LOGIC
         function generate23Id() { return Array.from({length: 23}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join(''); }
-
-        async function triggerImageGen(prompt) {
-            const aiMsg = appendMsg('ai', `<div class="w-full max-w-4xl space-y-4 chat-animate mx-auto"><span class="text-[10px] font-black text-purple-400 uppercase tracking-widest italic thinking-pulse">Thinking...</span><div class="skeleton w-full aspect-square border border-white/10"></div></div>`);
-            const seed = Math.floor(Math.random() * 99999);
-            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
-            const img = new Image();
-            img.src = imageUrl;
-            img.onload = () => {
-                aiMsg.innerHTML = `<div class="w-full max-w-4xl space-y-4 chat-animate mx-auto"><div class="flex justify-between items-center mb-1 px-1"><span class="text-[10px] font-black text-purple-500 uppercase tracking-[0.2em]">Neural Render</span><button onclick="window.open('${imageUrl}')" class="text-[9px] text-slate-500 hover:text-white font-black uppercase">HD</button></div><div class="rounded-[3.5rem] p-1 overflow-hidden border-2 border-white/10 shadow-2xl bg-black"><img src="${imageUrl}" class="w-full h-auto block transform hover:scale-[1.02] transition-all duration-700"></div></div>`;
-            };
-        }
 
         async function handleChat() {
             const inputField = document.getElementById('input-field');
@@ -160,7 +130,7 @@
             inputField.value = '';
 
             if (val.toLowerCase().includes("generate image") || val.toLowerCase().includes("/imagine")) {
-                triggerImageGen(val.replace(/generate image|\/imagine/gi, "").trim() || "Neon Tech Core");
+                triggerImageGen(val.replace(/generate image|\/imagine/gi, "").trim());
                 return;
             }
 
@@ -175,33 +145,43 @@
                 });
                 const data = await res.json();
                 if (data.error) throw new Error(data.error);
+                
                 aiMsg.innerText = data.choices[0].message.content;
                 chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: aiMsg.innerText });
-                
-                // SAVE TO PRIVATE STORAGE
                 localStorage.setItem(`myth_chats_${userName}`, JSON.stringify(chats));
                 renderSidebar();
             } catch (e) { 
-                aiMsg.innerText = e.message; 
+                aiMsg.innerText = "Error: " + e.message; 
                 if (e.message.includes("Session")) { sessionStorage.clear(); location.reload(); }
             }
+        }
+
+        async function triggerImageGen(prompt) {
+            const aiMsg = appendMsg('ai', `<div class="w-full max-w-4xl space-y-4 mx-auto"><span class="thinking-pulse text-purple-400 font-black">Rendering...</span><div class="skeleton w-full aspect-square"></div></div>`);
+            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.floor(Math.random()*999)}&model=flux&nologo=true`;
+            const img = new Image();
+            img.src = imageUrl;
+            img.onload = () => {
+                aiMsg.innerHTML = `<div class="w-full max-w-4xl space-y-4 mx-auto"><div class="rounded-[3.5rem] p-1 border-2 border-white/10 shadow-2xl bg-black"><img src="${imageUrl}" class="w-full rounded-[3.3rem]"></div></div>`;
+            };
         }
 
         function createNewChat() {
             currentChatId = generate23Id();
             chats[currentChatId] = [];
             window.location.hash = `/chat/${currentChatId}`;
-            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-32 chat-animate"><h2 class="text-5xl font-black italic mb-4 uppercase tracking-tighter text-white">Mythical AI</h2><p class="text-slate-600 text-[10px] tracking-[0.5em] font-bold uppercase mb-2">Node: ${currentChatId}</p><p class="text-purple-500/50 text-[9px] font-black uppercase italic tracking-widest">By Chethan</p></div>`;
+            document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId}`;
+            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-32 chat-animate"><h2 class="text-5xl font-black italic mb-4 uppercase text-white">Mythical AI</h2><p class="text-slate-600 text-[10px] tracking-[0.5em] font-bold uppercase mb-2">Node: ${currentChatId}</p></div>`;
             renderSidebar();
         }
 
         function renderSidebar() {
             const list = document.getElementById('history-list');
-            list.innerHTML = `<p class="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 mb-6 italic">Neural Archives</p>`;
+            list.innerHTML = `<p class="text-[9px] font-black text-slate-600 uppercase px-2 mb-6">Neural Archives</p>`;
             Object.keys(chats).reverse().forEach(id => {
                 const div = document.createElement('div');
                 div.className = `p-4 mb-2 rounded-[1.5rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat shadow-lg' : 'text-slate-500 hover:bg-white/5'}`;
-                div.innerText = chats[id][0]?.content || "New Instance";
+                div.innerText = chats[id][0]?.content || "New Chat";
                 div.onclick = () => loadChat(id);
                 list.appendChild(div);
             });
@@ -219,12 +199,15 @@
         function appendMsg(role, content) {
             const div = document.createElement('div');
             div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
-            div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[2.5rem] text-sm shadow-lg ${role === 'user' ? 'mythic-gradient text-white' : 'glass text-slate-200'}">${content}</div>`;
+            div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[2.5rem] text-sm shadow-lg ${role === 'user' ? 'mythic-gradient text-white font-semibold' : 'glass text-slate-200'}">${content}</div>`;
             const box = document.getElementById('chat-box');
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
             return div.querySelector('div');
         }
+
+        // INPUT EVENT
+        document.getElementById('input-field').addEventListener('keypress', (e) => { if(e.key==='Enter') handleChat(); });
     </script>
 </body>
 </html>
