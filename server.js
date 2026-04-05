@@ -8,32 +8,32 @@ app.use(express.json());
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
-// Memory-based session storage (Resets when Render sleeps)
-let activeSessions = {}; 
+// --- THE FIX: Multi-User Session Map ---
+// This stores { "192.168.1.1": "Chethan", "1.2.3.4": "Maddy" }
+let activeSessions = new Map(); 
 
-// --- AUTHENTICATION ENDPOINT ---
 app.post('/api/auth', (req, res) => {
     const { passcode, googleName } = req.body;
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     
     const staff = {"C@MN26": "Chethan", "T@MN26": "Thaman", "M@MN26": "Maddy"};
-    
     let authorizedName = googleName || staff[passcode];
 
     if (authorizedName) {
-        activeSessions[clientIp] = authorizedName; 
-        console.log(`🔐 Session Authorized: ${authorizedName} | IP: ${clientIp}`);
+        // We set the name specifically for THIS IP address
+        activeSessions.set(clientIp, authorizedName); 
+        console.log(`🔐 Private Session Created: ${authorizedName} [${clientIp}]`);
         return res.json({ success: true, name: authorizedName });
     }
     res.status(401).json({ success: false, message: "Unauthorized" });
 });
 
-// --- CHAT ENDPOINT (IP PROTECTED) ---
 app.post('/api/chat', async (req, res) => {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     
-    if (!activeSessions[clientIp]) {
-        return res.status(403).json({ error: "IP mismatch or Session Expired. Please Re-login." });
+    // Check if THIS specific IP has a session
+    if (!activeSessions.has(clientIp)) {
+        return res.status(403).json({ error: "Session Expired. Please Re-login." });
     }
 
     try {
@@ -51,11 +51,11 @@ app.post('/api/chat', async (req, res) => {
 
 app.post('/api/logout', (req, res) => {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
-    delete activeSessions[clientIp];
+    activeSessions.delete(clientIp);
     res.json({ success: true });
 });
 
-app.get('/', (req, res) => res.send("Mythical AI Engine: Status Online | By Chethan"));
+app.get('/', (req, res) => res.send("Mythical AI Engine: Multi-User Core Online"));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server active on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Multi-User Server active on port ${PORT}`));
