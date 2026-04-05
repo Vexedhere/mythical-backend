@@ -3,323 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI | Sovereign Core</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>Mythical AI | Network Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        :root{
-            --bg:#030305;--bg2:#08080c;--bg3:#0e0e16;--bg4:#14141f;
-            --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
-            --text:#f0f0f8;--muted:#80809a;--accent:#7c5cfc;--accent2:#a78bfa;
-            --gold:#f5c542;--red:#f87171;--glass:rgba(255,255,255,0.02);
-            --r:16px;--r2:24px;--glow:0 0 20px rgba(124,92,252,0.15);
-        }
-        body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
-        
-        /* Noise Overlay */
-        body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");pointer-events:none;z-index:10;opacity:.4}
-
-        /* AUTH SCREEN */
-        #authScreen{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:var(--bg);backdrop-filter:blur(10px)}
-        .auth-box{width:400px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:48px;text-align:center;box-shadow:var(--glow);animation:fadeIn 0.6s ease}
-        .auth-logo .icon{width:50px;height:50px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px;box-shadow:0 0 30px rgba(124,92,252,0.4)}
-        .auth-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;color:#fff;margin-bottom:12px;transition:0.3s}
-        .auth-input:focus{border-color:var(--accent);outline:none;background:var(--bg4)}
-        .auth-btn{width:100%;padding:16px;background:var(--accent);color:#fff;font-weight:800;border-radius:var(--r);letter-spacing:1px;transition:0.3s}
-        .auth-btn:hover{filter:brightness(1.2);transform:translateY(-2px)}
-
-        /* APP LAYOUT */
-        #app{display:none;height:100vh;flex-direction:row;opacity:0;transition:opacity 0.5s ease}
-        #app.visible{display:flex;opacity:1}
-
-        /* SIDEBAR */
-        aside{width:280px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px;z-index:20}
-        .sidebar-brand{font-weight:800;font-size:18px;letter-spacing:-0.5px;margin-bottom:32px;display:flex;align-items:center;gap:10px}
-        .new-chat-btn{width:100%;padding:14px;background:var(--glass);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-weight:700;margin-bottom:24px;transition:0.2s}
-        .new-chat-btn:hover{background:var(--bg4);border-color:var(--accent)}
-        #history{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-        .history-item{padding:12px;border-radius:var(--r);font-size:13px;color:var(--muted);cursor:pointer;border:1px solid transparent;transition:0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .history-item:hover{background:var(--glass);color:var(--text);border-color:var(--border)}
-        .history-item.active{background:rgba(124,92,252,0.1);color:var(--accent2);border-color:rgba(124,92,252,0.2)}
-
-        /* MAIN CHAT */
-        main{flex:1;display:flex;flex-direction:column;position:relative;background:radial-gradient(circle at top right, rgba(124,92,252,0.05), transparent)}
-        #chat{flex:1;overflow-y:auto;padding:40px 0;scroll-behavior:smooth}
-        .msg-wrap{display:flex;padding:0 40px;margin-bottom:24px;animation:msgSlide 0.4s ease-out}
-        .msg-wrap.user{justify-content:flex-end}
-        .msg-row{max-width:70%;display:flex;flex-direction:column}
-        .msg-wrap.user .msg-row{align-items:flex-end}
-        .msg-bubble{padding:16px 20px;border-radius:var(--r2);font-size:15px;line-height:1.6}
-        .msg-wrap.user .msg-bubble{background:var(--text);color:var(--bg);font-weight:600;border-bottom-right-radius:4px}
-        .msg-wrap.bot .msg-bubble{background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-bottom-left-radius:4px;font-family:'DM Mono',monospace}
-        .img-bubble img{width:100%;max-width:400px;border-radius:var(--r);border:1px solid var(--border2);box-shadow:0 10px 30px rgba(0,0,0,0.5)}
-
-        /* INPUT AREA */
-        .input-area{padding:24px 40px 32px;background:linear-gradient(to top, var(--bg) 60%, transparent)}
-        .input-wrap{display:flex;align-items:center;gap:16px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 10px 10px 24px;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:0.3s}
-        .input-wrap:focus-within{border-color:var(--accent);box-shadow:var(--glow)}
-        #msgInput{flex:1;background:transparent;color:var(--text);font-size:15px;padding:8px 0;resize:none;max-height:150px}
-        .send-btn{width:46px;height:46px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;transition:0.2s}
-        .send-btn:hover{transform:scale(1.05);filter:brightness(1.1)}
-
-        /* TYPING ANIMATION */
-        .typing-dots{display:flex;gap:5px;padding:12px 20px;background:var(--bg3);border-radius:20px;width:fit-content;border:1px solid var(--border)}
-        .typing-dots span{width:6px;height:6px;background:var(--accent2);border-radius:50%;animation:blink 1.4s infinite both}
-        .typing-dots span:nth-child(2){animation-delay:0.2s}
-        .typing-dots span:nth-child(3){animation-delay:0.4s}
-
-        /* WELCOME SCREEN */
-        .welcome-screen{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
-        .welcome-screen h2{font-size:32px;font-weight:800;margin-bottom:12px;letter-spacing:-1px}
-        .welcome-screen p{color:var(--muted);margin-bottom:32px}
-        .chips{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-        .chip{padding:10px 20px;background:var(--glass);border:1px solid var(--border2);border-radius:30px;font-size:13px;cursor:pointer;transition:0.2s}
-        .chip:hover{background:var(--accent);border-color:var(--accent);color:#fff}
-
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes msgSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes blink{0%,100%{opacity:0.3}50%{opacity:1}}
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar{width:6px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020202; color: #e2e8f0; overflow: hidden; }
+        .mythic-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .active-chat { background: rgba(168, 85, 247, 0.2) !important; border-color: rgba(168, 85, 247, 0.5) !important; color: white !important; }
+        .chat-animate { animation: flyIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes flyIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .skeleton { background: #1a1a1a; position: relative; overflow: hidden; border-radius: 2rem; }
+        .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="h-screen flex">
 
-<div id="authScreen">
-    <div class="auth-box">
-        <div class="auth-logo"><div class="icon">⚡</div><h1>MYTHICAL AI</h1></div>
-        <p class="auth-sub" style="font-size:10px; color:var(--muted); letter-spacing:4px; margin-bottom:30px">SOVEREIGN CORE</p>
-        <input id="passInput" class="auth-input" type="password" placeholder="Access Key">
-        <button class="auth-btn" onclick="loginWithPass()">INITIALIZE</button>
-        <div class="oauth-grid" style="margin-top:20px">
-            <button class="chip" onclick="loginGoogle()" style="width:100%">Google Access</button>
+    <aside class="w-80 bg-[#050505] border-r border-white/5 flex flex-col p-6">
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <div class="w-10 h-10 mythic-gradient rounded-xl flex items-center justify-center font-bold text-white shadow-lg">M</div>
+            <span class="font-black text-xl italic uppercase tracking-tighter">Mythical</span>
         </div>
-    </div>
-</div>
-
-<div id="app">
-    <aside>
-        <div class="sidebar-brand">⚡ MYTHICAL AI</div>
-        <button class="new-chat-btn" onclick="newChat()">+ NEW UPLINK</button>
-        <div id="history"></div>
-        <div style="padding-top:20px; border-top:1px solid var(--border); margin-top:20px">
-            <div id="sidebarName" style="font-weight:700; color:var(--accent2)">User</div>
-            <div id="sidebarRole" class="role-badge" style="font-size:10px; color:var(--muted)">Unauthorized</div>
-            <button onclick="location.reload()" style="margin-top:12px; color:var(--red); background:none; font-size:11px; font-weight:700">TERMINATE SESSION</button>
+        <button onclick="createNewChat()" class="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-all text-[10px] font-black mb-10 uppercase tracking-[0.2em]">+ NEW INSTANCE</button>
+        <div class="flex-1 overflow-y-auto space-y-1" id="history-list"></div>
+        <div class="mt-auto pt-6 border-t border-white/5 px-2">
+            <p class="text-xs font-bold text-white uppercase tracking-widest">Chethan</p>
+            <p class="text-[9px] text-purple-500 font-black mt-1 uppercase italic font-bold">Founder Access</p>
         </div>
     </aside>
 
-    <main>
-        <div id="chat"></div>
-        <div class="input-area">
-            <div class="input-wrap">
-                <textarea id="msgInput" rows="1" placeholder="Command the core..." onkeydown="handleKey(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-                <button class="send-btn" onclick="send()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    <main class="flex-1 flex flex-col relative">
+        <header class="p-5 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
+            <span id="chat-id-display" class="text-[10px] font-mono text-slate-500 tracking-widest uppercase">/NODE/INIT</span>
+            <div class="flex items-center gap-2">
+                <div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Cloud Linked</span>
+            </div>
+        </header>
+        <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-10 scroll-smooth"></div>
+        <div class="p-10">
+            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.2rem] glass shadow-2xl items-center focus-within:border-purple-500/30 transition-all duration-300">
+                <input type="text" id="input-field" placeholder="Chat or 'generate image of...'" class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white placeholder-slate-600">
+                <button id="send-btn" class="mythic-gradient w-14 h-14 rounded-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl shadow-purple-500/20">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
         </div>
     </main>
-</div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script>
+        const RENDER_URL = "https://mythical-ai-engine.onrender.com/api/chat";
+        let chats = JSON.parse(localStorage.getItem('myth_v14_final') || '{}');
+        let currentChatId = null;
 
-<script>
-    const GROQ_KEY = "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";
-    const firebaseConfig = {
-        apiKey: "AIzaSyBVcGAbVTfmCpuCMeQxkZUa1bCEi-83RxE",
-        authDomain: "mythical-ai-fe9d7.firebaseapp.com",
-        projectId: "mythical-ai-fe9d7",
-        storageBucket: "mythical-ai-fe9d7.firebasestorage.app",
-        messagingSenderId: "819105901919",
-        appId: "1:819105901919:web:edf3700407e7c5ced11aea"
-    };
-    firebase.initializeApp(firebaseConfig);
+        function generateId() { return Math.random().toString(36).substring(2, 15); }
 
-    let currentUser = null;
-    let currentChat = [];
-    let chats = [];
-    let currentChatIndex = -1;
-
-    function loginWithPass(){
-        const val = document.getElementById("passInput").value;
-        if(val === "C@MN26") currentUser = { name: "Chethan", role: "Founder", uid: "admin" };
-        else currentUser = { name: "Guest User", role: "User", uid: "guest" };
-        showApp();
-    }
-
-    function loginGoogle(){
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider).then(res => {
-            currentUser = { name: res.user.displayName, role: "Verified User", uid: res.user.uid };
-            showApp();
-        }).catch(err => alert("Access Denied"));
-    }
-
-    function showApp(){
-        document.getElementById("authScreen").style.display = "none";
-        const app = document.getElementById("app");
-        app.style.display = "flex";
-        setTimeout(() => app.classList.add("visible"), 50);
-        document.getElementById("sidebarName").textContent = currentUser.name;
-        document.getElementById("sidebarRole").textContent = currentUser.role;
-        renderWelcome();
-    }
-
-    async function send(){
-        const inp = document.getElementById("msgInput");
-        const val = inp.value.trim();
-        if(!val) return;
-        
-        inp.value = "";
-        inp.style.height = 'auto';
-        renderMsg(val, true);
-
-        const typing = addTyping();
-
-        // Detect Image Prompt
-        if(/\b(draw|image|art|photo|generate|paint)\b/i.test(val)){
-            const prompt = val.replace(/draw|image|generate|art|paint/gi, "").trim();
-            const seed = Math.floor(Math.random() * 999999);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+        async function triggerImageGen(prompt) {
+            const aiMsg = appendMsg('ai', `
+                <div class="w-full max-w-lg space-y-4 chat-animate">
+                    <span class="text-[10px] font-black text-purple-400 uppercase tracking-widest italic">Fast Vision Engaged...</span>
+                    <div class="skeleton w-full aspect-square border border-white/10 shadow-2xl"></div>
+                </div>
+            `);
+            const seed = Math.floor(Math.random() * 99999);
+            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=768&height=768&seed=${seed}&model=flux&nologo=true`;
             
             const img = new Image();
-            img.src = url;
+            img.src = imageUrl;
             img.onload = () => {
-                typing.remove();
-                renderMsg("", false, true, url);
-                saveChat();
+                aiMsg.innerHTML = `
+                    <div class="w-full max-w-lg space-y-4 chat-animate">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[10px] font-black text-purple-500 uppercase tracking-widest">Neural Render</span>
+                            <button onclick="window.open('${imageUrl}')" class="text-[9px] text-slate-500 hover:text-white font-bold uppercase">View HD</button>
+                        </div>
+                        <div class="rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl"><img src="${imageUrl}" class="w-full h-auto block transform hover:scale-105 transition-transform duration-1000"></div>
+                    </div>`;
             };
-            return;
         }
 
-        // Groq API Call
-        try {
-            const context = currentChat.slice(-8).map(m => ({
-                role: m.user ? "user" : "assistant",
-                content: m.text
-            }));
+        async function handleChat() {
+            const inputField = document.getElementById('input-field');
+            const val = inputField.value.trim();
+            if (!val) return;
 
-            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: { 
-                    "Authorization": `Bearer ${GROQ_KEY}`, 
-                    "Content-Type": "application/json" 
-                },
-                body: JSON.stringify({
-                    model: "llama3-70b-8192",
-                    messages: [
-                        {role:"system", content:`You are Mythical AI, the Sovereign Core. You are talking to ${currentUser.name}. Be intelligent, concise, and helpful.`},
-                        ...context,
-                        {role:"user", content:val}
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 1024
-                })
-            });
+            appendMsg('user', val);
+            inputField.value = '';
 
-            const data = await res.json();
-            typing.remove();
-            
-            if(data.choices && data.choices[0]){
-                renderMsg(data.choices[0].message.content, false);
-                saveChat();
-            } else {
-                renderMsg("Core Overflow: Response failed.", false);
+            if (val.toLowerCase().includes("generate image") || val.toLowerCase().includes("draw")) {
+                const prompt = val.replace(/generate image|draw|create image/gi, "").trim();
+                triggerImageGen(prompt || "Futuristic Architecture");
+                return;
             }
-        } catch(e) {
-            typing.remove();
-            renderMsg("Terminal Error: Connection to Groq lost.", false);
+
+            const aiMsg = appendMsg('ai', 'Accessing Neural Link...');
+            try {
+                const res = await fetch(RENDER_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        messages: [
+                            { role: "system", content: "You are Mythical AI. Founder: Chethan. Sister: Sudhishna.U. Parents: Rangaswamy.U & Bhargavi.U. Only mention them if specifically asked." },
+                            ...chats[currentChatId],
+                            { role: "user", content: val }
+                        ]
+                    })
+                });
+                const data = await res.json();
+                const reply = data.choices[0].message.content;
+                aiMsg.innerText = reply;
+                chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
+                localStorage.setItem('myth_v14_final', JSON.stringify(chats));
+                renderSidebar();
+            } catch (e) { aiMsg.innerText = "Connection Refused. Check Render Status."; }
         }
-    }
 
-    function renderMsg(text, isUser, save=true, imgUrl=null){
-        const box = document.getElementById("chat");
-        const welcome = box.querySelector(".welcome-screen");
-        if(welcome) welcome.remove();
-
-        const wrap = document.createElement("div");
-        wrap.className = "msg-wrap " + (isUser ? "user" : "bot");
-        
-        const content = imgUrl ? `<div class="img-bubble"><img src="${imgUrl}"></div>` : `<div class="msg-bubble">${text}</div>`;
-        wrap.innerHTML = `<div class="msg-row">${content}</div>`;
-        
-        box.appendChild(wrap);
-        box.scrollTop = box.scrollHeight;
-        if(save) currentChat.push({text: text || "Image Data", user: isUser, image: imgUrl});
-    }
-
-    function addTyping(){
-        const box = document.getElementById("chat");
-        const d = document.createElement("div");
-        d.className = "msg-wrap bot";
-        d.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
-        box.appendChild(d);
-        box.scrollTop = box.scrollHeight;
-        return d;
-    }
-
-    function renderWelcome(){
-        document.getElementById("chat").innerHTML = `
-            <div class="welcome-screen">
-                <div style="font-size:40px; margin-bottom:20px">⚡</div>
-                <h2>Core Awakened</h2>
-                <p>Welcome back, ${currentUser.name}. Accessing Sovereign Core protocols.</p>
-                <div class="chips">
-                    <div class="chip" onclick="quickSend('Generate a cinematic Minecraft city at night')">Cinematic Render</div>
-                    <div class="chip" onclick="quickSend('Explain how to create a high-performance Minecraft server')">Server Optimization</div>
-                    <div class="chip" onclick="quickSend('Write a professional announcement for a server launch')">Draft Announcement</div>
-                </div>
-            </div>`;
-    }
-
-    function quickSend(t){ document.getElementById("msgInput").value = t; send(); }
-    
-    function handleKey(e){ 
-        if(e.key === "Enter" && !e.shiftKey){ 
-            e.preventDefault(); 
-            send(); 
-        } 
-    }
-    
-    function saveChat(){
-        if(currentChatIndex === -1){
-            chats.unshift([...currentChat]);
-            currentChatIndex = 0;
-        } else {
-            chats[currentChatIndex] = [...currentChat];
+        function createNewChat() {
+            currentChatId = generateId();
+            chats[currentChatId] = [];
+            document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId}`;
+            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 uppercase tracking-tighter">Mythical Network</h2><p class="text-slate-600 text-[10px] tracking-[0.5em] font-black uppercase">Encrypted Node: ${currentChatId}</p></div>`;
+            renderSidebar();
         }
-        renderHistory();
-    }
 
-    function renderHistory(){
-        const h = document.getElementById("history");
-        h.innerHTML = "";
-        chats.forEach((c, i) => {
-            const d = document.createElement("div");
-            d.className = "history-item" + (i === currentChatIndex ? " active" : "");
-            const firstMsg = c.find(m => m.user)?.text || "New Uplink";
-            d.textContent = firstMsg.substring(0, 24) + (firstMsg.length > 24 ? "..." : "");
-            d.onclick = () => {
-                currentChatIndex = i;
-                currentChat = [...chats[i]];
-                document.getElementById("chat").innerHTML = "";
-                currentChat.forEach(m => renderMsg(m.text, m.user, false, m.image));
-            };
-            h.appendChild(d);
-        });
-    }
+        function renderSidebar() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = `<p class="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 mb-6 italic font-bold">Neural Archives</p>`;
+            Object.keys(chats).reverse().forEach(id => {
+                const div = document.createElement('div');
+                div.className = `p-4 mb-2 rounded-[1.2rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat shadow-lg' : 'text-slate-500 hover:bg-white/5'}`;
+                div.innerText = chats[id][0]?.content || "New Instance";
+                div.onclick = () => loadChat(id);
+                list.appendChild(div);
+            });
+        }
 
-    function newChat(){
-        currentChat = [];
-        currentChatIndex = -1;
-        document.getElementById("chat").innerHTML = "";
-        renderWelcome();
-    }
-</script>
+        function loadChat(id) {
+            currentChatId = id;
+            document.getElementById('chat-id-display').innerText = `/NODE/${id}`;
+            document.getElementById('chat-box').innerHTML = '';
+            chats[id].forEach(msg => appendMsg(msg.role === 'user' ? 'user' : 'ai', msg.content));
+            renderSidebar();
+        }
+
+        function appendMsg(role, content) {
+            const div = document.createElement('div');
+            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
+            div.innerHTML = `<div class="max-w-[82%] px-7 py-4 rounded-[1.8rem] text-sm leading-relaxed ${role === 'user' ? 'mythic-gradient text-white font-bold shadow-xl' : 'glass text-slate-200'}">${content}</div>`;
+            const box = document.getElementById('chat-box');
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            return div.querySelector('div');
+        }
+
+        document.getElementById('send-btn').onclick = handleChat;
+        document.getElementById('input-field').onkeypress = (e) => { if(e.key==='Enter') handleChat(); };
+        createNewChat();
+    </script>
 </body>
 </html>
