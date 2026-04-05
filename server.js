@@ -6,25 +6,39 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-// Pulls key from Render's Environment Variables (Security First!)
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+// FOUNDER KEY: This is your actual Groq Engine Link
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
-// 1. Home Route: Shows status when visiting the URL in a browser
-app.get('/', (req, res) => {
-    res.send(`
-        <body style="background:#020202;color:#a855f7;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;">
-            <div style="padding:40px;border:1px solid #333;border-radius:30px;background:#050505;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
-                <h1 style="font-style:italic;text-transform:uppercase;letter-spacing:5px;margin:0;">Mythical AI Engine</h1>
-                <p style="color:#64748b;font-weight:800;margin-top:10px;font-size:12px;letter-spacing:2px;">STATUS: <span style="color:#22c55e;">ONLINE</span></p>
-                <div style="height:2px;width:50px;background:#a855f7;margin:20px auto;"></div>
-                <p style="color:#475569;font-size:10px;">NEURAL LINK READY FOR POST REQUESTS</p>
-            </div>
-        </body>
-    `);
+// --- IP Guard & Session Logic ---
+let activeSessions = {}; 
+
+app.post('/api/auth', (req, res) => {
+    const { passcode } = req.body;
+    // We use 'x-forwarded-for' because Render acts as a proxy
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    const staff = {
+        "C@MN26": "Chethan", 
+        "T@MN26": "Thaman", 
+        "M@MN26": "Maddy"
+    };
+    
+    if (staff[passcode]) {
+        activeSessions[clientIp] = staff[passcode]; 
+        console.log(`🔐 Session Authorized for: ${staff[passcode]} at IP: ${clientIp}`);
+        return res.json({ success: true, name: staff[passcode], ip: clientIp });
+    }
+    res.status(401).json({ success: false, message: "Invalid Passcode" });
 });
 
-// 2. Chat Route: The actual AI processing engine
 app.post('/api/chat', async (req, res) => {
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    // IP Verification
+    if (!activeSessions[clientIp]) {
+        return res.status(403).json({ error: "IP mismatch or Session Expired. Please Re-login." });
+    }
+
     try {
         const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
             model: "llama-3.1-8b-instant",
@@ -34,9 +48,26 @@ app.post('/api/chat', async (req, res) => {
         });
         res.json(response.data);
     } catch (error) {
-        console.error("Inference Error:", error.message);
-        res.status(500).json({ error: "Neural Link Offline." });
+        console.error("Groq API Error:", error.message);
+        res.status(500).json({ error: "Neural Link Offline. Check API Credits." });
     }
+});
+
+app.post('/api/logout', (req, res) => {
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    delete activeSessions[clientIp];
+    console.log(`🚫 Session Terminated for IP: ${clientIp}`);
+    res.json({ success: true });
+});
+
+// Status Page
+app.get('/', (req, res) => {
+    res.send(`
+        <body style="background:#020202;color:#a855f7;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;">
+            <h1 style="font-style:italic;text-transform:uppercase;letter-spacing:5px;">Mythical AI Engine</h1>
+            <p style="color:#64748b;font-weight:800;font-size:12px;">STATUS: ONLINE | KEY: LOADED</p>
+        </body>
+    `);
 });
 
 const PORT = process.env.PORT || 5000;
