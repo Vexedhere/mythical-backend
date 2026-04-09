@@ -6,13 +6,11 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-// FOUNDER KEY: Your Groq API Link
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
-// Multi-User Session Map (Isolates Chethan, Maddy, and Thaman)
+// Session Map to isolate users (Chethan, Maddy, Thaman)
 let activeSessions = new Map(); 
 
-// 1. AUTHENTICATION (Registers Name to IP)
 app.post('/api/auth', (req, res) => {
     const { passcode, googleName } = req.body;
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
@@ -22,13 +20,11 @@ app.post('/api/auth', (req, res) => {
 
     if (authorizedName) {
         activeSessions.set(clientIp, authorizedName); 
-        console.log(`🔐 Private Session: ${authorizedName} [${clientIp}]`);
         return res.json({ success: true, name: authorizedName });
     }
     res.status(401).json({ success: false, message: "Unauthorized" });
 });
 
-// 2. CHAT (IP PROTECTED)
 app.post('/api/chat', async (req, res) => {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     
@@ -46,22 +42,19 @@ app.post('/api/chat', async (req, res) => {
         });
         res.json(response.data);
     } catch (error) {
-        console.error("Cloud Error:", error.message);
         res.status(500).json({ error: "Neural Link Offline." });
     }
 });
 
-// 3. LOGOUT
 app.post('/api/logout', (req, res) => {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     activeSessions.delete(clientIp);
     res.json({ success: true });
 });
 
-// 4. STATUS & BINDING
-app.get('/', (req, res) => res.send("Engine Online | By Chethan"));
+app.get('/', (req, res) => res.send("Mythical AI Engine: Online | By Chethan"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Mythical Engine active on port ${PORT}`);
+    console.log(`🚀 Server active on port ${PORT}`);
 });
