@@ -3,42 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mythical AI</title>
+<title>Mythical AI | Portal</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
-body { background:#020202; color:white; font-family:system-ui; }
-.glass { background:rgba(255,255,255,0.05); backdrop-filter:blur(10px); }
+body {
+    background:#020202;
+    color:white;
+    font-family: 'Segoe UI', sans-serif;
+}
+.glass {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+}
+.gradient {
+    background: linear-gradient(135deg,#6366f1,#a855f7,#ec4899);
+}
 </style>
 </head>
 
-<body class="h-screen flex">
+<body class="h-screen flex items-center justify-center">
 
 <!-- LOGIN -->
-<div id="login" class="m-auto glass p-10 rounded-3xl w-[350px] text-center">
-    <h1 class="text-2xl font-bold mb-6">MYTHICAL AI</h1>
+<div id="login" class="glass p-10 rounded-3xl w-[360px] text-center">
 
+    <h1 class="text-3xl font-black mb-6">MYTHICAL AI</h1>
+
+    <!-- GOOGLE LOGIN -->
+    <div id="g_id_onload"
+        data-client_id="YOUR_GOOGLE_CLIENT_ID"
+        data-callback="handleGoogleLogin">
+    </div>
+
+    <div class="g_id_signin mb-6 flex justify-center"
+        data-type="standard"
+        data-theme="filled_black"
+        data-shape="pill">
+    </div>
+
+    <p class="text-xs text-gray-500 mb-4">OR</p>
+
+    <!-- PASSCODE -->
     <input id="pass" placeholder="Access Key"
     class="w-full p-3 mb-4 rounded-xl bg-black border border-white/10 text-center">
 
     <button onclick="login()"
-    class="w-full p-3 bg-white text-black rounded-xl font-bold">
+    class="w-full p-3 gradient rounded-xl font-bold">
     LOGIN
     </button>
+
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden flex flex-col w-full">
+<div id="app" class="hidden w-full h-full flex flex-col">
 
+    <!-- HEADER -->
+    <div class="p-4 border-b border-white/10 flex justify-between">
+        <span class="font-bold">Mythical AI</span>
+        <button onclick="logout()" class="text-red-400 text-sm">Logout</button>
+    </div>
+
+    <!-- CHAT -->
     <div id="chat" class="flex-1 p-6 overflow-y-auto space-y-4"></div>
 
-    <div class="p-4 flex gap-2">
-        <input id="input" placeholder="Type message..."
-        class="flex-1 p-3 rounded-xl bg-black border border-white/10">
+    <!-- INPUT -->
+    <div class="p-4 flex gap-3">
+        <input id="input"
+        class="flex-1 p-3 rounded-xl bg-black border border-white/10"
+        placeholder="Ask something...">
 
         <button onclick="send()"
-        class="px-6 bg-purple-600 rounded-xl">Send</button>
+        class="px-6 gradient rounded-xl">
+        Send
+        </button>
     </div>
 
 </div>
@@ -49,8 +88,14 @@ const API = "http://localhost:5000";
 let token = sessionStorage.getItem("auth_token");
 let messages = [];
 
+/* ================= AUTO LOGIN ================= */
 if(token){
-    document.getElementById("login").style.display="none";
+    showApp();
+}
+
+/* ================= SHOW APP ================= */
+function showApp(){
+    document.getElementById("login").style.display = "none";
     document.getElementById("app").classList.remove("hidden");
 }
 
@@ -58,22 +103,50 @@ if(token){
 async function login(){
     const pass = document.getElementById("pass").value;
 
-    const res = await fetch(API + "/api/auth", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ passcode: pass })
-    });
+    try{
+        const res = await fetch(API + "/api/auth", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({ passcode: pass })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if(data.success){
-        token = data.token;
-        sessionStorage.setItem("auth_token", token);
+        if(data.success){
+            token = data.token;
+            sessionStorage.setItem("auth_token", token);
+            showApp();
+        } else {
+            alert("❌ Invalid Access Key");
+        }
 
-        document.getElementById("login").style.display="none";
-        document.getElementById("app").classList.remove("hidden");
-    } else {
-        alert("Login failed");
+    } catch(e){
+        alert("❌ Backend not running on port 5000");
+    }
+}
+
+/* ================= GOOGLE LOGIN ================= */
+window.handleGoogleLogin = async function(response){
+    try{
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        const name = payload.name;
+
+        const res = await fetch(API + "/api/auth", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({ googleName: name })
+        });
+
+        const data = await res.json();
+
+        if(data.success){
+            token = data.token;
+            sessionStorage.setItem("auth_token", token);
+            showApp();
+        }
+
+    }catch(e){
+        alert("❌ Google login failed");
     }
 }
 
@@ -81,6 +154,7 @@ async function login(){
 async function send(){
     const input = document.getElementById("input");
     const text = input.value.trim();
+
     if(!text) return;
 
     addMsg("user", text);
@@ -97,7 +171,7 @@ async function send(){
                 "Content-Type":"application/json",
                 "Authorization":"Bearer " + token
             },
-            body:JSON.stringify({ messages })
+            body: JSON.stringify({ messages })
         });
 
         const data = await res.json();
@@ -113,8 +187,14 @@ async function send(){
         messages.push({ role:"assistant", content:reply });
 
     }catch(e){
-        aiDiv.innerText = "Server not reachable";
+        aiDiv.innerText = "❌ Server offline";
     }
+}
+
+/* ================= LOGOUT ================= */
+function logout(){
+    sessionStorage.removeItem("auth_token");
+    location.reload();
 }
 
 /* ================= UI ================= */
@@ -122,7 +202,9 @@ function addMsg(role, text){
     const div = document.createElement("div");
 
     div.className = "p-3 rounded-xl max-w-[70%] " +
-        (role==="user" ? "bg-purple-600 ml-auto" : "glass");
+        (role === "user"
+            ? "ml-auto gradient"
+            : "glass");
 
     div.innerText = text;
 
