@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI |BY CHETHAN</title>
+    <title>Mythical AI | Vision Enabled</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -49,7 +49,7 @@
         <div class="mt-auto pt-6 border-t border-white/5">
             <div class="p-4 glass rounded-2xl mb-4">
                 <p id="user-display" class="text-xs font-black text-white truncate uppercase tracking-widest">Guest</p>
-                <p id="role-display" class="text-[9px] text-purple-500 font-black mt-1 uppercase">Rank: USER</p>
+                <p id="role-display" class="text-[9px] text-purple-500 font-black mt-1 uppercase italic tracking-widest">Rank: INITIALIZING</p>
             </div>
             <button onclick="location.reload()" class="w-full py-2 text-slate-500 text-[10px] font-bold hover:text-red-500 uppercase tracking-widest">Terminate Link</button>
         </div>
@@ -95,140 +95,28 @@
                 "C@MN26": ["Chethan", "FOUNDER"], 
                 "T@MN26": ["Thaman Devapuram", "ADMIN"], 
                 "P@MN26": ["Pavan", "MODERATOR"],
-                "VP@HPS": ["Srinivasa Murthy", "ADMIN"],
-                "Z@HPSK": ["Zakaria", "STAFF"],
-                "V@HPSK": ["Vijayalakshmi", "STAFF"],
-                "R@HPSK": ["Rajesh", "STAFF"]
+                "VP@HPS": ["Srinivasa Murthy", "VICE PRINCIPAL"],
+                "Z@HPSK": ["Zakaria", "TEACHER"],
+                "V@HPSK": ["Vijayalakshmi", "TEACHER"],
+                "R@HPSK": ["Rajesh", "TEACHER"]
             };
 
             if (staff[p]) {
                 enterApp(staff[p][0], staff[p][1], p);
             } else {
-                alert("Access Denied. Neural Fingerprint Unrecognized.");
+                alert("Unauthorized Access. Security Pass Denied.");
             }
         }
 
         function enterApp(name, role, userKey) {
             currentUser = { name, role, key: userKey };
             
-            // ISOLATION: Load only chats belonging to THIS password
-            const saved = localStorage.getItem(`myth_v11_${userKey}`);
+            // ISOLATION: Load private history for this specific pass
+            const saved = localStorage.getItem(`myth_v12_${userKey}`);
             chats = saved ? JSON.parse(saved) : {};
 
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
-            document.getElementById('role-display').innerText = `Rank: ${role}`;
-            
-            createNewChat();
-            renderSidebar();
-        }
-
-        async function handleChat() {
-            const input = document.getElementById('input-field');
-            const val = input.value.trim();
-            if (!val) return;
-
-            appendMsg('user', val);
-            input.value = '';
-
-            // IMAGE LOGIC
-            if (val.startsWith('/imagine ')) {
-                const prompt = val.replace('/imagine ', '');
-                const aiMsg = appendMsg('ai', `
-                    <div class="w-full max-w-lg space-y-4">
-                        <div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-black text-purple-400 uppercase tracking-widest">Mythical Vision</span></div>
-                        <div class="skeleton w-full aspect-square rounded-[2rem] border border-white/10"></div>
-                    </div>
-                `);
-                const seed = Math.floor(Math.random() * 9999999);
-                const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
-                const img = new Image();
-                img.src = url;
-                img.onload = () => {
-                    aiMsg.innerHTML = `<div class="w-full max-w-lg space-y-4 chat-animate">
-                        <img src="${url}" class="rounded-[2.5rem] border border-white/10 shadow-2xl">
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest px-2">${prompt}</p>
-                    </div>`;
-                };
-                return;
-            }
-
-            // TEXT LOGIC
-            const aiMsg = appendMsg('ai', 'Thinking...');
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "llama-3.1-8b-instant",
-                        messages: [
-                            { role: "system", content: `You are Mythical AI. User: ${currentUser.name}. Role: ${currentUser.role}. Founder: Chethan.` },
-                            ...(chats[currentChatId] || []),
-                            { role: "user", content: val }
-                        ]
-                    })
-                });
-
-                if (res.status === 401) { aiMsg.innerText = "Error: Key Unauthorized."; return; }
-
-                const data = await res.json();
-                const reply = data.choices[0].message.content;
-                aiMsg.innerText = reply;
-                
-                if (!chats[currentChatId]) chats[currentChatId] = [];
-                chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
-                
-                // SAVE TO USER-SPECIFIC STORAGE
-                localStorage.setItem(`myth_v11_${currentUser.key}`, JSON.stringify(chats));
-                renderSidebar();
-            } catch (e) { 
-                aiMsg.innerText = "Neural Connection Interrupted."; 
-            }
-        }
-
-        function createNewChat() {
-            currentChatId = generate23Id();
-            chats[currentChatId] = [];
-            document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId}`;
-            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 tracking-tighter uppercase">Mythical Network</h2><p class="text-slate-600 text-[9px] tracking-[0.4em] font-black uppercase">Active Session: ${currentUser.name}</p></div>`;
-            renderSidebar();
-        }
-
-        function renderSidebar() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = `<p class="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 mb-6">Neural Archives</p>`;
-            Object.keys(chats).reverse().forEach(id => {
-                if (chats[id].length === 0) return;
-                const div = document.createElement('div');
-                div.className = `p-4 mb-2 rounded-[1.2rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat' : 'text-slate-500 hover:bg-white/5'}`;
-                div.innerText = chats[id][0]?.content || "New Session";
-                div.onclick = () => loadChat(id);
-                list.appendChild(div);
-            });
-        }
-
-        function loadChat(id) {
-            currentChatId = id;
-            document.getElementById('chat-id-display').innerText = `/NODE/${id}`;
-            document.getElementById('chat-box').innerHTML = '';
-            chats[id].forEach(msg => appendMsg(msg.role === 'user' ? 'user' : 'ai', msg.content));
-            renderSidebar();
-        }
-
-        function appendMsg(role, content) {
-            const div = document.createElement('div');
-            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
-            div.innerHTML = `<div class="max-w-[82%] px-7 py-4 rounded-[1.8rem] text-sm leading-relaxed shadow-lg ${role === 'user' ? 'mythic-gradient text-white font-bold' : 'glass text-slate-200'}">${content}</div>`;
-            const box = document.getElementById('chat-box');
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-            return div.querySelector('div');
-        }
-
-        document.getElementById('send-btn').onclick = handleChat;
-        document.getElementById('input-field').onkeypress = (e) => { if(e.key==='Enter') handleChat(); };
-    </script>
-</body>
-</html>
+            document.getElementById('role-display').innerText = `Rank:
