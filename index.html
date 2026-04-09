@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI | By Chethan</title>
+    <title>Mythical AI | Vision Enabled</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -82,7 +82,6 @@
         let currentChatId = null;
         let currentUser = { name: "Guest", role: "USER", key: "guest" };
 
-        // Ensure URL says /login on startup
         window.onload = () => { if (!currentChatId) window.location.hash = "/login"; };
 
         function generate23Id() { 
@@ -113,7 +112,7 @@
 
         function enterApp(name, role, userKey) {
             currentUser = { name, role, key: userKey };
-            const saved = localStorage.getItem(`myth_v14_${userKey}`);
+            const saved = localStorage.getItem(`myth_v16_${userKey}`);
             chats = saved ? JSON.parse(saved) : {};
 
             document.getElementById('login-page').classList.add('hidden');
@@ -134,11 +133,40 @@
             appendMsg('user', val);
             input.value = '';
 
-            if (val.startsWith('/imagine ')) {
-                // ... Image Engine Logic (Truncated for brevity, keep your existing image block)
+            // IMPROVED IMAGE DETECTION (Works for /imagine OR "generate image of")
+            const isImageRequest = val.toLowerCase().startsWith('/imagine ') || val.toLowerCase().startsWith('generate image');
+            
+            if (isImageRequest) {
+                let prompt = val.replace('/imagine ', '').replace(/generate image (of )?/i, '');
+                const aiMsg = appendMsg('ai', `
+                    <div class="w-full max-w-lg space-y-4">
+                        <div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-black text-purple-400 uppercase tracking-widest italic">Mythical Vision Engaged</span></div>
+                        <div class="skeleton w-full aspect-square rounded-[2rem] border border-white/10"></div>
+                    </div>
+                `);
+
+                const seed = Math.floor(Math.random() * 9999999);
+                const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true&t=${Date.now()}`;
+                
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = () => {
+                    aiMsg.innerHTML = `
+                        <div class="w-full max-w-lg space-y-4 chat-animate">
+                             <div class="relative group rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-black">
+                                <img src="${imageUrl}" class="w-full h-auto block">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent flex items-end p-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <p class="text-[9px] text-white/70 font-bold uppercase tracking-[0.2em]">${prompt}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                };
+                img.onerror = () => { aiMsg.innerText = "Vision link failed. Neural connection unstable."; };
                 return;
             }
 
+            // TEXT PROCESSING
             const aiMsg = appendMsg('ai', 'Neural Processing...');
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -147,7 +175,7 @@
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",
                         messages: [
-                            { role: "system", content: `You are Mythical AI. User: ${currentUser.name}.` },
+                            { role: "system", content: `You are Mythical AI. User: ${currentUser.name}. Founder: Chethan.` },
                             ...(chats[currentChatId] || []),
                             { role: "user", content: val }
                         ]
@@ -161,7 +189,7 @@
                 if (!chats[currentChatId]) chats[currentChatId] = [];
                 chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
                 
-                localStorage.setItem(`myth_v14_${currentUser.key}`, JSON.stringify(chats));
+                localStorage.setItem(`myth_v16_${currentUser.key}`, JSON.stringify(chats));
                 renderSidebar();
             } catch (e) { aiMsg.innerText = "Connection lost."; }
         }
@@ -169,12 +197,9 @@
         function createNewChat() {
             currentChatId = generate23Id();
             chats[currentChatId] = [];
-            
-            // CRITICAL FIX: Update Header AND URL
             document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId}`;
             window.location.hash = `/chat/${currentChatId}`;
-            
-            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 tracking-tighter uppercase">Mythical Network</h2><p class="text-slate-600 text-[9px] tracking-[0.4em] font-black uppercase">Active Link: ${currentUser.name}</p></div>`;
+            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 tracking-tighter uppercase">Mythical Network</h2><p class="text-slate-600 text-[9px] tracking-[0.4em] font-black uppercase">Established Handshake: ${currentUser.name}</p></div>`;
             renderSidebar();
         }
 
@@ -194,7 +219,7 @@
                 if (chats[id].length === 0) return;
                 const div = document.createElement('div');
                 div.className = `p-4 mb-2 rounded-[1.2rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat' : 'text-slate-500 hover:bg-white/5'}`;
-                div.innerText = chats[id][0]?.content || "New Session";
+                div.innerText = chats[id][0]?.content || "Archived Handshake";
                 div.onclick = () => loadChat(id);
                 list.appendChild(div);
             });
