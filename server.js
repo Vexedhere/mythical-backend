@@ -3,14 +3,23 @@ const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
-app.use(cors()); 
+
+// Professional CORS configuration to allow your GitHub Pages domain
+app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
+// Founder's Engine Key
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
 
-// Session Map to isolate users (Chethan, Maddy, Thaman)
+// Isolated Session Map: Maps Client IP to Username
 let activeSessions = new Map(); 
 
+// 1. AUTHENTICATION: Registers IP to the Mythical Network
 app.post('/api/auth', (req, res) => {
     const { passcode, googleName } = req.body;
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
@@ -20,11 +29,13 @@ app.post('/api/auth', (req, res) => {
 
     if (authorizedName) {
         activeSessions.set(clientIp, authorizedName); 
+        console.log(`🔐 Node Authorized: ${authorizedName} at IP ${clientIp}`);
         return res.json({ success: true, name: authorizedName });
     }
-    res.status(401).json({ success: false, message: "Unauthorized" });
+    res.status(401).json({ success: false, message: "Unauthorized Access" });
 });
 
+// 2. NEURAL LINK: Chat Processing
 app.post('/api/chat', async (req, res) => {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     
@@ -46,15 +57,17 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// 3. TERMINATE: Logout
 app.post('/api/logout', (req, res) => {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     activeSessions.delete(clientIp);
     res.json({ success: true });
 });
 
+// 4. PUBLIC STATUS PAGE
 app.get('/', (req, res) => res.send("Mythical AI Engine: Online | By Chethan"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server active on port ${PORT}`);
+    console.log(`🚀 Mythical Engine active on port ${PORT}`);
 });
