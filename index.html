@@ -31,7 +31,7 @@
 
     <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
         <div class="glass p-12 rounded-[3.5rem] w-full max-w-md text-center shadow-2xl chat-animate">
-            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-purple-500/20">M</div>
+            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl">M</div>
             <h1 class="text-3xl font-black mb-2 italic uppercase tracking-widest text-white">Mythical AI</h1>
             <p class="text-[10px] text-slate-500 font-bold mb-10 tracking-[0.3em] uppercase">By Chethan</p>
             <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
@@ -52,7 +52,7 @@
         <div class="mt-auto pt-6 border-t border-white/5 px-2">
             <p id="user-display" class="text-xs font-bold text-white uppercase tracking-widest truncate">Founder</p>
             <p class="text-[9px] text-purple-500 font-black mt-1 uppercase italic font-bold mb-4">By Chethan</p>
-            <button onclick="triggerDownload()" class="w-full py-3 mb-3 rounded-xl border border-purple-500/30 text-purple-400 text-[10px] font-black uppercase tracking-widest hover:bg-purple-500/10 transition-all italic">Download App</button>
+            <button onclick="triggerDownload()" class="w-full py-3 mb-3 rounded-xl border border-purple-500/30 text-purple-400 text-[10px] font-black uppercase tracking-widest hover:bg-purple-500/10 transition-all italic font-bold tracking-widest">Download App</button>
             <button onclick="logout()" class="w-full py-3 rounded-xl border border-red-500/20 text-red-500 text-[10px] font-black uppercase transition-all">Logout</button>
         </div>
     </aside>
@@ -65,7 +65,7 @@
         <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-12 scroll-smooth"></div>
         <div class="p-10">
             <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center">
-                <input type="text" id="input-field" placeholder="Ask or '/imagine'..." class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white">
+                <input type="text" id="input-field" placeholder="Ask anything or '/imagine'..." class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white">
                 <button onclick="handleChat()" class="mythic-gradient w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
@@ -82,7 +82,8 @@
     </div>
 
     <script>
-        const API_BASE = "https://mythical-ai-engine.onrender.com/api";
+        // UPDATED URL
+        const API_BASE = "https://mythical-ai-engine-ej9a.onrender.com/api";
         let userName = sessionStorage.getItem('myth_user') || 'Guest';
         let chats = {};
         let currentChatId = null;
@@ -110,7 +111,7 @@
                     userName = data.name;
                     enterApp(data.name);
                 } else { alert("Access Denied"); }
-            } catch (e) { alert("Server waking up... Try again in 20s."); }
+            } catch (e) { alert("Server waking up... Try again in 30s."); }
         }
 
         function handleGoogleLogin(res) { syncAuth({ googleName: JSON.parse(atob(res.credential.split('.')[1])).name }); }
