@@ -18,6 +18,8 @@
         .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
         .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body class="h-screen flex">
@@ -41,7 +43,7 @@
         <button onclick="createNewChat()" class="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-all text-[10px] font-black mb-10 uppercase tracking-[0.2em]">+ NEW INSTANCE</button>
         
         <div class="flex-1 overflow-y-auto space-y-1" id="history-list">
-            <p class="text-[10px] font-black text-slate-600 uppercase tracking-widest px-2 mb-4">Neural Archives</p>
+            <p class="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 mb-6">Neural Archives</p>
         </div>
 
         <div class="mt-auto pt-6 border-t border-white/5">
@@ -56,7 +58,10 @@
     <main id="main-content" class="flex-1 flex flex-col hidden relative">
         <header class="p-5 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
             <span id="chat-id-display" class="text-[10px] font-mono text-slate-500 tracking-widest">/NODE/INIT</span>
-            <div class="flex items-center gap-2"><div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div><span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Secure Handshake</span></div>
+            <div class="flex items-center gap-2">
+                <div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Secure Handshake</span>
+            </div>
         </header>
 
         <div id="chat-box" class="flex-1 overflow-y-auto p-12 space-y-10 scroll-smooth"></div>
@@ -72,17 +77,16 @@
     </main>
 
     <script>
-        // CORE CONFIG
         const GROQ_KEY = "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";
-        let chats = JSON.parse(localStorage.getItem('myth_v9_public') || '{}');
+        let chats = {};
         let currentChatId = null;
-        let currentUser = { name: "Guest", role: "USER" };
+        let currentUser = { name: "Guest", role: "USER", key: "guest" };
 
         function generate23Id() { return Array.from({length: 23}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join(''); }
 
         function handleGoogleLogin(res) { 
             const data = JSON.parse(atob(res.credential.split('.')[1]));
-            enterApp(data.name, "MEMBER"); 
+            enterApp(data.name, "MEMBER", data.sub); 
         }
 
         function checkStaffPass() {
@@ -90,25 +94,34 @@
             const staff = {
                 "C@MN26": ["Chethan", "FOUNDER"], 
                 "T@MN26": ["Thaman Devapuram", "ADMIN"], 
-                "P@MN26": ["Pavan", "MODERATOR"]
+                "P@MN26": ["Pavan", "MODERATOR"],
+                "VP@HPS": ["Srinivasa Murthy", "ADMIN"],
+                "Z@HPSK": ["Zakaria", "STAFF"],
+                "V@HPSK": ["Vijayalakshmi", "STAFF"],
+                "R@HPSK": ["Rajesh", "STAFF"]
             };
-            if (staff[p]) enterApp(staff[p][0], staff[p][1]);
-            else alert("Access Denied. Verification Failed.");
+
+            if (staff[p]) {
+                enterApp(staff[p][0], staff[p][1], p);
+            } else {
+                alert("Access Denied. Neural Fingerprint Unrecognized.");
+            }
         }
 
-        function enterApp(name, role) {
-            currentUser = { name, role };
+        function enterApp(name, role, userKey) {
+            currentUser = { name, role, key: userKey };
+            
+            // ISOLATION: Load only chats belonging to THIS password
+            const saved = localStorage.getItem(`myth_v11_${userKey}`);
+            chats = saved ? JSON.parse(saved) : {};
+
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
             document.getElementById('role-display').innerText = `Rank: ${role}`;
             
-            const hash = window.location.hash;
-            if (hash.startsWith('#/chat/') && hash.length > 25) {
-                const id = hash.split('/chat/')[1];
-                if (chats[id]) loadChat(id); else createNewChat();
-            } else { createNewChat(); }
+            createNewChat();
             renderSidebar();
         }
 
@@ -120,90 +133,66 @@
             appendMsg('user', val);
             input.value = '';
 
-            // VISION ENGINE (/imagine)
+            // IMAGE LOGIC
             if (val.startsWith('/imagine ')) {
                 const prompt = val.replace('/imagine ', '');
                 const aiMsg = appendMsg('ai', `
                     <div class="w-full max-w-lg space-y-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[10px] font-black text-purple-400 uppercase tracking-widest">Mythical Vision Engine</span>
-                        </div>
-                        <div class="skeleton w-full aspect-square rounded-[2rem] border border-white/10 shadow-2xl"></div>
-                        <p class="text-xs text-slate-500 italic px-2 tracking-tight">Accessing Flux Neural Path for: ${prompt}</p>
+                        <div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-black text-purple-400 uppercase tracking-widest">Mythical Vision</span></div>
+                        <div class="skeleton w-full aspect-square rounded-[2rem] border border-white/10"></div>
                     </div>
                 `);
-
                 const seed = Math.floor(Math.random() * 9999999);
-                const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
-                
-                const testImg = new Image();
-                testImg.src = imageUrl;
-                testImg.onload = () => {
-                    aiMsg.innerHTML = `
-                        <div class="w-full max-w-lg space-y-4 chat-animate">
-                            <div class="flex justify-between items-center mb-1 px-1">
-                                <span class="text-[10px] font-black text-purple-500 uppercase tracking-[0.3em]">Neural Render Complete</span>
-                                <button onclick="window.open('${imageUrl}')" class="text-[9px] text-slate-500 hover:text-white uppercase font-black transition-colors">HD LINK</button>
-                            </div>
-                            <div class="relative group rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-black">
-                                <img src="${imageUrl}" class="w-full h-auto block transform group-hover:scale-105 transition-transform duration-1000">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
-                                    <p class="text-xs text-white/90 italic font-medium leading-relaxed">${prompt}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
+                const img = new Image();
+                img.src = url;
+                img.onload = () => {
+                    aiMsg.innerHTML = `<div class="w-full max-w-lg space-y-4 chat-animate">
+                        <img src="${url}" class="rounded-[2.5rem] border border-white/10 shadow-2xl">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest px-2">${prompt}</p>
+                    </div>`;
                 };
                 return;
             }
 
-            // TEXT ENGINE (Groq)
+            // TEXT LOGIC
             const aiMsg = appendMsg('ai', 'Thinking...');
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${GROQ_KEY}`, 
-                        "Content-Type": "application/json" 
-                    },
+                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",
                         messages: [
-                            { role: "system", content: `You are Mythical AI, an elite assistant. Founder: Chethan. Currently speaking to: ${currentUser.name} (${currentUser.role}).` },
-                            ...chats[currentChatId],
+                            { role: "system", content: `You are Mythical AI. User: ${currentUser.name}. Role: ${currentUser.role}. Founder: Chethan.` },
+                            ...(chats[currentChatId] || []),
                             { role: "user", content: val }
                         ]
                     })
                 });
 
-                if (res.status === 401) {
-                    aiMsg.innerText = "Error: Invalid/Revoked API Key. Update GROQ_KEY.";
-                    return;
-                }
-                if (res.status === 429) {
-                    aiMsg.innerText = "Error: Rate limit hit. Please wait a moment.";
-                    return;
-                }
+                if (res.status === 401) { aiMsg.innerText = "Error: Key Unauthorized."; return; }
 
                 const data = await res.json();
                 const reply = data.choices[0].message.content;
                 aiMsg.innerText = reply;
                 
+                if (!chats[currentChatId]) chats[currentChatId] = [];
                 chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
-                localStorage.setItem('myth_v9_public', JSON.stringify(chats));
+                
+                // SAVE TO USER-SPECIFIC STORAGE
+                localStorage.setItem(`myth_v11_${currentUser.key}`, JSON.stringify(chats));
                 renderSidebar();
             } catch (e) { 
-                console.error(e);
-                aiMsg.innerText = "Neural Connection Interrupted. Check network or F12 console."; 
+                aiMsg.innerText = "Neural Connection Interrupted."; 
             }
         }
 
         function createNewChat() {
             currentChatId = generate23Id();
             chats[currentChatId] = [];
-            window.location.hash = `/chat/${currentChatId}`;
             document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId}`;
-            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 tracking-tighter uppercase">Mythical Network</h2><p class="text-slate-600 text-[10px] tracking-[0.5em] font-black uppercase">Node Established: ${currentChatId}</p></div>`;
+            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 tracking-tighter uppercase">Mythical Network</h2><p class="text-slate-600 text-[9px] tracking-[0.4em] font-black uppercase">Active Session: ${currentUser.name}</p></div>`;
             renderSidebar();
         }
 
@@ -211,6 +200,7 @@
             const list = document.getElementById('history-list');
             list.innerHTML = `<p class="text-[9px] font-black text-slate-600 uppercase tracking-widest px-2 mb-6">Neural Archives</p>`;
             Object.keys(chats).reverse().forEach(id => {
+                if (chats[id].length === 0) return;
                 const div = document.createElement('div');
                 div.className = `p-4 mb-2 rounded-[1.2rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat' : 'text-slate-500 hover:bg-white/5'}`;
                 div.innerText = chats[id][0]?.content || "New Session";
@@ -221,7 +211,6 @@
 
         function loadChat(id) {
             currentChatId = id;
-            window.location.hash = `/chat/${id}`;
             document.getElementById('chat-id-display').innerText = `/NODE/${id}`;
             document.getElementById('chat-box').innerHTML = '';
             chats[id].forEach(msg => appendMsg(msg.role === 'user' ? 'user' : 'ai', msg.content));
