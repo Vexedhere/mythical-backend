@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI | BY CHETHAN</title>
+    <title>Mythical AI | Vision Enabled</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -95,6 +95,7 @@
                 "C@MN26": ["Chethan", "FOUNDER"], 
                 "T@MN26": ["Thaman Devapuram", "ADMIN"], 
                 "P@MN26": ["Pavan", "MODERATOR"],
+                "P@HPSK": ["Amit Singh", "PRINCIPAL"],
                 "VP@HPS": ["Srinivasa Murthy", "VICE PRINCIPAL"],
                 "Z@HPSK": ["Zakaria", "TEACHER"],
                 "V@HPSK": ["Vijayalakshmi", "TEACHER"],
@@ -104,15 +105,15 @@
             if (staff[p]) {
                 enterApp(staff[p][0], staff[p][1], p);
             } else {
-                alert("Unauthorized Access. Security Pass Denied.");
+                alert("Unauthorized Access. Neural Identity Denied.");
             }
         }
 
         function enterApp(name, role, userKey) {
             currentUser = { name, role, key: userKey };
             
-            // ISOLATION: Load private history for this specific pass
-            const saved = localStorage.getItem(`myth_v12_${userKey}`);
+            // ISOLATION: Key-based storage to separate history
+            const saved = localStorage.getItem(`myth_v13_${userKey}`);
             chats = saved ? JSON.parse(saved) : {};
 
             document.getElementById('login-page').classList.add('hidden');
@@ -133,7 +134,7 @@
             appendMsg('user', val);
             input.value = '';
 
-            // VISION ENGINE
+            // VISION RENDERING
             if (val.startsWith('/imagine ')) {
                 const prompt = val.replace('/imagine ', '');
                 const aiMsg = appendMsg('ai', `
@@ -149,13 +150,13 @@
                 img.onload = () => {
                     aiMsg.innerHTML = `<div class="w-full max-w-lg space-y-4 chat-animate">
                         <img src="${url}" class="rounded-[2.5rem] border border-white/10 shadow-2xl">
-                        <p class="text-[9px] text-slate-600 uppercase tracking-widest px-2 font-bold">${prompt}</p>
+                        <p class="text-[9px] text-slate-600 uppercase tracking-widest px-2 font-bold italic">${prompt}</p>
                     </div>`;
                 };
                 return;
             }
 
-            // NEURAL ENGINE
+            // NEURAL PROCESSING
             const aiMsg = appendMsg('ai', 'Neural Processing...');
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -171,7 +172,7 @@
                     })
                 });
 
-                if (res.status === 401) { aiMsg.innerText = "Error: Connection Denied (Key Issue)."; return; }
+                if (res.status === 401) { aiMsg.innerText = "Connection Denied: Key Validation Failed."; return; }
 
                 const data = await res.json();
                 const reply = data.choices[0].message.content;
@@ -180,10 +181,10 @@
                 if (!chats[currentChatId]) chats[currentChatId] = [];
                 chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
                 
-                localStorage.setItem(`myth_v12_${currentUser.key}`, JSON.stringify(chats));
+                localStorage.setItem(`myth_v13_${currentUser.key}`, JSON.stringify(chats));
                 renderSidebar();
             } catch (e) { 
-                aiMsg.innerText = "Connection Dropped. Please check your network."; 
+                aiMsg.innerText = "Link Interrupted. Connection unstable."; 
             }
         }
 
@@ -191,7 +192,7 @@
             currentChatId = generate23Id();
             chats[currentChatId] = [];
             document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId}`;
-            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 tracking-tighter uppercase">Mythical Network</h2><p class="text-slate-600 text-[9px] tracking-[0.4em] font-black uppercase">Active Node: ${currentUser.name}</p></div>`;
+            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-24 chat-animate"><h2 class="text-4xl font-black italic mb-3 tracking-tighter uppercase">Mythical Network</h2><p class="text-slate-600 text-[9px] tracking-[0.4em] font-black uppercase">Active Link: ${currentUser.name}</p></div>`;
             renderSidebar();
         }
 
@@ -202,7 +203,7 @@
                 if (chats[id].length === 0) return;
                 const div = document.createElement('div');
                 div.className = `p-4 mb-2 rounded-[1.2rem] text-[10px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat' : 'text-slate-500 hover:bg-white/5'}`;
-                div.innerText = chats[id][0]?.content || "Archived Session";
+                div.innerText = chats[id][0]?.content || "Archived Handshake";
                 div.onclick = () => loadChat(id);
                 list.appendChild(div);
             });
