@@ -16,7 +16,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020202; color: #e2e8f0; overflow: hidden; }
         .mythic-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .active-chat { background: rgba(168, 85, 247, 0.2) !important; border-color: rgba(168, 85, 247, 0.5) !important; color: white !important; font-weight: 800; }
         .chat-animate { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -31,14 +31,16 @@
 
     <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
         <div class="glass p-12 rounded-[3.5rem] w-full max-w-md text-center shadow-2xl chat-animate">
-            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl">M</div>
+            <div class="w-20 h-20 mythic-gradient rounded-3xl mx-auto mb-8 flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-purple-500/20">M</div>
             <h1 class="text-3xl font-black mb-2 italic uppercase tracking-widest text-white">Mythical AI</h1>
             <p class="text-[10px] text-slate-500 font-bold mb-10 tracking-[0.3em] uppercase">By Chethan</p>
+            
             <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
             <div class="g_id_signin mb-6 flex justify-center" data-type="standard"></div>
+
             <div class="h-[1px] bg-white/10 w-full mb-6"></div>
-            <input type="password" id="staff-pass" placeholder="Passcode" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-purple-500 text-center text-purple-400 font-bold">
-            <button onclick="loginWithPasscode()" class="w-full py-4 rounded-2xl font-black bg-white text-black hover:opacity-90 active:scale-95 transition-all uppercase text-xs tracking-widest">Login</button>
+            <input type="password" id="staff-pass" placeholder="Security Passcode" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-purple-500 text-center font-bold text-purple-400">
+            <button onclick="loginWithPasscode()" class="w-full py-4 rounded-2xl font-black bg-white text-black hover:opacity-90 active:scale-95 transition-all uppercase text-xs tracking-widest">Authorize Node</button>
         </div>
     </div>
 
@@ -52,7 +54,7 @@
         <div class="mt-auto pt-6 border-t border-white/5 px-2">
             <p id="user-display" class="text-xs font-bold text-white uppercase tracking-widest truncate">Founder</p>
             <p class="text-[9px] text-purple-500 font-black mt-1 uppercase italic font-bold mb-4">By Chethan</p>
-            <button onclick="triggerDownload()" class="w-full py-3 mb-3 rounded-xl border border-purple-500/30 text-purple-400 text-[10px] font-black uppercase tracking-widest hover:bg-purple-500/10 transition-all">Download App</button>
+            <button onclick="triggerDownload()" class="w-full py-3 mb-3 rounded-xl border border-purple-500/30 text-purple-400 text-[10px] font-black uppercase tracking-widest hover:bg-purple-500/10 transition-all italic">Download App</button>
             <button onclick="logout()" class="w-full py-3 rounded-xl border border-red-500/20 text-red-500 text-[10px] font-black uppercase transition-all">Logout</button>
         </div>
     </aside>
@@ -60,13 +62,16 @@
     <main id="main-content" class="flex-1 flex flex-col hidden relative">
         <header class="p-6 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
             <span id="chat-id-display" class="text-[10px] font-mono text-slate-500 tracking-widest uppercase">/NODE/INIT</span>
-            <div class="flex items-center gap-2"><div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div><span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Secure Cloud</span></div>
+            <div class="flex items-center gap-2">
+                <div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Secure Cloud</span>
+            </div>
         </header>
         <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-12 scroll-smooth"></div>
         <div class="p-10">
-            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center">
-                <input type="text" id="input-field" placeholder="Ask or '/imagine'..." class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white">
-                <button id="send-btn" onclick="handleChat()" class="mythic-gradient w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+            <div class="max-w-4xl mx-auto flex gap-4 p-3 rounded-[2.5rem] glass shadow-2xl items-center focus-within:border-purple-500/30 transition-all duration-500">
+                <input type="text" id="input-field" placeholder="Ask anything or '/imagine'..." class="flex-1 bg-transparent border-none outline-none px-6 py-2 text-sm text-white placeholder-slate-600">
+                <button id="send-btn" onclick="handleChat()" class="mythic-gradient w-14 h-14 rounded-[1.5rem] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl shadow-purple-500/20">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
@@ -77,7 +82,7 @@
         <div class="glass p-10 rounded-[3rem] max-w-sm w-full chat-animate">
             <h2 class="text-2xl font-black mb-2 text-white italic uppercase">Install App</h2>
             <p id="download-text" class="text-slate-400 text-sm mb-8 leading-relaxed"></p>
-            <button onclick="closeDownload()" class="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest">Close</button>
+            <button onclick="closeDownload()" class="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest hover:scale-95 transition-all">Close</button>
         </div>
     </div>
 
@@ -88,6 +93,7 @@
         let currentChatId = null;
         let deferredPrompt;
 
+        // AUTH & BOOT
         window.onload = () => {
             if (!sessionStorage.getItem('myth_auth')) window.location.hash = "/login";
             else enterApp(userName);
@@ -108,8 +114,8 @@
                     sessionStorage.setItem('myth_user', data.name);
                     userName = data.name;
                     enterApp(data.name);
-                } else { alert("Login Failed."); }
-            } catch (e) { alert("Server starting... try in 10s."); }
+                } else { alert("Access Denied"); }
+            } catch (e) { alert("Cloud Engine Warming Up... Wait 15s."); }
         }
 
         function handleGoogleLogin(res) { syncAuth({ googleName: JSON.parse(atob(res.credential.split('.')[1])).name }); }
@@ -122,21 +128,19 @@
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
             chats = JSON.parse(localStorage.getItem(`myth_chats_${name}`) || '{}');
-            
-            const hash = window.location.hash;
-            if (hash.startsWith('#/chat/') && hash.length > 20) loadChat(hash.split('/chat/')[1]);
+            if (window.location.hash.startsWith('#/chat/')) loadChat(window.location.hash.split('/chat/')[1]);
             else createNewChat();
             renderSidebar();
         }
 
+        // CHAT ENGINE
         function generate23Id() { return Array.from({length: 23}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join(''); }
 
         async function handleChat() {
             const inputField = document.getElementById('input-field');
             const val = inputField.value.trim();
             if (!val) return;
-
-            // FIX: Ensure chat history exists before iteration
+            
             if (!chats[currentChatId]) chats[currentChatId] = [];
 
             appendMsg('user', val);
@@ -152,9 +156,7 @@
                 const res = await fetch(`${API_BASE}/chat`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        messages: [{ role: "system", content: "You are Mythical AI by Chethan." }, ...chats[currentChatId], { role: "user", content: val }]
-                    })
+                    body: JSON.stringify({ messages: [{ role: "system", content: "You are Mythical AI by Chethan." }, ...chats[currentChatId], { role: "user", content: val }] })
                 });
                 const data = await res.json();
                 if (data.error) throw new Error(data.error);
@@ -162,27 +164,27 @@
                 chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: aiMsg.innerText });
                 localStorage.setItem(`myth_chats_${userName}`, JSON.stringify(chats));
                 renderSidebar();
-            } catch (e) { 
-                aiMsg.innerText = "Connection Refused. Restarting Node..."; 
-                if (e.message.includes("Session")) { sessionStorage.clear(); location.reload(); }
-            }
+            } catch (e) { aiMsg.innerText = "Error Connecting to Cloud. Restarting Node..."; }
         }
 
-        async function triggerImageGen(p) {
-            const aiMsg = appendMsg('ai', `<div class="w-full max-w-4xl mx-auto"><span class="thinking-pulse text-purple-400 font-black text-[10px]">Visioning...</span><div class="skeleton w-full aspect-square mt-4"></div></div>`);
+        function triggerImageGen(p) {
+            const aiMsg = appendMsg('ai', `<div class="w-full max-w-4xl mx-auto"><span class="thinking-pulse text-purple-400 font-black text-[10px] uppercase">Rendering Vision...</span><div class="skeleton w-full aspect-square mt-4"></div></div>`);
             const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1024&height=1024&seed=${Math.floor(Math.random()*999)}&model=flux&nologo=true`;
             const img = new Image(); img.src = url;
-            img.onload = () => { aiMsg.innerHTML = `<div class="w-full max-w-4xl mx-auto chat-animate"><div class="rounded-[3.5rem] p-1 border-2 border-white/10 bg-black"><img src="${url}" class="w-full rounded-[3.3rem]"></div></div>`; };
+            img.onload = () => { aiMsg.innerHTML = `<div class="w-full max-w-4xl mx-auto chat-animate"><div class="rounded-[3.5rem] p-1 border-2 border-white/10 bg-black shadow-2xl"><img src="${url}" class="w-full rounded-[3.3rem]"></div></div>`; };
         }
 
-        function createNewChat() { 
-            currentChatId = generate23Id(); 
-            chats[currentChatId] = []; 
-            window.location.hash = `/chat/${currentChatId}`; 
-            document.getElementById('chat-box').innerHTML = `<div class="max-w-xl mx-auto text-center py-32 chat-animate"><h2 class="text-5xl font-black italic mb-4 uppercase text-white">Mythical AI</h2><p class="text-slate-600 text-[10px] tracking-[0.5em] font-bold uppercase">Node: ${currentChatId}</p></div>`;
-            renderSidebar(); 
+        function triggerDownload() {
+            const popup = document.getElementById('download-popup');
+            const text = document.getElementById('download-text');
+            popup.style.display = 'flex';
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) text.innerHTML = "On **iPhone**:<br><br>1. Tap the <b class='text-white'>'Share'</b> icon.<br>2. Tap <b class='text-white'>'Add to Home Screen'</b>.";
+            else if (deferredPrompt) { deferredPrompt.prompt(); closeDownload(); }
+            else text.innerHTML = "On **Laptops**:<br><br>Click the <b class='text-white'>'Install'</b> icon in the top right of your address bar.";
         }
 
+        function closeDownload() { document.getElementById('download-popup').style.display = 'none'; }
+        function createNewChat() { currentChatId = generate23Id(); chats[currentChatId] = []; window.location.hash = `/chat/${currentChatId}`; renderSidebar(); }
         function renderSidebar() {
             const list = document.getElementById('history-list'); list.innerHTML = `<p class="text-[9px] font-black text-slate-600 uppercase px-2 mb-6">Neural Archives</p>`;
             Object.keys(chats).reverse().forEach(id => {
@@ -192,17 +194,6 @@
                 div.onclick = () => loadChat(id); list.appendChild(div);
             });
         }
-
-        function triggerDownload() {
-            const popup = document.getElementById('download-popup');
-            const text = document.getElementById('download-text');
-            popup.style.display = 'flex';
-            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) text.innerHTML = "On **iPhone**:<br><br>1. Tap the <b class='text-white'>'Share'</b> icon.<br>2. Tap <b class='text-white'>'Add to Home Screen'</b>.";
-            else if (deferredPrompt) { deferredPrompt.prompt(); closeDownload(); }
-            else text.innerHTML = "On **Laptops**:<br><br>Click the <b class='text-white'>'Install'</b> icon in the top right address bar.";
-        }
-
-        function closeDownload() { document.getElementById('download-popup').style.display = 'none'; }
         function loadChat(id) { currentChatId = id; window.location.hash = `/chat/${id}`; document.getElementById('chat-box').innerHTML = ''; chats[id].forEach(msg => appendMsg(msg.role === 'user' ? 'user' : 'ai', msg.content)); renderSidebar(); }
         function appendMsg(role, content) {
             const div = document.createElement('div'); div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
