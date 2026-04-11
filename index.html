@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI | By Chethann</title>
+    <title>Mythical AI | Founder Build V16.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -19,13 +19,17 @@
         .chat-animate { animation: flyIn 0.3s ease-out; }
         @keyframes flyIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .code-container { position: relative; margin: 0.8rem 0; border-radius: 0.8rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #0d1117; }
-        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; }
-        .copy-btn { padding: 2px 10px; border-radius: 5px; background: rgba(168, 85, 247, 0.2); color: #a855f7; cursor: pointer; font-size: 8px; }
-        pre { padding: 1rem; overflow-x: auto; margin: 0 !important; font-size: 11.5px !important; line-height: 1.5; }
+        .code-container { position: relative; margin: 0.8rem 0; border-radius: 0.8rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #0d1117; width: 100%; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .copy-btn { padding: 2px 10px; border-radius: 5px; background: rgba(168, 85, 247, 0.2); color: #a855f7; cursor: pointer; font-size: 8px; transition: 0.2s; }
+        .copy-btn:hover { background: #a855f7; color: white; }
+        pre { padding: 1rem; overflow-x: auto; margin: 0 !important; font-size: 11.5px !important; line-height: 1.5; white-space: pre !important; }
         
+        .skeleton { background: #1a1a1a; position: relative; overflow: hidden; }
+        .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
         .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
@@ -33,11 +37,11 @@
 
     <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
         <div class="glass p-10 rounded-[3rem] w-full max-w-sm text-center shadow-2xl chat-animate">
-            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-white">M</div>
-            <h1 class="text-2xl font-black mb-8 italic uppercase">Mythical AI</h1>
+            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-purple-500/20">M</div>
+            <h1 class="text-2xl font-black mb-8 italic uppercase tracking-tighter">Mythical AI</h1>
             <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
             <div class="g_id_signin mb-4 flex justify-center" data-type="standard"></div>
-            <input type="password" id="staff-pass" placeholder="Security Passcode" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 mb-3 outline-none focus:border-purple-500 text-center font-bold text-purple-400 text-sm">
+            <input type="password" id="staff-pass" placeholder="Founder Access" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 mb-3 outline-none focus:border-purple-500 text-center font-bold text-purple-400 text-sm">
             <button onclick="checkStaffPass()" class="w-full py-3 rounded-xl font-black bg-white text-black hover:opacity-90 transition-all uppercase text-[10px] tracking-widest">Authorize Node</button>
         </div>
     </div>
@@ -52,7 +56,7 @@
         <div class="mt-auto pt-4 border-t border-white/5">
             <div class="p-3 glass rounded-xl mb-3">
                 <p id="user-display" class="text-[10px] font-black text-white truncate uppercase">Guest</p>
-                <p id="role-display" class="text-[8px] text-purple-500 font-black mt-0.5 uppercase italic">Rank: INITIALIZING</p>
+                <p id="role-display" class="text-[8px] text-purple-500 font-black mt-0.5 uppercase italic tracking-widest">Rank: INITIALIZING</p>
             </div>
             <button onclick="logout()" class="w-full py-1 text-slate-500 text-[8px] font-bold hover:text-red-500 uppercase tracking-widest">Terminate Link</button>
         </div>
@@ -60,16 +64,18 @@
 
     <main id="main-content" class="flex-1 flex flex-col hidden relative">
         <header class="p-4 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
-            <span id="chat-id-display" class="text-[9px] font-mono text-slate-500 tracking-widest uppercase italic">/NODE/INIT</span>
+            <span id="chat-id-display" class="text-[9px] font-mono text-slate-500 tracking-widest uppercase italic font-bold">/NODE/INIT</span>
             <div class="flex items-center gap-2">
-                <div class="h-1 w-1 rounded-full bg-green-500"></div>
-                <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Neural Link Secure</span>
+                <div class="h-1 w-1 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]"></div>
+                <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Handshake Secure</span>
             </div>
         </header>
+
         <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"></div>
+
         <div class="p-6">
             <div class="max-w-3xl mx-auto flex gap-3 p-2 rounded-[1.8rem] glass shadow-2xl transition-all border border-white/5 focus-within:border-purple-500/40">
-                <input type="text" id="input-field" placeholder="Ask anything..." class="flex-1 bg-transparent border-none outline-none px-4 py-1 text-xs text-white">
+                <input type="text" id="input-field" placeholder="Query or /imagine..." class="flex-1 bg-transparent border-none outline-none px-4 py-1 text-xs text-white">
                 <button id="send-btn" class="mythic-gradient w-10 h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
@@ -84,6 +90,8 @@
         let currentUser = { name: "Guest", role: "USER", key: "guest" };
 
         marked.setOptions({ highlight: (code) => hljs.highlightAuto(code).value, breaks: true });
+
+        function generate23Id() { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 12); }
 
         function checkStaffPass() {
             const p = document.getElementById('staff-pass').value;
@@ -103,12 +111,15 @@
 
         function enterApp(name, role, userKey) {
             currentUser = { name, role, key: userKey };
+            const saved = localStorage.getItem(`myth_v16_${userKey}`);
+            chats = saved ? JSON.parse(saved) : {};
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
             document.getElementById('role-display').innerText = `Rank: ${role}`;
             createNewChat();
+            renderSidebar();
         }
 
         async function handleChat() {
@@ -117,7 +128,10 @@
             if (!val) return;
             appendMsg('user', val);
             input.value = '';
-            const aiMsg = appendMsg('ai', '<span class="animate-pulse">Neural Processing...</span>');
+
+            if (val.toLowerCase().startsWith('/imagine ')) { handleVision(val); return; }
+
+            const aiMsg = appendMsg('ai', '<span class="animate-pulse">Neural Linking...</span>');
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
@@ -125,16 +139,30 @@
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",
                         messages: [
-                            { role: "system", content: "You are Mythical AI. Provide code in ONE SINGLE BLOCK. Do not split responses." },
+                            { 
+                                role: "system", 
+                                content: `You are Mythical AI, built by the FOUNDER Chethan. 1. If the user says hi/hello, respond naturally. 2. If the user asks for CODE, provide it in ONE SINGLE UNIFIED BLOCK. Never split scripts.` 
+                            },
                             ...(chats[currentChatId] || []),
                             { role: "user", content: val }
-                        ]
+                        ],
+                        temperature: 0.5
                     })
                 });
                 const data = await res.json();
                 let reply = data.choices[0].message.content;
-                aiMsg.innerHTML = formatAIResponse(reply);
-                aiMsg.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
+                
+                if (reply.includes("```")) {
+                    aiMsg.innerHTML = formatAIResponse(reply);
+                    aiMsg.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
+                } else {
+                    aiMsg.innerText = reply;
+                }
+
+                if (!chats[currentChatId]) chats[currentChatId] = [];
+                chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
+                localStorage.setItem(`myth_v16_${currentUser.key}`, JSON.stringify(chats));
+                renderSidebar();
             } catch (e) { aiMsg.innerText = "Connection lost."; }
         }
 
@@ -145,7 +173,7 @@
             tempDiv.querySelectorAll('pre').forEach((pre) => {
                 const container = document.createElement('div');
                 container.className = 'code-container';
-                container.innerHTML = `<div class="code-header"><span>Source</span><span class="copy-btn" onclick="copyCode(this)">COPY</span></div>`;
+                container.innerHTML = `<div class="code-header"><span>Source Code</span><span class="copy-btn" onclick="copyCode(this)">COPY</span></div>`;
                 const clonePre = pre.cloneNode(true);
                 container.appendChild(clonePre);
                 pre.replaceWith(container);
@@ -160,6 +188,44 @@
             setTimeout(() => btn.innerText = 'COPY', 2000);
         }
 
+        function handleVision(val) {
+            let prompt = val.replace('/imagine ', '');
+            const aiMsg = appendMsg('ai', `<div class="skeleton w-48 h-48 rounded-xl"></div>`);
+            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+            const img = new Image();
+            img.src = imageUrl;
+            img.onload = () => { aiMsg.innerHTML = `<img src="${imageUrl}" class="w-64 rounded-xl border border-white/10 shadow-xl">`; };
+        }
+
+        function createNewChat() {
+            currentChatId = generate23Id();
+            chats[currentChatId] = [];
+            document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId.substring(0,8)}`;
+            document.getElementById('chat-box').innerHTML = `<div class="text-center py-10"><p class="text-slate-600 text-[8px] tracking-[0.4em] font-black uppercase">Channel Secured: ${currentUser.name}</p></div>`;
+            renderSidebar();
+        }
+
+        function loadChat(id) {
+            currentChatId = id;
+            document.getElementById('chat-box').innerHTML = '';
+            chats[id].forEach(msg => appendMsg(msg.role === 'user' ? 'user' : 'ai', msg.role === 'user' ? msg.content : formatAIResponse(msg.content)));
+            renderSidebar();
+            document.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = `<p class="text-[8px] font-black text-slate-600 uppercase tracking-widest px-2 mb-4">Neural Archives</p>`;
+            Object.keys(chats).reverse().forEach(id => {
+                if (chats[id].length === 0) return;
+                const div = document.createElement('div');
+                div.className = `p-3 mb-1 rounded-xl text-[9px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat' : 'text-slate-500 hover:bg-white/5'}`;
+                div.innerText = chats[id][0]?.content || "Archived Handshake";
+                div.onclick = () => loadChat(id);
+                list.appendChild(div);
+            });
+        }
+
         function appendMsg(role, content) {
             const div = document.createElement('div');
             div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
@@ -168,12 +234,6 @@
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
             return div.querySelector('div');
-        }
-
-        function createNewChat() {
-            currentChatId = Math.random().toString(36).substring(7);
-            chats[currentChatId] = [];
-            document.getElementById('chat-box').innerHTML = `<div class="text-center py-10"><p class="text-slate-600 text-[8px] font-black uppercase tracking-widest">Handshake Established: ${currentUser.name}</p></div>`;
         }
 
         function logout() { location.reload(); }
