@@ -3,97 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Shop</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <title>Mythical AI | Unified V16</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
     <style>
-        body {
-            background-color: #f2f2f2;
-        }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .coffee-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .coffee-list li {
-            margin-bottom: 20px;
-        }
-        .coffee-list li a {
-            text-decoration: none;
-            color: #337ab7;
-        }
-        .coffee-list li a:hover {
-            color: #23527c;
-        }
-        .coffee-details {
-            padding: 20px;
-        }
-        .coffee-details h1 {
-            margin-top: 0;
-        }
-        .order-form {
-            padding: 20px;
-        }
-        .order-form label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        .order-form input[type="text"], .order-form input[type="number"] {
-            width: 100%;
-            height: 40px;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .order-form input[type="submit"] {
-            width: 100%;
-            height: 40px;
-            padding: 10px;
-            background-color: #337ab7;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .order-form input[type="submit"]:hover {
-            background-color: #23527c;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020202; color: #e2e8f0; overflow: hidden; }
+        .mythic-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .active-chat { background: rgba(168, 85, 247, 0.12) !important; border-color: rgba(168, 85, 247, 0.3) !important; color: white !important; font-weight: 800; }
+        .chat-animate { animation: flyIn 0.3s ease-out; }
+        @keyframes flyIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Unified Code Blocks */
+        .code-container { position: relative; margin: 0.8rem 0; border-radius: 0.8rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #0d1117; width: 100%; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .copy-btn { padding: 2px 10px; border-radius: 5px; background: rgba(168, 85, 247, 0.2); color: #a855f7; cursor: pointer; font-size: 8px; transition: 0.2s; }
+        .copy-btn:hover { background: #a855f7; color: white; }
+        pre { padding: 1rem; overflow-x: auto; margin: 0 !important; font-size: 11.5px !important; line-height: 1.5; white-space: pre !important; }
+        
+        .skeleton { background: #1a1a1a; position: relative; overflow: hidden; }
+        .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Coffee Shop</h1>
-        <ul class="coffee-list">
-            {% for coffee in coffees %}
-                <li>
-                    <a href="{{ url_for('coffee', coffee_id=coffee.id) }}">{{ coffee.name }}</a>
-                </li>
-            {% endfor %}
-        </ul>
-        <div class="coffee-details">
-            {% if coffee %}
-                <h1>{{ coffee.name }}</h1>
-                <p>Price: {{ coffee.price }}</p>
-                <p>Description: {{ coffee.description }}</p>
-                <form action="{{ url_for('order') }}" method="post">
-                    <input type="hidden" name="coffee_id" value="{{ coffee.id }}">
-                    <label for="customer_name">Customer Name:</label>
-                    <input type="text" id="customer_name" name="customer_name"><br><br>
-                    <label for="quantity">Quantity:</label>
-                    <input type="number" id="quantity" name="quantity"><br><br>
-                    <input type="submit" value="Order">
-                </form>
-            {% endif %}
+<body class="h-screen flex">
+
+    <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm text-center shadow-2xl chat-animate">
+            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-purple-500/20">M</div>
+            <h1 class="text-2xl font-black mb-8 italic tracking-tighter uppercase">Mythical AI</h1>
+            <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
+            <div class="g_id_signin mb-4 flex justify-center" data-type="standard"></div>
+            <input type="password" id="staff-pass" placeholder="Founder Access" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 mb-3 outline-none focus:border-purple-500 text-center font-bold text-purple-400 text-sm">
+            <button onclick="checkStaffPass()" class="w-full py-3 rounded-xl font-black bg-white text-black hover:opacity-90 transition-all uppercase text-[10px] tracking-widest">Authorize Node</button>
         </div>
     </div>
+
+    <aside id="sidebar" class="w-64 bg-[#050505] border-r border-white/5 flex flex-col p-4 hidden">
+        <div class="flex items-center gap-2 mb-8 px-2">
+            <div class="w-8 h-8 mythic-gradient rounded-lg flex items-center justify-center font-bold text-white text-xs">M</div>
+            <span class="font-black text-lg italic uppercase tracking-tighter">Mythical</span>
+        </div>
+        <button onclick="createNewChat()" class="w-full py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-[9px] font-black mb-6 uppercase tracking-widest">+ NEW INSTANCE</button>
+        
+        <div class="flex-1 overflow-y-auto space-y-1" id="history-list"></div>
+
+        <div class="mt-auto pt-4 border-t border-white/5">
+            <div class="p-3 glass rounded-xl mb-3">
+                <p id="user-display" class="text-[10px] font-black text-white truncate uppercase">Guest</p>
+                <p id="role-display" class="text-[8px] text-purple-500 font-black mt-0.5 uppercase italic tracking-widest">Rank: INITIALIZING</p>
+            </div>
+            <button onclick="logout()" class="w-full py-1 text-slate-500 text-[8px] font-bold hover:text-red-500 uppercase">Terminate Link</button>
+        </div>
+    </aside>
+
+    <main id="main-content" class="flex-1 flex flex-col hidden relative">
+        <header class="p-4 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
+            <span id="chat-id-display" class="text-[9px] font-mono text-slate-500 tracking-widest uppercase italic">/NODE/INIT</span>
+            <div class="flex items-center gap-2">
+                <div class="h-1 w-1 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]"></div>
+                <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Handshake Secure</span>
+            </div>
+        </header>
+
+        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"></div>
+
+        <div class="p-6">
+            <div class="max-w-3xl mx-auto flex gap-3 p-2 rounded-[1.8rem] glass shadow-2xl transition-all border border-white/5 focus-within:border-purple-500/40">
+                <input type="text" id="input-field" placeholder="Query or /imagine..." class="flex-1 bg-transparent border-none outline-none px-4 py-1 text-xs text-white">
+                <button id="send-btn" class="mythic-gradient w-10 h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const GROQ_KEY = "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";
+        let chats = {};
+        let currentChatId = null;
+        let currentUser = { name: "Guest", role: "USER", key: "guest" };
+
+        marked.setOptions({ highlight: (code) => hljs.highlightAuto(code).value, breaks: true });
+
+        function generate23Id() { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 12); }
+
+        function checkStaffPass() {
+            const p = document.getElementById('staff-pass').value;
+            const staff = {
+                "C@MN26": ["Chethan", "FOUNDER"], "T@MN26": ["Thaman", "ADMIN"], 
+                "P@MN26": ["Pavan", "MODERATOR"], "P@HPSK": ["Amit Singh", "PRINCIPAL"]
+            };
+            if (staff[p]) enterApp(staff[p][0], staff[p][1], p);
+            else alert("Neural Access Denied.");
+        }
+
+        function enterApp(name, role, userKey) {
+            currentUser = { name, role, key: userKey };
+            const saved = localStorage.getItem(`myth_v16_${userKey}`);
+            chats = saved ? JSON.parse(saved) : {};
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('user-display').innerText = name;
+            document.getElementById('role-display').innerText = `Rank: ${role}`;
+            createNewChat();
+            renderSidebar();
+        }
+
+        async function handleChat() {
+            const input = document.getElementById('input-field');
+            const val = input.value.trim();
+            if (!val) return;
+
+            appendMsg('user', val);
+            input.value = '';
+
+            if (val.toLowerCase().startsWith('/imagine ')) { handleVision(val); return; }
+
+            const aiMsg = appendMsg('ai', '<span class="animate-pulse">Neural Linking...</span>');
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "llama-3.1-8b-instant",
+                        messages: [
+                            { role: "system", content: "You are Mythical AI. Provide code in ONE SINGLE BLOCK per response. Never split a script into multiple parts. Use triple backticks." }, 
+                            ...(chats[currentChatId] || []), 
+                            { role: "user", content: val }
+                        ],
+                        temperature: 0.3 // Lower temperature for more consistent, unified code blocks
+                    })
+                });
+                const data = await res.json();
+                let reply = data.choices[0].message.content;
+                aiMsg.innerHTML = formatAIResponse(reply);
+                if (!chats[currentChatId]) chats[currentChatId] = [];
+                chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
+                localStorage.setItem(`myth_v16_${currentUser.key}`, JSON.stringify(chats));
+                renderSidebar();
+                aiMsg.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
+            } catch (e) { aiMsg.innerText = "Error."; }
+        }
+
+        function formatAIResponse(text) {
+            let formatted = marked.parse(text);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = formatted;
+            tempDiv.querySelectorAll('pre').forEach((pre) => {
+                const container = document.createElement('div');
+                container.className = 'code-container';
+                container.innerHTML = `<div class="code-header"><span>Unified Source</span><span class="copy-btn" onclick="copyCode(this)">COPY</span></div>`;
+                const clonePre = pre.cloneNode(true);
+                container.appendChild(clonePre);
+                pre.replaceWith(container);
+            });
+            return tempDiv.innerHTML;
+        }
+
+        function copyCode(btn) {
+            const code = btn.closest('.code-container').querySelector('pre').innerText;
+            navigator.clipboard.writeText(code);
+            btn.innerText = 'COPIED!';
+            setTimeout(() => btn.innerText = 'COPY', 2000);
+        }
+
+        function handleVision(val) {
+            let prompt = val.replace('/imagine ', '');
+            const aiMsg = appendMsg('ai', `<div class="skeleton w-48 h-48 rounded-xl"></div>`);
+            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+            const img = new Image();
+            img.src = imageUrl;
+            img.onload = () => { aiMsg.innerHTML = `<img src="${imageUrl}" class="w-64 rounded-xl border border-white/10 shadow-xl">`; };
+        }
+
+        function createNewChat() {
+            currentChatId = generate23Id();
+            chats[currentChatId] = [];
+            document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId.substring(0,8)}`;
+            document.getElementById('chat-box').innerHTML = `<div class="text-center py-10"><p class="text-slate-600 text-[8px] tracking-[0.4em] font-black uppercase">Channel Secured: ${currentUser.name}</p></div>`;
+            renderSidebar();
+        }
+
+        function loadChat(id) {
+            currentChatId = id;
+            document.getElementById('chat-box').innerHTML = '';
+            chats[id].forEach(msg => appendMsg(msg.role === 'user' ? 'user' : 'ai', msg.role === 'user' ? msg.content : formatAIResponse(msg.content)));
+            renderSidebar();
+            document.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = `<p class="text-[8px] font-black text-slate-600 uppercase tracking-widest px-2 mb-4">Neural Archives</p>`;
+            Object.keys(chats).reverse().forEach(id => {
+                if (chats[id].length === 0) return;
+                const div = document.createElement('div');
+                div.className = `p-3 mb-1 rounded-xl text-[9px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat' : 'text-slate-500 hover:bg-white/5'}`;
+                div.innerText = chats[id][0]?.content || "Chat Instance";
+                div.onclick = () => loadChat(id);
+                list.appendChild(div);
+            });
+        }
+
+        function appendMsg(role, content) {
+            const div = document.createElement('div');
+            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
+            div.innerHTML = `<div class="max-w-[75%] px-5 py-3 rounded-[1.4rem] text-[11px] leading-relaxed shadow-lg ${role === 'user' ? 'mythic-gradient text-white font-bold' : 'glass text-slate-200'}">${content}</div>`;
+            const box = document.getElementById('chat-box');
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            return div.querySelector('div');
+        }
+
+        function logout() { location.reload(); }
+        document.getElementById('send-btn').onclick = handleChat;
+        document.getElementById('input-field').onkeypress = (e) => { if(e.key==='Enter') handleChat(); };
+    </script>
 </body>
 </html>
