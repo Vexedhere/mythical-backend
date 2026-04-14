@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mythical AI </title>
+<title>Mythical AI Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -81,7 +81,6 @@
     <input id="pass" placeholder="Enter passcode" class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none text-lg mb-4">
     
     <button onclick="login()" class="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 p-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">Authenticate</button>
-    
     <button onclick="guestLogin()" class="w-full mt-3 text-gray-400 hover:text-white p-4 rounded-2xl font-medium transition-all">Continue as Guest</button>
   </div>
 </div>
@@ -97,7 +96,8 @@
   <div class="flex flex-1 pt-11">
 
     <!-- SIDEBAR -->
-    <div id="sidebar" class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col transition-all duration-300">
+    <div id="sidebar" class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col transition-all duration-300 lg:translate-x-0 -translate-x-full fixed lg:static h-full z-50">
+      
       <div class="p-5 border-b border-gray-800 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
@@ -106,8 +106,9 @@
             <p class="text-xs text-purple-400 font-medium">Neural Registry • V16.8</p>
           </div>
         </div>
+        <!-- Close button for mobile -->
         <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
-          <i class="fas fa-times text-xl"></i>
+          <i class="fas fa-times text-2xl"></i>
         </button>
       </div>
 
@@ -135,11 +136,13 @@
       </div>
     </div>
 
-    <!-- CHAT AREA -->
+    <!-- MAIN CHAT AREA -->
     <div class="flex-1 flex flex-col relative">
-      <!-- Mobile Menu Button -->
-      <button onclick="toggleSidebar()" class="lg:hidden absolute top-4 left-4 z-50 bg-[#1f2937] p-2 rounded-xl text-gray-400 hover:text-white">
-        <i class="fas fa-bars text-xl"></i>
+
+      <!-- Hamburger Menu Button -->
+      <button onclick="toggleSidebar()" 
+        class="lg:hidden absolute top-4 left-4 z-40 bg-[#1f2937] hover:bg-[#374151] p-3 rounded-2xl text-gray-300 hover:text-white transition-all">
+        <i class="fas fa-bars text-2xl"></i>
       </button>
 
       <div class="h-16 border-b border-gray-800 flex items-center px-6 bg-[#0a0a0a]">
@@ -157,8 +160,11 @@
       <div class="p-6 border-t border-gray-800 bg-[#0a0a0a]">
         <div class="max-w-4xl mx-auto">
           <div class="relative">
-            <input id="input" class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all" placeholder="Ask Mythical AI anything...">
-            <button onclick="send()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
+            <input id="input" 
+              class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all"
+              placeholder="Ask Mythical AI anything...">
+            <button onclick="send()" 
+              class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
               <i class="fas fa-paper-plane"></i>
             </button>
           </div>
@@ -177,7 +183,6 @@ let chats = {};
 let currentChatId = null;
 let currentUser = "Guest";
 let currentRank = "GUEST";
-let sidebarOpen = true;
 
 const registry = {
     "C@MN26": { name: "Chethan", rank: "FOUNDER" },
@@ -216,7 +221,7 @@ function login() {
     currentRank = registry[pass].rank;
     startApp();
   } else {
-    alert("Invalid passcode. Access denied.");
+    alert("Invalid passcode.");
   }
 }
 
@@ -227,7 +232,7 @@ function guestLogin() {
 }
 
 function logout() {
-  if (confirm("Are you sure you want to logout?")) {
+  if (confirm("Logout from Mythical AI?")) {
     localStorage.removeItem("myth_" + currentUser);
     location.reload();
   }
@@ -253,13 +258,10 @@ function startApp() {
   renderHistory();
 }
 
-// ==================== SIDEBAR TOGGLE ====================
+// ==================== SIDEBAR TOGGLE (Hamburger) ====================
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
-  sidebarOpen = !sidebarOpen;
-  if (window.innerWidth < 1024) {
-    sidebar.style.transform = sidebarOpen ? 'translateX(0)' : 'translateX(-100%)';
-  }
+  sidebar.classList.toggle("-translate-x-full");
 }
 
 // ==================== SYSTEM PROMPT ====================
@@ -355,7 +357,7 @@ function loadChat(chatId) {
 
 function deleteChat(chatId, e) {
   e.stopImmediatePropagation();
-  if (confirm("Delete this chat permanently?")) {
+  if (confirm("Delete this chat?")) {
     delete chats[chatId];
     if (currentChatId === chatId) newChat();
     save();
@@ -391,7 +393,7 @@ function save() {
   renderHistory();
 }
 
-// Browser navigation
+// Browser back button support
 window.addEventListener('popstate', () => {
   const path = getPathFromURL();
   if (path.startsWith("/chat/")) {
@@ -408,25 +410,12 @@ document.getElementById("input").addEventListener("keydown", e => {
     send();
   }
 });
-
-// Close sidebar on mobile when clicking outside (optional enhancement)
-document.addEventListener('click', (e) => {
-  if (window.innerWidth < 1024) {
-    const sidebar = document.getElementById("sidebar");
-    if (!sidebar.contains(e.target) && !e.target.closest('button[onclick="toggleSidebar()"]')) {
-      sidebar.style.transform = 'translateX(-100%)';
-    }
-  }
-});
 </script>
 
 <style>
 .custom-scroll::-webkit-scrollbar { width: 6px; }
 .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 20px; }
 .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-@media (max-width: 1024px) {
-  #sidebar { transform: translateX(-100%); }
-}
 </style>
 
 </body>
