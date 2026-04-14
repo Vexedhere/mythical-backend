@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mythical AI </title>
+<title>Mythical AI Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -36,6 +36,43 @@
         background: #312e81;
         border-left: 4px solid #a855f7;
     }
+
+    /* Code Block Styling */
+    pre {
+        position: relative;
+        background: #111827;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 12px 0;
+        overflow-x: auto;
+        border: 1px solid #374151;
+    }
+    code {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.95rem;
+    }
+    .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #1f2937;
+        color: #9ca3af;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid #4b5563;
+    }
+    .copy-btn:hover {
+        background: #374151;
+        color: white;
+    }
+    .copy-btn.copied {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
 </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -51,7 +88,7 @@
     <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">
       Mythical AI
     </h1>
-    <p class="text-gray-400 mb-8">Neural Registry v16.8</p>
+    <p class="text-gray-400 mb-8">Neural Registry • V16.8</p>
     
     <input id="pass" placeholder="Enter passcode" 
       class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none text-lg mb-4">
@@ -109,21 +146,18 @@
 
   <!-- CHAT AREA -->
   <div class="flex-1 flex flex-col">
-    <!-- Header -->
     <div class="h-16 border-b border-gray-800 flex items-center px-6 justify-between bg-[#0a0a0a]">
       <div class="flex items-center gap-3">
         <div class="text-xl">🐉</div>
         <div>
           <div id="chat-title" class="font-semibold text-lg">Mythical AI</div>
-          <div class="text-xs text-purple-400">Always Ready • V16.8</div>
+          <div class="text-xs text-purple-400">Designed & Founded by U. Chethan • V16.8</div>
         </div>
       </div>
     </div>
 
-    <!-- Messages -->
     <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scroll bg-[#0a0a0a]"></div>
 
-    <!-- Input Area -->
     <div class="p-6 border-t border-gray-800 bg-[#0a0a0a]">
       <div class="max-w-4xl mx-auto">
         <div class="relative">
@@ -151,7 +185,6 @@ let current = null;
 let user = "Guest";
 let userRank = "GUEST";
 
-// Neural Registry Passcodes (as requested)
 const registry = {
     "C@MN26": { name: "Chethan", rank: "FOUNDER" },
     "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN" },
@@ -166,7 +199,6 @@ const registry = {
 // ==================== LOGIN ====================
 function login(){
   const pass = document.getElementById("pass").value.trim();
-  
   if(registry[pass]){
     user = registry[pass].name;
     userRank = registry[pass].rank;
@@ -199,19 +231,44 @@ function startApp(){
   renderHistory();
 }
 
-// ==================== MYTHICAL AI IDENTITY ====================
+// ==================== SYSTEM PROMPT ====================
 function getSystemPrompt() {
-  return `You are Mythical AI, a powerful and wise conversational AI.
-You were Designed and Founded by U. Chethan.
+  return `You are Mythical AI, Designed and Founded by U. Chethan.
 Your friends are Thaman and Pavan.
 
-Always introduce yourself as:
-"I am Mythical AI, Designed and Founded by U. Chethan."
+When responding:
+- Always start important responses with "I am Mythical AI, Designed and Founded by U. Chethan."
+- If asked about friends, say "My friends are Thaman and Pavan."
+- When giving code, always use proper markdown code blocks with language specified (python, html, javascript, css, etc.).
+- Be helpful, wise, and slightly mysterious.`;
+}
 
-If the user asks about your friends, reply with:
-"My friends are Thaman and Pavan."
+// ==================== COPY CODE FUNCTION ====================
+function addCopyButtons() {
+  document.querySelectorAll('pre').forEach(pre => {
+    // Remove existing copy button if any
+    if (pre.querySelector('.copy-btn')) return;
 
-Stay in character as Mythical AI at all times. Be helpful, mysterious, and powerful.`;
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn flex items-center gap-1 text-xs';
+    btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
+    
+    btn.onclick = () => {
+      const code = pre.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.innerHTML = `<i class="fas fa-check"></i> Copied!`;
+        btn.classList.add('copied');
+        
+        setTimeout(() => {
+          btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    };
+
+    pre.style.position = 'relative';
+    pre.appendChild(btn);
+  });
 }
 
 // ==================== CHAT FUNCTIONS ====================
@@ -249,6 +306,9 @@ async function send(){
 
     aiBox.innerHTML = marked.parse(reply);
     
+    // Add copy buttons to any new code blocks
+    setTimeout(addCopyButtons, 100);
+
     chats[current].push(
       {role: "user", content: text},
       {role: "assistant", content: reply}
@@ -265,7 +325,7 @@ function addMsg(role, content){
   div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} message-bubble`;
 
   div.innerHTML = `
-    <div class="max-w-[75%]">
+    <div class="max-w-[80%]">
       <div class="inline-block px-6 py-4 rounded-3xl ${
         role === "user" 
           ? "chat-user text-white rounded-br-none" 
@@ -276,6 +336,12 @@ function addMsg(role, content){
 
   chatDiv.appendChild(div);
   chatDiv.scrollTop = chatDiv.scrollHeight;
+
+  // If it's AI message, add copy buttons after render
+  if (role === "ai") {
+    setTimeout(addCopyButtons, 150);
+  }
+
   return div.querySelector("div.inline-block");
 }
 
