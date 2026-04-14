@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mythical AI Pro</title>
+<title>Mythical AI </title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -56,11 +56,17 @@
     }
     .copy-btn:hover { background: #374151; color: white; }
     .copy-btn.copied { background: #10b981; color: white; border-color: #10b981; }
+
+    .url-bar {
+        background: #111827;
+        border: 1px solid #374151;
+        font-family: monospace;
+    }
 </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
-<!-- LOGIN -->
+<!-- LOGIN SCREEN -->
 <div id="login" class="fixed inset-0 flex items-center justify-center bg-black z-50">
   <div class="bg-[#111] p-10 rounded-3xl w-96 text-center shadow-2xl border border-purple-500/20">
     <div class="flex justify-center mb-6">
@@ -71,7 +77,10 @@
     <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">
       Mythical AI
     </h1>
-    <p class="text-gray-400 mb-8">Neural Registry • V16.8</p>
+    <p class="text-gray-400 mb-2">Neural Registry • V16.8</p>
+    <div class="url-bar px-4 py-2 rounded-2xl text-sm text-purple-400 font-mono mb-8">
+      ai.mythicalstudios.online/login
+    </div>
     
     <input id="pass" placeholder="Enter passcode" 
       class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none text-lg mb-4">
@@ -124,30 +133,37 @@
 
   <!-- CHAT AREA -->
   <div class="flex-1 flex flex-col">
-    <div class="h-16 border-b border-gray-800 flex items-center px-6 bg-[#0a0a0a]">
-      <div class="flex items-center gap-3">
-        <div class="text-xl">🐉</div>
-        <div>
-          <div id="chat-title" class="font-semibold text-lg">Mythical AI</div>
-          <div class="text-xs text-purple-400">Designed & Founded by U. Chethan • V16.8</div>
-        </div>
-      </div>
+    <!-- URL Bar -->
+    <div class="h-12 bg-[#111827] border-b border-gray-800 flex items-center px-6 text-sm font-mono text-purple-400">
+      <span id="current-url" class="select-all">ai.mythicalstudios.online/chat/</span>
     </div>
 
-    <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scroll bg-[#0a0a0a]"></div>
-
-    <div class="p-6 border-t border-gray-800 bg-[#0a0a0a]">
-      <div class="max-w-4xl mx-auto">
-        <div class="relative">
-          <input id="input" 
-            class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all"
-            placeholder="Ask Mythical AI anything...">
-          <button onclick="send()" 
-            class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
-            <i class="fas fa-paper-plane"></i>
-          </button>
+    <div class="flex-1 flex flex-col">
+      <div class="h-16 border-b border-gray-800 flex items-center px-6 bg-[#0a0a0a]">
+        <div class="flex items-center gap-3">
+          <div class="text-xl">🐉</div>
+          <div>
+            <div id="chat-title" class="font-semibold text-lg">Mythical AI</div>
+            <div class="text-xs text-purple-400">Designed & Founded by U. Chethan</div>
+          </div>
         </div>
-        <p class="text-center text-xs text-gray-500 mt-4">Mythical AI • Designed & Founded by U. Chethan</p>
+      </div>
+
+      <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scroll bg-[#0a0a0a]"></div>
+
+      <div class="p-6 border-t border-gray-800 bg-[#0a0a0a]">
+        <div class="max-w-4xl mx-auto">
+          <div class="relative">
+            <input id="input" 
+              class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all"
+              placeholder="Ask Mythical AI anything...">
+            <button onclick="send()" 
+              class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          <p class="text-center text-xs text-gray-500 mt-4">Mythical AI • Designed & Founded by U. Chethan</p>
+        </div>
       </div>
     </div>
   </div>
@@ -208,7 +224,21 @@ function startApp(){
   renderHistory();
 }
 
-// ==================== SYSTEM PROMPT (Now knows who is logged in) ====================
+// ==================== URL GENERATOR (23 characters after /chat/) ====================
+function generateChatId() {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let id = "";
+  for(let i = 0; i < 23; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return id;
+}
+
+function updateURL(chatId) {
+  document.getElementById("current-url").textContent = `ai.mythicalstudios.online/chat/${chatId}`;
+}
+
+// ==================== SYSTEM PROMPT ====================
 function getSystemPrompt() {
   return `You are Mythical AI, Designed and Founded by U. Chethan.
 Your friends are Thaman and Pavan.
@@ -217,14 +247,14 @@ The current logged-in user is **${currentUser}** (${currentRank}).
 
 Rules:
 - Always address the user by their name: "${currentUser}"
-- Start most responses with something like "Hello ${currentUser}," or "Yes ${currentUser},"
-- If asked who you are, say: "I am Mythical AI, Designed and Founded by U. Chethan."
-- If asked about your friends, say: "My friends are Thaman and Pavan."
-- When giving code, use proper markdown code blocks with language name (python, html, javascript, etc.).
+- Start responses naturally with "Hello ${currentUser}," or similar.
+- If asked who you are: "I am Mythical AI, Designed and Founded by U. Chethan."
+- If asked about friends: "My friends are Thaman and Pavan."
+- When giving code, use proper markdown code blocks with language.
 - Be helpful, wise, and slightly mysterious.`;
 }
 
-// ==================== COPY CODE FUNCTION ====================
+// ==================== COPY CODE ====================
 function addCopyButtons() {
   document.querySelectorAll('pre:not(:has(.copy-btn))').forEach(pre => {
     const btn = document.createElement('button');
@@ -242,7 +272,6 @@ function addCopyButtons() {
         }, 2000);
       });
     };
-
     pre.appendChild(btn);
   });
 }
@@ -256,7 +285,7 @@ async function send(){
   addMsg("user", text);
   input.value = "";
 
-  const aiBox = addMsg("ai", `<div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i> Thinking in the neural realm...</div>`);
+  const aiBox = addMsg("ai", `<div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i> Thinking...</div>`);
 
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -283,13 +312,10 @@ async function send(){
     aiBox.innerHTML = marked.parse(reply);
     setTimeout(addCopyButtons, 100);
 
-    chats[current].push(
-      {role: "user", content: text},
-      {role: "assistant", content: reply}
-    );
+    chats[current].push({role: "user", content: text}, {role: "assistant", content: reply});
     save();
   } catch(e) {
-    aiBox.innerHTML = `<span class="text-red-400">⚠️ Neural connection disrupted. Please try again.</span>`;
+    aiBox.innerHTML = `<span class="text-red-400">⚠️ Neural connection disrupted.</span>`;
   }
 }
 
@@ -318,9 +344,14 @@ function addMsg(role, content){
 // ==================== CHAT MANAGEMENT ====================
 function newChat(){
   current = "chat_" + Date.now();
+  const chatId = generateChatId();   // 23 characters
   chats[current] = [];
+  
   document.getElementById("chat").innerHTML = "";
+  updateURL(chatId);   // Update fake URL
+  
   document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
+  
   save();
   renderHistory();
 }
@@ -337,6 +368,10 @@ function load(id){
     }
   });
 
+  // Generate a consistent-looking ID for display (not real storage key)
+  const displayId = generateChatId();
+  updateURL(displayId);
+
   document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
 }
 
@@ -352,7 +387,7 @@ function renderHistory(){
     div.className = `sidebar-chat p-4 rounded-2xl cursor-pointer transition-all text-sm ${current === id ? 'active-chat' : ''}`;
     div.innerHTML = `
       <div class="font-medium text-gray-200 line-clamp-1">${preview}</div>
-      <div class="text-xs text-gray-500 mt-1">${new Date(parseInt(id.split('_')[1])).toLocaleDateString('en-IN')}</div>
+      <div class="text-xs text-gray-500 mt-1">ai.mythicalstudios.online/chat/•••••••••••••••••••••••</div>
     `;
     div.onclick = () => load(id);
     container.appendChild(div);
@@ -364,7 +399,7 @@ function save(){
   renderHistory();
 }
 
-// Enter key
+// Enter key support
 document.getElementById("input").addEventListener("keydown", e => {
   if(e.key === "Enter" && !e.shiftKey){
     e.preventDefault();
