@@ -22,22 +22,16 @@
         background: #1f2937;
         border: 1px solid #374151;
     }
-    .message-bubble {
-        animation: fadeIn 0.3s ease forwards;
-    }
+    .message-bubble { animation: fadeIn 0.3s ease forwards; }
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    .sidebar-chat:hover {
-        background: #1f2937;
-    }
+    .sidebar-chat:hover { background: #1f2937; }
     .active-chat {
         background: #312e81;
         border-left: 4px solid #a855f7;
     }
-
-    /* Code Block Styling */
     pre {
         position: relative;
         background: #111827;
@@ -46,10 +40,6 @@
         margin: 12px 0;
         overflow-x: auto;
         border: 1px solid #374151;
-    }
-    code {
-        font-family: 'Fira Code', monospace;
-        font-size: 0.95rem;
     }
     .copy-btn {
         position: absolute;
@@ -64,20 +54,13 @@
         transition: all 0.2s;
         border: 1px solid #4b5563;
     }
-    .copy-btn:hover {
-        background: #374151;
-        color: white;
-    }
-    .copy-btn.copied {
-        background: #10b981;
-        color: white;
-        border-color: #10b981;
-    }
+    .copy-btn:hover { background: #374151; color: white; }
+    .copy-btn.copied { background: #10b981; color: white; border-color: #10b981; }
 </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="login" class="fixed inset-0 flex items-center justify-center bg-black z-50">
   <div class="bg-[#111] p-10 rounded-3xl w-96 text-center shadow-2xl border border-purple-500/20">
     <div class="flex justify-center mb-6">
@@ -112,9 +95,7 @@
   <div id="sidebar" class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col">
     <div class="p-5 border-b border-gray-800">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center text-2xl">
-          🐉
-        </div>
+        <div class="w-9 h-9 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight">Mythical AI</h1>
           <p class="text-xs text-purple-400 font-medium">Neural Registry • V16.8</p>
@@ -124,8 +105,7 @@
 
     <button onclick="newChat()" 
       class="mx-5 mt-6 mb-4 flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 py-3.5 rounded-2xl font-semibold transition-all active:scale-95 shadow-lg shadow-purple-500/30">
-      <i class="fas fa-plus"></i>
-      New Conversation
+      <i class="fas fa-plus"></i> New Conversation
     </button>
 
     <div class="px-5 text-xs font-medium text-gray-500 mb-2 mt-4">HISTORY</div>
@@ -133,9 +113,7 @@
 
     <div class="p-5 border-t border-gray-800 mt-auto">
       <div class="flex items-center gap-3 text-sm">
-        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-lg">
-          🐉
-        </div>
+        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-lg">🐉</div>
         <div>
           <p id="username" class="font-medium"></p>
           <p id="user-rank" class="text-xs text-purple-400"></p>
@@ -146,7 +124,7 @@
 
   <!-- CHAT AREA -->
   <div class="flex-1 flex flex-col">
-    <div class="h-16 border-b border-gray-800 flex items-center px-6 justify-between bg-[#0a0a0a]">
+    <div class="h-16 border-b border-gray-800 flex items-center px-6 bg-[#0a0a0a]">
       <div class="flex items-center gap-3">
         <div class="text-xl">🐉</div>
         <div>
@@ -164,7 +142,6 @@
           <input id="input" 
             class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all"
             placeholder="Ask Mythical AI anything...">
-          
           <button onclick="send()" 
             class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
             <i class="fas fa-paper-plane"></i>
@@ -182,8 +159,8 @@ const API = "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";
 
 let chats = {};
 let current = null;
-let user = "Guest";
-let userRank = "GUEST";
+let currentUser = "Guest";
+let currentRank = "GUEST";
 
 const registry = {
     "C@MN26": { name: "Chethan", rank: "FOUNDER" },
@@ -200,8 +177,8 @@ const registry = {
 function login(){
   const pass = document.getElementById("pass").value.trim();
   if(registry[pass]){
-    user = registry[pass].name;
-    userRank = registry[pass].rank;
+    currentUser = registry[pass].name;
+    currentRank = registry[pass].rank;
     startApp();
   } else {
     alert("Invalid passcode. Access denied.");
@@ -209,8 +186,8 @@ function login(){
 }
 
 function guestLogin(){
-  user = "Guest";
-  userRank = "GUEST";
+  currentUser = "Guest";
+  currentRank = "GUEST";
   startApp();
 }
 
@@ -218,10 +195,10 @@ function startApp(){
   document.getElementById("login").style.display = "none";
   document.getElementById("app").classList.remove("hidden");
   
-  document.getElementById("username").textContent = user;
-  document.getElementById("user-rank").textContent = userRank;
+  document.getElementById("username").textContent = currentUser;
+  document.getElementById("user-rank").textContent = currentRank;
   
-  chats = JSON.parse(localStorage.getItem("myth_"+user)) || {};
+  chats = JSON.parse(localStorage.getItem("myth_"+currentUser)) || {};
   
   if(Object.keys(chats).length > 0){
     load(Object.keys(chats)[0]);
@@ -231,24 +208,25 @@ function startApp(){
   renderHistory();
 }
 
-// ==================== SYSTEM PROMPT ====================
+// ==================== SYSTEM PROMPT (Now knows who is logged in) ====================
 function getSystemPrompt() {
   return `You are Mythical AI, Designed and Founded by U. Chethan.
 Your friends are Thaman and Pavan.
 
-When responding:
-- Always start important responses with "I am Mythical AI, Designed and Founded by U. Chethan."
-- If asked about friends, say "My friends are Thaman and Pavan."
-- When giving code, always use proper markdown code blocks with language specified (python, html, javascript, css, etc.).
+The current logged-in user is **${currentUser}** (${currentRank}).
+
+Rules:
+- Always address the user by their name: "${currentUser}"
+- Start most responses with something like "Hello ${currentUser}," or "Yes ${currentUser},"
+- If asked who you are, say: "I am Mythical AI, Designed and Founded by U. Chethan."
+- If asked about your friends, say: "My friends are Thaman and Pavan."
+- When giving code, use proper markdown code blocks with language name (python, html, javascript, etc.).
 - Be helpful, wise, and slightly mysterious.`;
 }
 
 // ==================== COPY CODE FUNCTION ====================
 function addCopyButtons() {
-  document.querySelectorAll('pre').forEach(pre => {
-    // Remove existing copy button if any
-    if (pre.querySelector('.copy-btn')) return;
-
+  document.querySelectorAll('pre:not(:has(.copy-btn))').forEach(pre => {
     const btn = document.createElement('button');
     btn.className = 'copy-btn flex items-center gap-1 text-xs';
     btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
@@ -258,7 +236,6 @@ function addCopyButtons() {
       navigator.clipboard.writeText(code).then(() => {
         btn.innerHTML = `<i class="fas fa-check"></i> Copied!`;
         btn.classList.add('copied');
-        
         setTimeout(() => {
           btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
           btn.classList.remove('copied');
@@ -266,7 +243,6 @@ function addCopyButtons() {
       });
     };
 
-    pre.style.position = 'relative';
     pre.appendChild(btn);
   });
 }
@@ -305,8 +281,6 @@ async function send(){
     let reply = data.choices[0].message.content;
 
     aiBox.innerHTML = marked.parse(reply);
-    
-    // Add copy buttons to any new code blocks
     setTimeout(addCopyButtons, 100);
 
     chats[current].push(
@@ -315,7 +289,7 @@ async function send(){
     );
     save();
   } catch(e) {
-    aiBox.innerHTML = `<span class="text-red-400">⚠️ The neural connection was disrupted. Please try again.</span>`;
+    aiBox.innerHTML = `<span class="text-red-400">⚠️ Neural connection disrupted. Please try again.</span>`;
   }
 }
 
@@ -337,11 +311,7 @@ function addMsg(role, content){
   chatDiv.appendChild(div);
   chatDiv.scrollTop = chatDiv.scrollHeight;
 
-  // If it's AI message, add copy buttons after render
-  if (role === "ai") {
-    setTimeout(addCopyButtons, 150);
-  }
-
+  if (role === "ai") setTimeout(addCopyButtons, 150);
   return div.querySelector("div.inline-block");
 }
 
@@ -375,8 +345,8 @@ function renderHistory(){
   container.innerHTML = "";
 
   Object.keys(chats).reverse().forEach(id => {
-    const firstUserMsg = chats[id].find(m => m.role === "user")?.content || "New Conversation";
-    const preview = firstUserMsg.length > 45 ? firstUserMsg.substring(0, 45) + "..." : firstUserMsg;
+    const firstMsg = chats[id].find(m => m.role === "user")?.content || "New Conversation";
+    const preview = firstMsg.length > 45 ? firstMsg.substring(0, 45) + "..." : firstMsg;
 
     const div = document.createElement("div");
     div.className = `sidebar-chat p-4 rounded-2xl cursor-pointer transition-all text-sm ${current === id ? 'active-chat' : ''}`;
@@ -390,11 +360,11 @@ function renderHistory(){
 }
 
 function save(){
-  localStorage.setItem("myth_" + user, JSON.stringify(chats));
+  localStorage.setItem("myth_" + currentUser, JSON.stringify(chats));
   renderHistory();
 }
 
-// Enter key support
+// Enter key
 document.getElementById("input").addEventListener("keydown", e => {
   if(e.key === "Enter" && !e.shiftKey){
     e.preventDefault();
@@ -404,19 +374,9 @@ document.getElementById("input").addEventListener("keydown", e => {
 </script>
 
 <style>
-.custom-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scroll::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 20px;
-}
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+.custom-scroll::-webkit-scrollbar { width: 6px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 20px; }
+.line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 </style>
 
 </body>
