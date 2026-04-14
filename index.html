@@ -51,14 +51,14 @@
     <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">
       Mythical AI
     </h1>
-    <p class="text-gray-400 mb-8">Enter the realm of intelligence</p>
+    <p class="text-gray-400 mb-8">Neural Registry v16.8</p>
     
     <input id="pass" placeholder="Enter passcode" 
       class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none text-lg mb-4">
     
     <button onclick="login()" 
       class="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 p-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
-      Login
+      Authenticate
     </button>
     
     <button onclick="guestLogin()" 
@@ -80,7 +80,7 @@
         </div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight">Mythical AI</h1>
-          <p class="text-xs text-purple-400 font-medium">Pro</p>
+          <p class="text-xs text-purple-400 font-medium">Neural Registry • V16.8</p>
         </div>
       </div>
     </div>
@@ -96,12 +96,12 @@
 
     <div class="p-5 border-t border-gray-800 mt-auto">
       <div class="flex items-center gap-3 text-sm">
-        <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-          👤
+        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-lg">
+          🐉
         </div>
         <div>
           <p id="username" class="font-medium"></p>
-          <p class="text-xs text-gray-500">Online</p>
+          <p id="user-rank" class="text-xs text-purple-400"></p>
         </div>
       </div>
     </div>
@@ -112,12 +112,11 @@
     <!-- Header -->
     <div class="h-16 border-b border-gray-800 flex items-center px-6 justify-between bg-[#0a0a0a]">
       <div class="flex items-center gap-3">
-        <div id="chat-title" class="font-semibold text-lg">New Conversation</div>
-      </div>
-      <div class="flex items-center gap-4 text-gray-400">
-        <button onclick="toggleSidebar()" class="lg:hidden">
-          <i class="fas fa-bars text-xl"></i>
-        </button>
+        <div class="text-xl">🐉</div>
+        <div>
+          <div id="chat-title" class="font-semibold text-lg">Mythical AI</div>
+          <div class="text-xs text-purple-400">Always Ready • V16.8</div>
+        </div>
       </div>
     </div>
 
@@ -130,14 +129,14 @@
         <div class="relative">
           <input id="input" 
             class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all"
-            placeholder="Message Mythical AI...">
+            placeholder="Ask Mythical AI anything...">
           
           <button onclick="send()" 
             class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
             <i class="fas fa-paper-plane"></i>
           </button>
         </div>
-        <p class="text-center text-xs text-gray-500 mt-4">Mythical AI can make mistakes. Consider checking important info.</p>
+        <p class="text-center text-xs text-gray-500 mt-4">Mythical AI • Designed & Founded by U. Chethan</p>
       </div>
     </div>
   </div>
@@ -146,28 +145,40 @@
 <script>
 // ==================== CONFIG ====================
 const API = "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";
+
 let chats = {};
 let current = null;
-let user = "guest";
+let user = "Guest";
+let userRank = "GUEST";
+
+// Neural Registry Passcodes (as requested)
+const registry = {
+    "C@MN26": { name: "Chethan", rank: "FOUNDER" },
+    "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN" },
+    "P@MN26": { name: "Pavan", rank: "MODERATOR" },
+    "P@HPSK": { name: "Amit Singh", rank: "PRINCIPAL" },
+    "VP@HPS": { name: "Srinivasa Murthy", rank: "VICE PRINCIPAL" },
+    "Z@HPSK": { name: "Zakaria", rank: "TEACHER" },
+    "V@HPSK": { name: "Vijayalakshmi", rank: "TEACHER" },
+    "R@HPSK": { name: "Rajesh", rank: "TEACHER" }
+};
 
 // ==================== LOGIN ====================
 function login(){
-  const p = document.getElementById("pass").value.trim();
-  const staff = {
-    "C@MN26": "Chethan (Founder)",
-    "T@MN26": "Admin"
-  };
+  const pass = document.getElementById("pass").value.trim();
   
-  if(staff[p]){
-    user = staff[p];
+  if(registry[pass]){
+    user = registry[pass].name;
+    userRank = registry[pass].rank;
     startApp();
   } else {
-    alert("Invalid passcode");
+    alert("Invalid passcode. Access denied.");
   }
 }
 
 function guestLogin(){
   user = "Guest";
+  userRank = "GUEST";
   startApp();
 }
 
@@ -176,6 +187,7 @@ function startApp(){
   document.getElementById("app").classList.remove("hidden");
   
   document.getElementById("username").textContent = user;
+  document.getElementById("user-rank").textContent = userRank;
   
   chats = JSON.parse(localStorage.getItem("myth_"+user)) || {};
   
@@ -187,6 +199,21 @@ function startApp(){
   renderHistory();
 }
 
+// ==================== MYTHICAL AI IDENTITY ====================
+function getSystemPrompt() {
+  return `You are Mythical AI, a powerful and wise conversational AI.
+You were Designed and Founded by U. Chethan.
+Your friends are Thaman and Pavan.
+
+Always introduce yourself as:
+"I am Mythical AI, Designed and Founded by U. Chethan."
+
+If the user asks about your friends, reply with:
+"My friends are Thaman and Pavan."
+
+Stay in character as Mythical AI at all times. Be helpful, mysterious, and powerful.`;
+}
+
 // ==================== CHAT FUNCTIONS ====================
 async function send(){
   const input = document.getElementById("input");
@@ -196,7 +223,7 @@ async function send(){
   addMsg("user", text);
   input.value = "";
 
-  const aiBox = addMsg("ai", `<div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i> Thinking...</div>`);
+  const aiBox = addMsg("ai", `<div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i> Thinking in the neural realm...</div>`);
 
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -208,22 +235,27 @@ async function send(){
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
+          { role: "system", content: getSystemPrompt() },
           ...(chats[current] || []),
           { role: "user", content: text }
         ],
-        temperature: 0.8,
+        temperature: 0.85,
         max_tokens: 2048
       })
     });
 
     const data = await res.json();
-    const reply = data.choices[0].message.content;
+    let reply = data.choices[0].message.content;
 
     aiBox.innerHTML = marked.parse(reply);
-    chats[current].push({role: "user", content: text}, {role: "assistant", content: reply});
+    
+    chats[current].push(
+      {role: "user", content: text},
+      {role: "assistant", content: reply}
+    );
     save();
   } catch(e) {
-    aiBox.innerHTML = `<span class="text-red-400">⚠️ Failed to get response. Please try again.</span>`;
+    aiBox.innerHTML = `<span class="text-red-400">⚠️ The neural connection was disrupted. Please try again.</span>`;
   }
 }
 
@@ -252,7 +284,7 @@ function newChat(){
   current = "chat_" + Date.now();
   chats[current] = [];
   document.getElementById("chat").innerHTML = "";
-  document.getElementById("chat-title").textContent = "New Conversation";
+  document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
   save();
   renderHistory();
 }
@@ -262,11 +294,14 @@ function load(id){
   document.getElementById("chat").innerHTML = "";
   
   chats[id].forEach(m => {
-    addMsg(m.role === "user" ? "user" : "ai", 
-           m.role === "assistant" ? marked.parse(m.content) : m.content);
+    if(m.role === "assistant"){
+      addMsg("ai", marked.parse(m.content));
+    } else {
+      addMsg("user", m.content);
+    }
   });
 
-  document.getElementById("chat-title").textContent = "Conversation " + id.slice(-6);
+  document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
 }
 
 function renderHistory(){
@@ -274,14 +309,14 @@ function renderHistory(){
   container.innerHTML = "";
 
   Object.keys(chats).reverse().forEach(id => {
-    const msg = chats[id].find(m => m.role === "user")?.content || "New Chat";
-    const preview = msg.length > 40 ? msg.substring(0, 40) + "..." : msg;
+    const firstUserMsg = chats[id].find(m => m.role === "user")?.content || "New Conversation";
+    const preview = firstUserMsg.length > 45 ? firstUserMsg.substring(0, 45) + "..." : firstUserMsg;
 
     const div = document.createElement("div");
     div.className = `sidebar-chat p-4 rounded-2xl cursor-pointer transition-all text-sm ${current === id ? 'active-chat' : ''}`;
     div.innerHTML = `
       <div class="font-medium text-gray-200 line-clamp-1">${preview}</div>
-      <div class="text-xs text-gray-500 mt-1">${new Date(parseInt(id.split('_')[1])).toLocaleDateString()}</div>
+      <div class="text-xs text-gray-500 mt-1">${new Date(parseInt(id.split('_')[1])).toLocaleDateString('en-IN')}</div>
     `;
     div.onclick = () => load(id);
     container.appendChild(div);
@@ -291,11 +326,6 @@ function renderHistory(){
 function save(){
   localStorage.setItem("myth_" + user, JSON.stringify(chats));
   renderHistory();
-}
-
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.classList.toggle("-translate-x-full");
 }
 
 // Enter key support
