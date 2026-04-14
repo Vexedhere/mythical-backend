@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI |  By Chethan</title>
+    <title>Mythical AI | Build V16.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -19,15 +19,19 @@
         .chat-animate { animation: flyIn 0.3s ease-out; }
         @keyframes flyIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* Sidebar Transitions */
+        #sidebar { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 260px; }
+        #sidebar.collapsed { width: 0; padding: 0; overflow: hidden; border-right: none; }
+        
         .code-container { position: relative; margin: 0.8rem 0; border-radius: 0.8rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #0d1117; width: 100%; }
         .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .copy-btn { padding: 2px 10px; border-radius: 5px; background: rgba(168, 85, 247, 0.2); color: #a855f7; cursor: pointer; font-size: 8px; transition: 0.2s; }
         .copy-btn:hover { background: #a855f7; color: white; }
         pre { padding: 1rem; overflow-x: auto; margin: 0 !important; font-size: 11.5px !important; line-height: 1.5; white-space: pre !important; }
         
-        .skeleton { background: #1a1a1a; position: relative; overflow: hidden; }
-        .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .delete-btn { opacity: 0; transition: 0.2s; }
+        .history-item:hover .delete-btn { opacity: 1; }
+        
         .hidden { display: none !important; }
         ::-webkit-scrollbar { width: 3px; height: 3px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -37,22 +41,25 @@
 
     <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
         <div class="glass p-10 rounded-[3rem] w-full max-w-sm text-center shadow-2xl chat-animate">
-            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-purple-500/20">M</div>
+            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-white">M</div>
             <h1 class="text-2xl font-black mb-8 italic uppercase tracking-tighter">Mythical AI</h1>
-            <div id="g_id_onload" data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com" data-callback="handleGoogleLogin"></div>
-            <div class="g_id_signin mb-4 flex justify-center" data-type="standard"></div>
             <input type="password" id="staff-pass" placeholder="Founder Access" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 mb-3 outline-none focus:border-purple-500 text-center font-bold text-purple-400 text-sm">
             <button onclick="checkStaffPass()" class="w-full py-3 rounded-xl font-black bg-white text-black hover:opacity-90 transition-all uppercase text-[10px] tracking-widest">Authorize Node</button>
         </div>
     </div>
 
-    <aside id="sidebar" class="w-64 bg-[#050505] border-r border-white/5 flex flex-col p-4 hidden">
-        <div class="flex items-center gap-2 mb-8 px-2">
-            <div class="w-8 h-8 mythic-gradient rounded-lg flex items-center justify-center font-bold text-white text-xs">M</div>
-            <span class="font-black text-lg italic uppercase tracking-tighter">Mythical</span>
+    <aside id="sidebar" class="bg-[#050505] border-r border-white/5 flex flex-col p-4 hidden">
+        <div class="flex items-center justify-between mb-8 px-2">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 mythic-gradient rounded-lg flex items-center justify-center font-bold text-white text-xs">M</div>
+                <span class="font-black text-lg italic uppercase tracking-tighter">Mythical</span>
+            </div>
         </div>
+        
         <button onclick="createNewChat()" class="w-full py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-[9px] font-black mb-6 uppercase tracking-widest">+ NEW INSTANCE</button>
+        
         <div class="flex-1 overflow-y-auto space-y-1" id="history-list"></div>
+        
         <div class="mt-auto pt-4 border-t border-white/5">
             <div class="p-3 glass rounded-xl mb-3">
                 <p id="user-display" class="text-[10px] font-black text-white truncate uppercase">Guest</p>
@@ -64,7 +71,12 @@
 
     <main id="main-content" class="flex-1 flex flex-col hidden relative">
         <header class="p-4 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
-            <span id="chat-id-display" class="text-[9px] font-mono text-slate-500 tracking-widest uppercase italic font-bold">/NODE/INIT</span>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-white/5 rounded-lg transition-all">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <span id="chat-id-display" class="text-[9px] font-mono text-slate-500 tracking-widest uppercase italic font-bold">/NODE/INIT</span>
+            </div>
             <div class="flex items-center gap-2">
                 <div class="h-1 w-1 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]"></div>
                 <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Handshake Secure</span>
@@ -91,8 +103,6 @@
 
         marked.setOptions({ highlight: (code) => hljs.highlightAuto(code).value, breaks: true });
 
-        function generate23Id() { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 12); }
-
         function checkStaffPass() {
             const p = document.getElementById('staff-pass').value;
             const staff = {
@@ -118,8 +128,13 @@
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('user-display').innerText = name;
             document.getElementById('role-display').innerText = `Rank: ${role}`;
-            createNewChat();
+            if (Object.keys(chats).length > 0) loadChat(Object.keys(chats).reverse()[0]);
+            else createNewChat();
             renderSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
         }
 
         async function handleChat() {
@@ -131,7 +146,7 @@
 
             if (val.toLowerCase().startsWith('/imagine ')) { handleVision(val); return; }
 
-            const aiMsg = appendMsg('ai', '<span class="animate-pulse">Neural Linking...</span>');
+            const aiMsg = appendMsg('ai', '<span class="animate-pulse font-bold tracking-widest text-[9px]">ANALYZING...</span>');
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
@@ -139,106 +154,22 @@
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",
                         messages: [
-                            { 
-                                role: "system", 
-                                content: `You are Mythical AI, built by the FOUNDER Chethan. 1. If the user says hi/hello, respond naturally. 2. If the user asks for CODE, provide it in ONE SINGLE UNIFIED BLOCK. Never split scripts.` 
-                            },
+                            { role: "system", content: `You are Mythical AI, built by the FOUNDER Chethan. 1. If greeting, be natural. 2. If code, provide ONE UNIFIED BLOCK.` },
                             ...(chats[currentChatId] || []),
                             { role: "user", content: val }
-                        ],
-                        temperature: 0.5
+                        ]
                     })
                 });
                 const data = await res.json();
                 let reply = data.choices[0].message.content;
                 
-                if (reply.includes("```")) {
-                    aiMsg.innerHTML = formatAIResponse(reply);
-                    aiMsg.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
-                } else {
-                    aiMsg.innerText = reply;
-                }
+                aiMsg.innerHTML = reply.includes("
+http://googleusercontent.com/immersive_entry_chip/0
+http://googleusercontent.com/immersive_entry_chip/1
 
-                if (!chats[currentChatId]) chats[currentChatId] = [];
-                chats[currentChatId].push({ role: "user", content: val }, { role: "assistant", content: reply });
-                localStorage.setItem(`myth_v16_${currentUser.key}`, JSON.stringify(chats));
-                renderSidebar();
-            } catch (e) { aiMsg.innerText = "Connection lost."; }
-        }
+### 🛠️ Founder's Technical Breakdown:
+* **Sidebar Toggle:** I added a "Hamburger" icon in the top left. Clicking it uses a `cubic-bezier` transition to slide the sidebar in and out without breaking the layout.
+* **Delete Nodes:** Every chat in the sidebar now has a hidden trash icon that appears when you hover over the chat. It asks for confirmation before wiping the data.
+* **Persistent Auth:** It still uses your secure registry, but now it auto-loads your most recent chat when you log in.
 
-        function formatAIResponse(text) {
-            let formatted = marked.parse(text);
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = formatted;
-            tempDiv.querySelectorAll('pre').forEach((pre) => {
-                const container = document.createElement('div');
-                container.className = 'code-container';
-                container.innerHTML = `<div class="code-header"><span>Source Code</span><span class="copy-btn" onclick="copyCode(this)">COPY</span></div>`;
-                const clonePre = pre.cloneNode(true);
-                container.appendChild(clonePre);
-                pre.replaceWith(container);
-            });
-            return tempDiv.innerHTML;
-        }
-
-        function copyCode(btn) {
-            const code = btn.closest('.code-container').querySelector('pre').innerText;
-            navigator.clipboard.writeText(code);
-            btn.innerText = 'COPIED!';
-            setTimeout(() => btn.innerText = 'COPY', 2000);
-        }
-
-        function handleVision(val) {
-            let prompt = val.replace('/imagine ', '');
-            const aiMsg = appendMsg('ai', `<div class="skeleton w-48 h-48 rounded-xl"></div>`);
-            const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
-            const img = new Image();
-            img.src = imageUrl;
-            img.onload = () => { aiMsg.innerHTML = `<img src="${imageUrl}" class="w-64 rounded-xl border border-white/10 shadow-xl">`; };
-        }
-
-        function createNewChat() {
-            currentChatId = generate23Id();
-            chats[currentChatId] = [];
-            document.getElementById('chat-id-display').innerText = `/NODE/${currentChatId.substring(0,8)}`;
-            document.getElementById('chat-box').innerHTML = `<div class="text-center py-10"><p class="text-slate-600 text-[8px] tracking-[0.4em] font-black uppercase">Channel Secured: ${currentUser.name}</p></div>`;
-            renderSidebar();
-        }
-
-        function loadChat(id) {
-            currentChatId = id;
-            document.getElementById('chat-box').innerHTML = '';
-            chats[id].forEach(msg => appendMsg(msg.role === 'user' ? 'user' : 'ai', msg.role === 'user' ? msg.content : formatAIResponse(msg.content)));
-            renderSidebar();
-            document.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
-        }
-
-        function renderSidebar() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = `<p class="text-[8px] font-black text-slate-600 uppercase tracking-widest px-2 mb-4">Neural Archives</p>`;
-            Object.keys(chats).reverse().forEach(id => {
-                if (chats[id].length === 0) return;
-                const div = document.createElement('div');
-                div.className = `p-3 mb-1 rounded-xl text-[9px] truncate cursor-pointer transition-all ${id === currentChatId ? 'active-chat' : 'text-slate-500 hover:bg-white/5'}`;
-                div.innerText = chats[id][0]?.content || "Archived Handshake";
-                div.onclick = () => loadChat(id);
-                list.appendChild(div);
-            });
-        }
-
-        function appendMsg(role, content) {
-            const div = document.createElement('div');
-            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} chat-animate`;
-            div.innerHTML = `<div class="max-w-[75%] px-5 py-3 rounded-[1.4rem] text-[11px] leading-relaxed shadow-lg ${role === 'user' ? 'mythic-gradient text-white font-bold' : 'glass text-slate-200'}">${content}</div>`;
-            const box = document.getElementById('chat-box');
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-            return div.querySelector('div');
-        }
-
-        function logout() { location.reload(); }
-        document.getElementById('send-btn').onclick = handleChat;
-        document.getElementById('input-field').onkeypress = (e) => { if(e.key==='Enter') handleChat(); };
-    </script>
-</body>
-</html>
+This build is ready for the **Founder Workstation**. Ready for the next module? 🚀🛡️
