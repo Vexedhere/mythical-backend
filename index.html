@@ -3,207 +3,204 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mythical AI | Stable Build</title>
+<title>Mythical AI Pro</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
 <style>
-body { background:#020202; color:#e2e8f0; font-family: sans-serif; }
-.glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); }
-.active-chat { background: rgba(168,85,247,0.2); }
-::-webkit-scrollbar { width:3px; }
+body { background:#0a0a0a; color:white; }
+.chat-user { background:#7c3aed; }
+.chat-ai { background:#1f2937; }
 </style>
 </head>
 
 <body class="h-screen flex">
 
 <!-- LOGIN -->
-<div id="login-page" class="fixed inset-0 flex items-center justify-center bg-black">
-    <div class="glass p-8 rounded-2xl text-center">
-        <h1 class="text-xl font-bold mb-4">Mythical AI</h1>
+<div id="login" class="fixed inset-0 flex items-center justify-center bg-black">
+  <div class="bg-[#111] p-8 rounded-2xl w-80 text-center shadow-2xl">
+    <h1 class="text-2xl font-bold mb-6">Mythical AI</h1>
 
-        <div id="g_id_onload"
-            data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com"
-            data-callback="handleGoogleLogin">
-        </div>
-        <div class="g_id_signin mb-4"></div>
+    <input id="pass" placeholder="Enter passcode"
+      class="w-full p-3 rounded bg-black border border-gray-700 mb-3">
 
-        <input id="staff-pass" type="password" placeholder="Passcode"
-            class="w-full p-2 rounded bg-black border border-white/10 mb-2">
+    <button onclick="login()" class="w-full bg-purple-600 p-3 rounded mb-2">
+      Login
+    </button>
 
-        <button onclick="checkStaffPass()" class="w-full bg-white text-black p-2 rounded">
-            Login
-        </button>
-    </div>
+    <button onclick="guestLogin()" class="w-full bg-gray-700 p-3 rounded">
+      Continue as Guest
+    </button>
+  </div>
 </div>
 
 <!-- SIDEBAR -->
-<aside id="sidebar" class="w-64 p-4 border-r border-white/10 hidden">
-    <button onclick="createNewChat()" class="w-full mb-4 bg-purple-600 p-2 rounded">
-        + New Chat
-    </button>
-    <div id="history-list"></div>
-</aside>
+<div id="sidebar" class="w-64 bg-[#111] p-4 hidden flex-col">
+  <button onclick="newChat()" class="bg-purple-600 p-2 rounded mb-4">
+    + New Chat
+  </button>
+  <div id="history"></div>
+</div>
 
 <!-- MAIN -->
-<main id="main" class="flex-1 flex flex-col hidden">
-    <div id="chat-box" class="flex-1 p-4 overflow-y-auto"></div>
+<div id="main" class="flex-1 flex flex-col hidden">
 
-    <div class="p-4 flex gap-2">
-        <input id="input" class="flex-1 p-2 bg-black border border-white/10 rounded">
-        <button onclick="handleChat()" class="bg-purple-600 px-4 rounded">Send</button>
-    </div>
-</main>
+  <!-- CHAT -->
+  <div id="chat" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+
+  <!-- INPUT -->
+  <div class="p-4 flex gap-2 border-t border-gray-800">
+    <input id="input" class="flex-1 p-3 rounded bg-[#111] border border-gray-700"
+      placeholder="Ask anything...">
+    <button onclick="send()" class="bg-purple-600 px-5 rounded">
+      Send
+    </button>
+  </div>
+
+</div>
 
 <script>
-const GROQ_KEY = "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";
+const API = "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";
 
 let chats = {};
-let currentChatId = null;
-let currentUser = { key: "guest" };
+let current = null;
+let user = "guest";
 
-marked.setOptions({
-    highlight: (code) => hljs.highlightAuto(code).value
-});
+/* LOGIN FIX */
+function login(){
+  const p = document.getElementById("pass").value;
 
-/* LOGIN */
-function handleGoogleLogin(res){
-    const data = JSON.parse(atob(res.credential.split('.')[1]));
-    enterApp(data.email);
+  const staff = {
+    "C@MN26":"Chethan (Founder)",
+    "T@MN26":"Admin"
+  };
+
+  if(staff[p]){
+    user = staff[p];
+    startApp();
+  } else {
+    alert("Invalid pass");
+  }
 }
 
-function checkStaffPass(){
-    if(document.getElementById("staff-pass").value === "admin"){
-        enterApp("admin");
-    } else {
-        alert("Wrong pass");
-    }
+function guestLogin(){
+  user = "Guest";
+  startApp();
 }
 
-function enterApp(key){
-    currentUser.key = key;
+function startApp(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("sidebar").classList.remove("hidden");
+  document.getElementById("main").classList.remove("hidden");
 
-    chats = JSON.parse(localStorage.getItem("myth_"+key)) || {};
+  chats = JSON.parse(localStorage.getItem("myth_"+user)) || {};
 
-    document.getElementById("login-page").style.display="none";
-    document.getElementById("sidebar").classList.remove("hidden");
-    document.getElementById("main").classList.remove("hidden");
+  if(Object.keys(chats).length){
+    load(Object.keys(chats)[0]);
+  } else {
+    newChat();
+  }
 
-    if(Object.keys(chats).length){
-        loadChat(Object.keys(chats)[0]);
-    } else {
-        createNewChat();
-    }
-
-    renderSidebar();
+  renderHistory();
 }
 
 /* CHAT */
-async function handleChat(){
-    const input = document.getElementById("input");
-    const text = input.value.trim();
-    if(!text) return;
+async function send(){
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+  if(!text) return;
 
-    appendMsg("user", text);
-    input.value="";
+  addMsg("user", text);
+  input.value="";
 
-    const aiDiv = appendMsg("ai", "Thinking...");
+  const aiBox = addMsg("ai", "Typing...");
 
-    try{
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
-            method:"POST",
-            headers:{
-                "Authorization":"Bearer "+GROQ_KEY,
-                "Content-Type":"application/json"
-            },
-            body: JSON.stringify({
-                model:"llama-3.1-8b-instant",
-                messages:[
-                    ...(chats[currentChatId]||[]),
-                    {role:"user",content:text}
-                ]
-            })
-        });
+  try{
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+API,
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({
+        model:"llama-3.1-8b-instant",
+        messages:[
+          ...(chats[current]||[]),
+          {role:"user",content:text}
+        ]
+      })
+    });
 
-        const data = await res.json();
-        const reply = data.choices[0].message.content;
+    const data = await res.json();
+    const reply = data.choices[0].message.content;
 
-        aiDiv.innerHTML = format(reply);
+    aiBox.innerHTML = marked.parse(reply);
 
-        chats[currentChatId].push(
-            {role:"user",content:text},
-            {role:"assistant",content:reply}
-        );
+    chats[current].push(
+      {role:"user",content:text},
+      {role:"assistant",content:reply}
+    );
 
-        save();
+    save();
 
-    }catch{
-        aiDiv.innerText="Error connecting API";
-    }
+  }catch{
+    aiBox.innerText="API Error";
+  }
 }
 
 /* UI */
-function appendMsg(role, text){
-    const div = document.createElement("div");
+function addMsg(role,text){
+  const div = document.createElement("div");
 
-    div.className = "mb-3 " + (role==="user"?"text-right":"text-left");
+  div.className = role==="user"?"text-right":"text-left";
 
-    div.innerHTML = `
-    <div class="inline-block p-3 rounded-lg ${
-        role==="user"?"bg-purple-600":"glass"
-    }">${text}</div>`;
+  div.innerHTML = `
+    <div class="inline-block px-4 py-3 rounded-xl max-w-[70%] ${
+      role==="user"?"chat-user":"chat-ai"
+    }">${text}</div>
+  `;
 
-    document.getElementById("chat-box").appendChild(div);
-    return div.querySelector("div");
-}
-
-function format(t){
-    let html = marked.parse(t);
-    return html;
+  document.getElementById("chat").appendChild(div);
+  return div.querySelector("div");
 }
 
 /* CHAT MGMT */
-function createNewChat(){
-    currentChatId = Math.random().toString(36).slice(2);
-    chats[currentChatId]=[];
-    document.getElementById("chat-box").innerHTML="";
-    save();
+function newChat(){
+  current = Math.random().toString(36).slice(2);
+  chats[current]=[];
+  document.getElementById("chat").innerHTML="";
+  save();
+  renderHistory();
 }
 
-function loadChat(id){
-    currentChatId=id;
-    const box = document.getElementById("chat-box");
-    box.innerHTML="";
-
-    chats[id].forEach(m=>{
-        appendMsg(m.role==="user"?"user":"ai", m.content);
-    });
+function load(id){
+  current=id;
+  document.getElementById("chat").innerHTML="";
+  chats[id].forEach(m=>{
+    addMsg(m.role==="user"?"user":"ai", m.content);
+  });
 }
 
-function renderSidebar(){
-    const list = document.getElementById("history-list");
-    list.innerHTML="";
-
-    Object.keys(chats).forEach(id=>{
-        const div=document.createElement("div");
-        div.className="p-2 cursor-pointer hover:bg-white/10";
-        div.innerText=id.slice(0,6);
-        div.onclick=()=>loadChat(id);
-        list.appendChild(div);
-    });
+function renderHistory(){
+  const h = document.getElementById("history");
+  h.innerHTML="";
+  Object.keys(chats).forEach(id=>{
+    const d=document.createElement("div");
+    d.className="p-2 cursor-pointer hover:bg-gray-800 rounded";
+    d.innerText="Chat "+id.slice(0,5);
+    d.onclick=()=>load(id);
+    h.appendChild(d);
+  });
 }
 
 function save(){
-    localStorage.setItem("myth_"+currentUser.key, JSON.stringify(chats));
+  localStorage.setItem("myth_"+user, JSON.stringify(chats));
 }
 
-/* ENTER KEY */
+/* ENTER */
 document.getElementById("input").addEventListener("keydown",e=>{
-    if(e.key==="Enter") handleChat();
+  if(e.key==="Enter") send();
 });
 </script>
 
