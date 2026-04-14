@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mythical AI </title>
+<title>Mythical AI Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -59,8 +59,9 @@
 
     .url-bar {
         background: #111827;
-        border: 1px solid #374151;
-        font-family: monospace;
+        border-bottom: 1px solid #374151;
+        font-family: 'SF Mono', monospace;
+        font-size: 0.95rem;
     }
 </style>
 </head>
@@ -78,7 +79,7 @@
       Mythical AI
     </h1>
     <p class="text-gray-400 mb-2">Neural Registry • V16.8</p>
-    <div class="url-bar px-4 py-2 rounded-2xl text-sm text-purple-400 font-mono mb-8">
+    <div class="url-bar px-5 py-3 rounded-2xl text-purple-400 mb-8 text-center">
       ai.mythicalstudios.online/login
     </div>
     
@@ -100,44 +101,45 @@
 <!-- MAIN APP -->
 <div class="flex h-full w-full hidden" id="app">
 
-  <!-- SIDEBAR -->
-  <div id="sidebar" class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col">
-    <div class="p-5 border-b border-gray-800">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight">Mythical AI</h1>
-          <p class="text-xs text-purple-400 font-medium">Neural Registry • V16.8</p>
-        </div>
-      </div>
-    </div>
-
-    <button onclick="newChat()" 
-      class="mx-5 mt-6 mb-4 flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 py-3.5 rounded-2xl font-semibold transition-all active:scale-95 shadow-lg shadow-purple-500/30">
-      <i class="fas fa-plus"></i> New Conversation
-    </button>
-
-    <div class="px-5 text-xs font-medium text-gray-500 mb-2 mt-4">HISTORY</div>
-    <div id="history" class="flex-1 overflow-y-auto px-3 space-y-1 custom-scroll"></div>
-
-    <div class="p-5 border-t border-gray-800 mt-auto">
-      <div class="flex items-center gap-3 text-sm">
-        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-lg">🐉</div>
-        <div>
-          <p id="username" class="font-medium"></p>
-          <p id="user-rank" class="text-xs text-purple-400"></p>
-        </div>
-      </div>
-    </div>
+  <!-- Top URL Bar -->
+  <div class="url-bar h-11 w-full flex items-center px-6 text-purple-400 fixed top-0 z-40">
+    <span id="fake-url">ai.mythicalstudios.online/chat/</span>
   </div>
 
-  <!-- CHAT AREA -->
-  <div class="flex-1 flex flex-col">
-    <!-- URL Bar -->
-    <div class="h-12 bg-[#111827] border-b border-gray-800 flex items-center px-6 text-sm font-mono text-purple-400">
-      <span id="current-url" class="select-all">ai.mythicalstudios.online/chat/</span>
+  <div class="flex h-full w-full pt-11">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col">
+      <div class="p-5 border-b border-gray-800">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight">Mythical AI</h1>
+            <p class="text-xs text-purple-400 font-medium">Neural Registry • V16.8</p>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="newChat()" 
+        class="mx-5 mt-6 mb-4 flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 py-3.5 rounded-2xl font-semibold transition-all active:scale-95 shadow-lg shadow-purple-500/30">
+        <i class="fas fa-plus"></i> New Conversation
+      </button>
+
+      <div class="px-5 text-xs font-medium text-gray-500 mb-2 mt-4">HISTORY</div>
+      <div id="history" class="flex-1 overflow-y-auto px-3 space-y-1 custom-scroll"></div>
+
+      <div class="p-5 border-t border-gray-800 mt-auto">
+        <div class="flex items-center gap-3 text-sm">
+          <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-lg">🐉</div>
+          <div>
+            <p id="username" class="font-medium"></p>
+            <p id="user-rank" class="text-xs text-purple-400"></p>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- CHAT AREA -->
     <div class="flex-1 flex flex-col">
       <div class="h-16 border-b border-gray-800 flex items-center px-6 bg-[#0a0a0a]">
         <div class="flex items-center gap-3">
@@ -174,7 +176,7 @@
 const API = "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";
 
 let chats = {};
-let current = null;
+let currentChatId = null;     // This will be the 23-char ID
 let currentUser = "Guest";
 let currentRank = "GUEST";
 
@@ -188,6 +190,29 @@ const registry = {
     "V@HPSK": { name: "Vijayalakshmi", rank: "TEACHER" },
     "R@HPSK": { name: "Rajesh", rank: "TEACHER" }
 };
+
+// ==================== URL HANDLING ====================
+function generateChatId() {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let id = "";
+  for(let i = 0; i < 23; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return id;
+}
+
+function updateBrowserURL(chatId) {
+  const newURL = `ai.mythicalstudios.online/chat/${chatId}`;
+  document.getElementById("fake-url").textContent = newURL;
+  
+  // Change actual browser URL (without reloading)
+  history.pushState({ chatId: chatId }, "", `?chat=${chatId}`);
+}
+
+function getChatIdFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("chat");
+}
 
 // ==================== LOGIN ====================
 function login(){
@@ -214,28 +239,20 @@ function startApp(){
   document.getElementById("username").textContent = currentUser;
   document.getElementById("user-rank").textContent = currentRank;
   
-  chats = JSON.parse(localStorage.getItem("myth_"+currentUser)) || {};
+  chats = JSON.parse(localStorage.getItem("myth_" + currentUser)) || {};
+
+  // Check if there's a chat ID in URL
+  let chatId = getChatIdFromURL();
   
-  if(Object.keys(chats).length > 0){
-    load(Object.keys(chats)[0]);
+  if (chatId && Object.keys(chats).length > 0) {
+    // Try to find matching chat (we'll use first chat for simplicity or create new)
+    currentChatId = chatId;
+    newChat(); // For now we create new with same ID style
   } else {
     newChat();
   }
+  
   renderHistory();
-}
-
-// ==================== URL GENERATOR (23 characters after /chat/) ====================
-function generateChatId() {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let id = "";
-  for(let i = 0; i < 23; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return id;
-}
-
-function updateURL(chatId) {
-  document.getElementById("current-url").textContent = `ai.mythicalstudios.online/chat/${chatId}`;
 }
 
 // ==================== SYSTEM PROMPT ====================
@@ -243,14 +260,9 @@ function getSystemPrompt() {
   return `You are Mythical AI, Designed and Founded by U. Chethan.
 Your friends are Thaman and Pavan.
 
-The current logged-in user is **${currentUser}** (${currentRank}).
+Current user: **${currentUser}** (${currentRank})
 
-Rules:
-- Always address the user by their name: "${currentUser}"
-- Start responses naturally with "Hello ${currentUser}," or similar.
-- If asked who you are: "I am Mythical AI, Designed and Founded by U. Chethan."
-- If asked about friends: "My friends are Thaman and Pavan."
-- When giving code, use proper markdown code blocks with language.
+- Always address the user by name: "${currentUser}"
 - Be helpful, wise, and slightly mysterious.`;
 }
 
@@ -260,16 +272,12 @@ function addCopyButtons() {
     const btn = document.createElement('button');
     btn.className = 'copy-btn flex items-center gap-1 text-xs';
     btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
-    
     btn.onclick = () => {
       const code = pre.querySelector('code').textContent;
       navigator.clipboard.writeText(code).then(() => {
         btn.innerHTML = `<i class="fas fa-check"></i> Copied!`;
         btn.classList.add('copied');
-        setTimeout(() => {
-          btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
-          btn.classList.remove('copied');
-        }, 2000);
+        setTimeout(() => { btn.innerHTML = `<i class="fas fa-copy"></i> Copy`; btn.classList.remove('copied'); }, 2000);
       });
     };
     pre.appendChild(btn);
@@ -290,15 +298,12 @@ async function send(){
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Authorization": "Bearer " + API,
-        "Content-Type": "application/json"
-      },
+      headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
           { role: "system", content: getSystemPrompt() },
-          ...(chats[current] || []),
+          ...(chats[currentChatId] || []),
           { role: "user", content: text }
         ],
         temperature: 0.85,
@@ -307,12 +312,13 @@ async function send(){
     });
 
     const data = await res.json();
-    let reply = data.choices[0].message.content;
+    const reply = data.choices[0].message.content;
 
     aiBox.innerHTML = marked.parse(reply);
     setTimeout(addCopyButtons, 100);
 
-    chats[current].push({role: "user", content: text}, {role: "assistant", content: reply});
+    if (!chats[currentChatId]) chats[currentChatId] = [];
+    chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
     save();
   } catch(e) {
     aiBox.innerHTML = `<span class="text-red-400">⚠️ Neural connection disrupted.</span>`;
@@ -323,32 +329,24 @@ function addMsg(role, content){
   const chatDiv = document.getElementById("chat");
   const div = document.createElement("div");
   div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} message-bubble`;
-
   div.innerHTML = `
     <div class="max-w-[80%]">
-      <div class="inline-block px-6 py-4 rounded-3xl ${
-        role === "user" 
-          ? "chat-user text-white rounded-br-none" 
-          : "chat-ai rounded-bl-none"
-      }">${content}</div>
+      <div class="inline-block px-6 py-4 rounded-3xl ${role === "user" ? "chat-user text-white rounded-br-none" : "chat-ai rounded-bl-none"}">${content}</div>
     </div>
   `;
-
   chatDiv.appendChild(div);
   chatDiv.scrollTop = chatDiv.scrollHeight;
 
   if (role === "ai") setTimeout(addCopyButtons, 150);
-  return div.querySelector("div.inline-block");
 }
 
 // ==================== CHAT MANAGEMENT ====================
 function newChat(){
-  current = "chat_" + Date.now();
-  const chatId = generateChatId();   // 23 characters
-  chats[current] = [];
+  currentChatId = generateChatId();        // 23 character ID
+  chats[currentChatId] = [];
   
   document.getElementById("chat").innerHTML = "";
-  updateURL(chatId);   // Update fake URL
+  updateBrowserURL(currentChatId);
   
   document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
   
@@ -356,22 +354,15 @@ function newChat(){
   renderHistory();
 }
 
-function load(id){
-  current = id;
+function load(chatId){
+  currentChatId = chatId;
   document.getElementById("chat").innerHTML = "";
   
-  chats[id].forEach(m => {
-    if(m.role === "assistant"){
-      addMsg("ai", marked.parse(m.content));
-    } else {
-      addMsg("user", m.content);
-    }
+  (chats[chatId] || []).forEach(m => {
+    addMsg(m.role === "user" ? "user" : "ai", m.role === "assistant" ? marked.parse(m.content) : m.content);
   });
 
-  // Generate a consistent-looking ID for display (not real storage key)
-  const displayId = generateChatId();
-  updateURL(displayId);
-
+  updateBrowserURL(chatId);
   document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
 }
 
@@ -380,14 +371,14 @@ function renderHistory(){
   container.innerHTML = "";
 
   Object.keys(chats).reverse().forEach(id => {
-    const firstMsg = chats[id].find(m => m.role === "user")?.content || "New Conversation";
-    const preview = firstMsg.length > 45 ? firstMsg.substring(0, 45) + "..." : firstMsg;
+    const previewMsg = chats[id].find(m => m.role === "user")?.content || "New Chat";
+    const preview = previewMsg.length > 40 ? previewMsg.substring(0, 40) + "..." : previewMsg;
 
     const div = document.createElement("div");
-    div.className = `sidebar-chat p-4 rounded-2xl cursor-pointer transition-all text-sm ${current === id ? 'active-chat' : ''}`;
+    div.className = `sidebar-chat p-4 rounded-2xl cursor-pointer transition-all text-sm ${currentChatId === id ? 'active-chat' : ''}`;
     div.innerHTML = `
       <div class="font-medium text-gray-200 line-clamp-1">${preview}</div>
-      <div class="text-xs text-gray-500 mt-1">ai.mythicalstudios.online/chat/•••••••••••••••••••••••</div>
+      <div class="text-xs text-gray-500 mt-1">ai.mythicalstudios.online/chat/${id}</div>
     `;
     div.onclick = () => load(id);
     container.appendChild(div);
@@ -399,7 +390,15 @@ function save(){
   renderHistory();
 }
 
-// Enter key support
+// Handle browser back/forward
+window.addEventListener('popstate', () => {
+  const chatId = getChatIdFromURL();
+  if (chatId && chats[chatId]) {
+    load(chatId);
+  }
+});
+
+// Enter key
 document.getElementById("input").addEventListener("keydown", e => {
   if(e.key === "Enter" && !e.shiftKey){
     e.preventDefault();
