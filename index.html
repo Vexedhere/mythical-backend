@@ -1,175 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI | Build V16.7</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mythical AI | Stable Build</title>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020202; color: #e2e8f0; overflow: hidden; }
-        .mythic-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .active-chat { background: rgba(168, 85, 247, 0.12) !important; border-color: rgba(168, 85, 247, 0.3) !important; color: white !important; }
-        .chat-animate { animation: flyIn 0.3s ease-out; }
-        @keyframes flyIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Sidebar Transitions */
-        #sidebar { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 260px; }
-        #sidebar.collapsed { width: 0; padding: 0; overflow: hidden; border-right: none; }
-        
-        .code-container { position: relative; margin: 0.8rem 0; border-radius: 0.8rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #0d1117; width: 100%; }
-        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .copy-btn { padding: 2px 10px; border-radius: 5px; background: rgba(168, 85, 247, 0.2); color: #a855f7; cursor: pointer; font-size: 8px; transition: 0.2s; }
-        .copy-btn:hover { background: #a855f7; color: white; }
-        pre { padding: 1rem; overflow-x: auto; margin: 0 !important; font-size: 11.5px !important; line-height: 1.5; white-space: pre !important; }
-        
-        .delete-btn { opacity: 0; transition: 0.2s; }
-        .history-item:hover .delete-btn { opacity: 1; }
-        
-        .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 3px; height: 3px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-    </style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<style>
+body { background:#020202; color:#e2e8f0; font-family: sans-serif; }
+.glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); }
+.active-chat { background: rgba(168,85,247,0.2); }
+::-webkit-scrollbar { width:3px; }
+</style>
 </head>
+
 <body class="h-screen flex">
 
-    <div id="login-page" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020202]">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm text-center shadow-2xl chat-animate">
-            <div class="w-16 h-16 mythic-gradient rounded-2xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-white">M</div>
-            <h1 class="text-2xl font-black mb-8 italic uppercase tracking-tighter">Mythical AI</h1>
-            <input type="password" id="staff-pass" placeholder="Founder Access" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 mb-3 outline-none focus:border-purple-500 text-center font-bold text-purple-400 text-sm">
-            <button onclick="checkStaffPass()" class="w-full py-3 rounded-xl font-black bg-white text-black hover:opacity-90 transition-all uppercase text-[10px] tracking-widest">Authorize Node</button>
+<!-- LOGIN -->
+<div id="login-page" class="fixed inset-0 flex items-center justify-center bg-black">
+    <div class="glass p-8 rounded-2xl text-center">
+        <h1 class="text-xl font-bold mb-4">Mythical AI</h1>
+
+        <div id="g_id_onload"
+            data-client_id="918972920532-h4g5b0b33b2nuqmon0rs3c79u7qt2sga.apps.googleusercontent.com"
+            data-callback="handleGoogleLogin">
         </div>
+        <div class="g_id_signin mb-4"></div>
+
+        <input id="staff-pass" type="password" placeholder="Passcode"
+            class="w-full p-2 rounded bg-black border border-white/10 mb-2">
+
+        <button onclick="checkStaffPass()" class="w-full bg-white text-black p-2 rounded">
+            Login
+        </button>
     </div>
+</div>
 
-    <aside id="sidebar" class="bg-[#050505] border-r border-white/5 flex flex-col p-4 hidden">
-        <div class="flex items-center justify-between mb-8 px-2">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 mythic-gradient rounded-lg flex items-center justify-center font-bold text-white text-xs">M</div>
-                <span class="font-black text-lg italic uppercase tracking-tighter">Mythical</span>
-            </div>
-        </div>
-        
-        <button onclick="createNewChat()" class="w-full py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-[9px] font-black mb-6 uppercase tracking-widest">+ NEW INSTANCE</button>
-        
-        <div class="flex-1 overflow-y-auto space-y-1" id="history-list"></div>
-        
-        <div class="mt-auto pt-4 border-t border-white/5">
-            <div class="p-3 glass rounded-xl mb-3">
-                <p id="user-display" class="text-[10px] font-black text-white truncate uppercase">Guest</p>
-                <p id="role-display" class="text-[8px] text-purple-500 font-black mt-0.5 uppercase italic tracking-widest">Rank: INITIALIZING</p>
-            </div>
-            <button onclick="logout()" class="w-full py-1 text-slate-500 text-[8px] font-bold hover:text-red-500 uppercase tracking-widest">Terminate Link</button>
-        </div>
-    </aside>
+<!-- SIDEBAR -->
+<aside id="sidebar" class="w-64 p-4 border-r border-white/10 hidden">
+    <button onclick="createNewChat()" class="w-full mb-4 bg-purple-600 p-2 rounded">
+        + New Chat
+    </button>
+    <div id="history-list"></div>
+</aside>
 
-    <main id="main-content" class="flex-1 flex flex-col hidden relative">
-        <header class="p-4 border-b border-white/5 bg-black/40 flex justify-between items-center backdrop-blur-xl">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="p-2 hover:bg-white/5 rounded-lg transition-all">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-                </button>
-                <span id="chat-id-display" class="text-[9px] font-mono text-slate-500 tracking-widest uppercase italic font-bold">/NODE/INIT</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="h-1 w-1 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]"></div>
-                <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Handshake Secure</span>
-            </div>
-        </header>
+<!-- MAIN -->
+<main id="main" class="flex-1 flex flex-col hidden">
+    <div id="chat-box" class="flex-1 p-4 overflow-y-auto"></div>
 
-        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"></div>
+    <div class="p-4 flex gap-2">
+        <input id="input" class="flex-1 p-2 bg-black border border-white/10 rounded">
+        <button onclick="handleChat()" class="bg-purple-600 px-4 rounded">Send</button>
+    </div>
+</main>
 
-        <div class="p-6">
-            <div class="max-w-3xl mx-auto flex gap-3 p-2 rounded-[1.8rem] glass shadow-2xl transition-all border border-white/5 focus-within:border-purple-500/40">
-                <input type="text" id="input-field" placeholder="Query or /imagine..." class="flex-1 bg-transparent border-none outline-none px-4 py-1 text-xs text-white">
-                <button id="send-btn" class="mythic-gradient w-10 h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                </button>
-            </div>
-        </div>
-    </main>
+<script>
+const GROQ_KEY = "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";
 
-    <script>
-        const GROQ_KEY = "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";
-        let chats = {};
-        let currentChatId = null;
-        let currentUser = { name: "Guest", role: "USER", key: "guest" };
+let chats = {};
+let currentChatId = null;
+let currentUser = { key: "guest" };
 
-        marked.setOptions({ highlight: (code) => hljs.highlightAuto(code).value, breaks: true });
+marked.setOptions({
+    highlight: (code) => hljs.highlightAuto(code).value
+});
 
-        function checkStaffPass() {
-            const p = document.getElementById('staff-pass').value;
-            const staff = {
-                "C@MN26": ["Chethan", "FOUNDER"],
-                "T@MN26": ["Thaman Devapuram", "ADMIN"],
-                "P@MN26": ["Pavan", "MODERATOR"],
-                "P@HPSK": ["Amit Singh", "PRINCIPAL"],
-                "VP@HPS": ["Srinivasa Murthy", "VICE PRINCIPAL"],
-                "Z@HPSK": ["Zakaria", "TEACHER"],
-                "V@HPSK": ["Vijayalakshmi", "TEACHER"],
-                "R@HPSK": ["Rajesh", "TEACHER"]
-            };
-            if (staff[p]) enterApp(staff[p][0], staff[p][1], p);
-            else alert("Access Denied.");
-        }
+/* LOGIN */
+function handleGoogleLogin(res){
+    const data = JSON.parse(atob(res.credential.split('.')[1]));
+    enterApp(data.email);
+}
 
-        function enterApp(name, role, userKey) {
-            currentUser = { name, role, key: userKey };
-            const saved = localStorage.getItem(`myth_v16_${userKey}`);
-            chats = saved ? JSON.parse(saved) : {};
-            document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('sidebar').classList.remove('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-display').innerText = name;
-            document.getElementById('role-display').innerText = `Rank: ${role}`;
-            if (Object.keys(chats).length > 0) loadChat(Object.keys(chats).reverse()[0]);
-            else createNewChat();
-            renderSidebar();
-        }
+function checkStaffPass(){
+    if(document.getElementById("staff-pass").value === "admin"){
+        enterApp("admin");
+    } else {
+        alert("Wrong pass");
+    }
+}
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-        }
+function enterApp(key){
+    currentUser.key = key;
 
-        async function handleChat() {
-            const input = document.getElementById('input-field');
-            const val = input.value.trim();
-            if (!val) return;
-            appendMsg('user', val);
-            input.value = '';
+    chats = JSON.parse(localStorage.getItem("myth_"+key)) || {};
 
-            if (val.toLowerCase().startsWith('/imagine ')) { handleVision(val); return; }
+    document.getElementById("login-page").style.display="none";
+    document.getElementById("sidebar").classList.remove("hidden");
+    document.getElementById("main").classList.remove("hidden");
 
-            const aiMsg = appendMsg('ai', '<span class="animate-pulse font-bold tracking-widest text-[9px]">ANALYZING...</span>');
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "llama-3.1-8b-instant",
-                        messages: [
-                            { role: "system", content: `You are Mythical AI, built by the FOUNDER Chethan. 1. If greeting, be natural. 2. If code, provide ONE UNIFIED BLOCK.` },
-                            ...(chats[currentChatId] || []),
-                            { role: "user", content: val }
-                        ]
-                    })
-                });
-                const data = await res.json();
-                let reply = data.choices[0].message.content;
-                
-                aiMsg.innerHTML = reply.includes("
-http://googleusercontent.com/immersive_entry_chip/0
-http://googleusercontent.com/immersive_entry_chip/1
+    if(Object.keys(chats).length){
+        loadChat(Object.keys(chats)[0]);
+    } else {
+        createNewChat();
+    }
 
-### 🛠️ Founder's Technical Breakdown:
-* **Sidebar Toggle:** I added a "Hamburger" icon in the top left. Clicking it uses a `cubic-bezier` transition to slide the sidebar in and out without breaking the layout.
-* **Delete Nodes:** Every chat in the sidebar now has a hidden trash icon that appears when you hover over the chat. It asks for confirmation before wiping the data.
-* **Persistent Auth:** It still uses your secure registry, but now it auto-loads your most recent chat when you log in.
+    renderSidebar();
+}
 
-This build is ready for the **Founder Workstation**. Ready for the next module? 🚀🛡️
+/* CHAT */
+async function handleChat(){
+    const input = document.getElementById("input");
+    const text = input.value.trim();
+    if(!text) return;
+
+    appendMsg("user", text);
+    input.value="";
+
+    const aiDiv = appendMsg("ai", "Thinking...");
+
+    try{
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+            method:"POST",
+            headers:{
+                "Authorization":"Bearer "+GROQ_KEY,
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                model:"llama-3.1-8b-instant",
+                messages:[
+                    ...(chats[currentChatId]||[]),
+                    {role:"user",content:text}
+                ]
+            })
+        });
+
+        const data = await res.json();
+        const reply = data.choices[0].message.content;
+
+        aiDiv.innerHTML = format(reply);
+
+        chats[currentChatId].push(
+            {role:"user",content:text},
+            {role:"assistant",content:reply}
+        );
+
+        save();
+
+    }catch{
+        aiDiv.innerText="Error connecting API";
+    }
+}
+
+/* UI */
+function appendMsg(role, text){
+    const div = document.createElement("div");
+
+    div.className = "mb-3 " + (role==="user"?"text-right":"text-left");
+
+    div.innerHTML = `
+    <div class="inline-block p-3 rounded-lg ${
+        role==="user"?"bg-purple-600":"glass"
+    }">${text}</div>`;
+
+    document.getElementById("chat-box").appendChild(div);
+    return div.querySelector("div");
+}
+
+function format(t){
+    let html = marked.parse(t);
+    return html;
+}
+
+/* CHAT MGMT */
+function createNewChat(){
+    currentChatId = Math.random().toString(36).slice(2);
+    chats[currentChatId]=[];
+    document.getElementById("chat-box").innerHTML="";
+    save();
+}
+
+function loadChat(id){
+    currentChatId=id;
+    const box = document.getElementById("chat-box");
+    box.innerHTML="";
+
+    chats[id].forEach(m=>{
+        appendMsg(m.role==="user"?"user":"ai", m.content);
+    });
+}
+
+function renderSidebar(){
+    const list = document.getElementById("history-list");
+    list.innerHTML="";
+
+    Object.keys(chats).forEach(id=>{
+        const div=document.createElement("div");
+        div.className="p-2 cursor-pointer hover:bg-white/10";
+        div.innerText=id.slice(0,6);
+        div.onclick=()=>loadChat(id);
+        list.appendChild(div);
+    });
+}
+
+function save(){
+    localStorage.setItem("myth_"+currentUser.key, JSON.stringify(chats));
+}
+
+/* ENTER KEY */
+document.getElementById("input").addEventListener("keydown",e=>{
+    if(e.key==="Enter") handleChat();
+});
+</script>
+
+</body>
+</html>
