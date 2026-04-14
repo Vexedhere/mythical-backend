@@ -4,83 +4,165 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mythical AI Pro</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 <style>
-body { background:#0a0a0a; color:white; }
-.chat-user { background:#7c3aed; }
-.chat-ai { background:#1f2937; }
+    body { 
+        background: #0a0a0a; 
+        color: white; 
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+    .chat-user { 
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        box-shadow: 0 4px 15px -2px rgba(124, 58, 237, 0.3);
+    }
+    .chat-ai { 
+        background: #1f2937;
+        border: 1px solid #374151;
+    }
+    .message-bubble {
+        animation: fadeIn 0.3s ease forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .sidebar-chat:hover {
+        background: #1f2937;
+    }
+    .active-chat {
+        background: #312e81;
+        border-left: 4px solid #a855f7;
+    }
 </style>
 </head>
+<body class="h-screen flex overflow-hidden">
 
-<body class="h-screen flex">
-
-<!-- LOGIN -->
-<div id="login" class="fixed inset-0 flex items-center justify-center bg-black">
-  <div class="bg-[#111] p-8 rounded-2xl w-80 text-center shadow-2xl">
-    <h1 class="text-2xl font-bold mb-6">Mythical AI</h1>
-
-    <input id="pass" placeholder="Enter passcode"
-      class="w-full p-3 rounded bg-black border border-gray-700 mb-3">
-
-    <button onclick="login()" class="w-full bg-purple-600 p-3 rounded mb-2">
+<!-- LOGIN SCREEN -->
+<div id="login" class="fixed inset-0 flex items-center justify-center bg-black z-50">
+  <div class="bg-[#111] p-10 rounded-3xl w-96 text-center shadow-2xl border border-purple-500/20">
+    <div class="flex justify-center mb-6">
+      <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-violet-600 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
+        🐉
+      </div>
+    </div>
+    <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">
+      Mythical AI
+    </h1>
+    <p class="text-gray-400 mb-8">Enter the realm of intelligence</p>
+    
+    <input id="pass" placeholder="Enter passcode" 
+      class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none text-lg mb-4">
+    
+    <button onclick="login()" 
+      class="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 p-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
       Login
     </button>
-
-    <button onclick="guestLogin()" class="w-full bg-gray-700 p-3 rounded">
+    
+    <button onclick="guestLogin()" 
+      class="w-full mt-3 text-gray-400 hover:text-white p-4 rounded-2xl font-medium transition-all">
       Continue as Guest
     </button>
   </div>
 </div>
 
-<!-- SIDEBAR -->
-<div id="sidebar" class="w-64 bg-[#111] p-4 hidden flex-col">
-  <button onclick="newChat()" class="bg-purple-600 p-2 rounded mb-4">
-    + New Chat
-  </button>
-  <div id="history"></div>
-</div>
+<!-- MAIN APP -->
+<div class="flex h-full w-full hidden" id="app">
 
-<!-- MAIN -->
-<div id="main" class="flex-1 flex flex-col hidden">
+  <!-- SIDEBAR -->
+  <div id="sidebar" class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col">
+    <div class="p-5 border-b border-gray-800">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center text-2xl">
+          🐉
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Mythical AI</h1>
+          <p class="text-xs text-purple-400 font-medium">Pro</p>
+        </div>
+      </div>
+    </div>
 
-  <!-- CHAT -->
-  <div id="chat" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
-
-  <!-- INPUT -->
-  <div class="p-4 flex gap-2 border-t border-gray-800">
-    <input id="input" class="flex-1 p-3 rounded bg-[#111] border border-gray-700"
-      placeholder="Ask anything...">
-    <button onclick="send()" class="bg-purple-600 px-5 rounded">
-      Send
+    <button onclick="newChat()" 
+      class="mx-5 mt-6 mb-4 flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 py-3.5 rounded-2xl font-semibold transition-all active:scale-95 shadow-lg shadow-purple-500/30">
+      <i class="fas fa-plus"></i>
+      New Conversation
     </button>
+
+    <div class="px-5 text-xs font-medium text-gray-500 mb-2 mt-4">HISTORY</div>
+    <div id="history" class="flex-1 overflow-y-auto px-3 space-y-1 custom-scroll"></div>
+
+    <div class="p-5 border-t border-gray-800 mt-auto">
+      <div class="flex items-center gap-3 text-sm">
+        <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+          👤
+        </div>
+        <div>
+          <p id="username" class="font-medium"></p>
+          <p class="text-xs text-gray-500">Online</p>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- CHAT AREA -->
+  <div class="flex-1 flex flex-col">
+    <!-- Header -->
+    <div class="h-16 border-b border-gray-800 flex items-center px-6 justify-between bg-[#0a0a0a]">
+      <div class="flex items-center gap-3">
+        <div id="chat-title" class="font-semibold text-lg">New Conversation</div>
+      </div>
+      <div class="flex items-center gap-4 text-gray-400">
+        <button onclick="toggleSidebar()" class="lg:hidden">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scroll bg-[#0a0a0a]"></div>
+
+    <!-- Input Area -->
+    <div class="p-6 border-t border-gray-800 bg-[#0a0a0a]">
+      <div class="max-w-4xl mx-auto">
+        <div class="relative">
+          <input id="input" 
+            class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all"
+            placeholder="Message Mythical AI...">
+          
+          <button onclick="send()" 
+            class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+        <p class="text-center text-xs text-gray-500 mt-4">Mythical AI can make mistakes. Consider checking important info.</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+// ==================== CONFIG ====================
 const API = "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";
-
 let chats = {};
 let current = null;
 let user = "guest";
 
-/* LOGIN FIX */
+// ==================== LOGIN ====================
 function login(){
-  const p = document.getElementById("pass").value;
-
+  const p = document.getElementById("pass").value.trim();
   const staff = {
-    "C@MN26":"Chethan (Founder)",
-    "T@MN26":"Admin"
+    "C@MN26": "Chethan (Founder)",
+    "T@MN26": "Admin"
   };
-
+  
   if(staff[p]){
     user = staff[p];
     startApp();
   } else {
-    alert("Invalid pass");
+    alert("Invalid passcode");
   }
 }
 
@@ -90,45 +172,47 @@ function guestLogin(){
 }
 
 function startApp(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("sidebar").classList.remove("hidden");
-  document.getElementById("main").classList.remove("hidden");
-
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").classList.remove("hidden");
+  
+  document.getElementById("username").textContent = user;
+  
   chats = JSON.parse(localStorage.getItem("myth_"+user)) || {};
-
-  if(Object.keys(chats).length){
+  
+  if(Object.keys(chats).length > 0){
     load(Object.keys(chats)[0]);
   } else {
     newChat();
   }
-
   renderHistory();
 }
 
-/* CHAT */
+// ==================== CHAT FUNCTIONS ====================
 async function send(){
   const input = document.getElementById("input");
   const text = input.value.trim();
   if(!text) return;
 
   addMsg("user", text);
-  input.value="";
+  input.value = "";
 
-  const aiBox = addMsg("ai", "Typing...");
+  const aiBox = addMsg("ai", `<div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i> Thinking...</div>`);
 
-  try{
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
-      method:"POST",
-      headers:{
-        "Authorization":"Bearer "+API,
-        "Content-Type":"application/json"
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + API,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model:"llama-3.1-8b-instant",
-        messages:[
-          ...(chats[current]||[]),
-          {role:"user",content:text}
-        ]
+        model: "llama-3.1-8b-instant",
+        messages: [
+          ...(chats[current] || []),
+          { role: "user", content: text }
+        ],
+        temperature: 0.8,
+        max_tokens: 2048
       })
     });
 
@@ -136,73 +220,108 @@ async function send(){
     const reply = data.choices[0].message.content;
 
     aiBox.innerHTML = marked.parse(reply);
-
-    chats[current].push(
-      {role:"user",content:text},
-      {role:"assistant",content:reply}
-    );
-
+    chats[current].push({role: "user", content: text}, {role: "assistant", content: reply});
     save();
-
-  }catch{
-    aiBox.innerText="API Error";
+  } catch(e) {
+    aiBox.innerHTML = `<span class="text-red-400">⚠️ Failed to get response. Please try again.</span>`;
   }
 }
 
-/* UI */
-function addMsg(role,text){
+function addMsg(role, content){
+  const chatDiv = document.getElementById("chat");
   const div = document.createElement("div");
-
-  div.className = role==="user"?"text-right":"text-left";
+  div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} message-bubble`;
 
   div.innerHTML = `
-    <div class="inline-block px-4 py-3 rounded-xl max-w-[70%] ${
-      role==="user"?"chat-user":"chat-ai"
-    }">${text}</div>
+    <div class="max-w-[75%]">
+      <div class="inline-block px-6 py-4 rounded-3xl ${
+        role === "user" 
+          ? "chat-user text-white rounded-br-none" 
+          : "chat-ai rounded-bl-none"
+      }">${content}</div>
+    </div>
   `;
 
-  document.getElementById("chat").appendChild(div);
-  return div.querySelector("div");
+  chatDiv.appendChild(div);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+  return div.querySelector("div.inline-block");
 }
 
-/* CHAT MGMT */
+// ==================== CHAT MANAGEMENT ====================
 function newChat(){
-  current = Math.random().toString(36).slice(2);
-  chats[current]=[];
-  document.getElementById("chat").innerHTML="";
+  current = "chat_" + Date.now();
+  chats[current] = [];
+  document.getElementById("chat").innerHTML = "";
+  document.getElementById("chat-title").textContent = "New Conversation";
   save();
   renderHistory();
 }
 
 function load(id){
-  current=id;
-  document.getElementById("chat").innerHTML="";
-  chats[id].forEach(m=>{
-    addMsg(m.role==="user"?"user":"ai", m.content);
+  current = id;
+  document.getElementById("chat").innerHTML = "";
+  
+  chats[id].forEach(m => {
+    addMsg(m.role === "user" ? "user" : "ai", 
+           m.role === "assistant" ? marked.parse(m.content) : m.content);
   });
+
+  document.getElementById("chat-title").textContent = "Conversation " + id.slice(-6);
 }
 
 function renderHistory(){
-  const h = document.getElementById("history");
-  h.innerHTML="";
-  Object.keys(chats).forEach(id=>{
-    const d=document.createElement("div");
-    d.className="p-2 cursor-pointer hover:bg-gray-800 rounded";
-    d.innerText="Chat "+id.slice(0,5);
-    d.onclick=()=>load(id);
-    h.appendChild(d);
+  const container = document.getElementById("history");
+  container.innerHTML = "";
+
+  Object.keys(chats).reverse().forEach(id => {
+    const msg = chats[id].find(m => m.role === "user")?.content || "New Chat";
+    const preview = msg.length > 40 ? msg.substring(0, 40) + "..." : msg;
+
+    const div = document.createElement("div");
+    div.className = `sidebar-chat p-4 rounded-2xl cursor-pointer transition-all text-sm ${current === id ? 'active-chat' : ''}`;
+    div.innerHTML = `
+      <div class="font-medium text-gray-200 line-clamp-1">${preview}</div>
+      <div class="text-xs text-gray-500 mt-1">${new Date(parseInt(id.split('_')[1])).toLocaleDateString()}</div>
+    `;
+    div.onclick = () => load(id);
+    container.appendChild(div);
   });
 }
 
 function save(){
-  localStorage.setItem("myth_"+user, JSON.stringify(chats));
+  localStorage.setItem("myth_" + user, JSON.stringify(chats));
+  renderHistory();
 }
 
-/* ENTER */
-document.getElementById("input").addEventListener("keydown",e=>{
-  if(e.key==="Enter") send();
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("-translate-x-full");
+}
+
+// Enter key support
+document.getElementById("input").addEventListener("keydown", e => {
+  if(e.key === "Enter" && !e.shiftKey){
+    e.preventDefault();
+    send();
+  }
 });
 </script>
+
+<style>
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 20px;
+}
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
 
 </body>
 </html>
