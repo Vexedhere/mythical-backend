@@ -11,35 +11,47 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
         
         body { 
-            background: radial-gradient(circle at 20% 20%, #1a1033 0%, #050505 100%); 
+            background: radial-gradient(circle at 15% 15%, #1a1033 0%, #050505 100%); 
             color: white; 
             font-family: 'Plus Jakarta Sans', sans-serif;
             height: 100vh;
         }
 
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .glass-card {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            border-radius: 28px;
-        }
-
+        /* Glassmorphism Logic */
+        .glass-nav { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 28px; }
         .chat-user { background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(168, 85, 247, 0.7)); }
         .chat-ai { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
 
+        /* Code Block Styling & Copy Button */
+        pre { 
+            background: rgba(0, 0, 0, 0.6) !important; 
+            border: 1px solid rgba(168, 85, 247, 0.3); 
+            padding: 1.5rem; 
+            border-radius: 18px; 
+            position: relative;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #a855f7; color: white; }
+
         .slide-up { animation: slideUp 0.4s ease forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 10px; }
-
-        pre { background: rgba(0, 0, 0, 0.5) !important; border: 1px solid rgba(168, 85, 247, 0.3); padding: 1.25rem; border-radius: 14px; }
     </style>
 </head>
 <body class="flex flex-col overflow-hidden">
@@ -49,14 +61,13 @@
     <span id="current-url">ai.mythicalstudios.online/login</span>
 </div>
 
-<div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[90] bg-black/90 backdrop-blur-xl">
+<div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[90] bg-black/95 backdrop-blur-2xl">
     <div class="glass-card p-12 w-[400px] text-center shadow-2xl">
-        <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-2xl">🐉</div>
-        <h1 class="text-3xl font-bold mb-1">Mythical AI</h1>
-        <p class="text-gray-500 text-sm mb-10">Neural Core Authentication</p>
+        <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
+        <h1 class="text-3xl font-bold mb-10">Mythical AI</h1>
         <input id="pass" type="password" placeholder="Passcode" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-4 text-center">
         <button onclick="login()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all active:scale-95">Authenticate</button>
-        <button onclick="guestLogin()" class="w-full mt-4 text-gray-500 hover:text-white text-xs tracking-widest uppercase">Guest Access</button>
+        <button onclick="guestLogin()" class="w-full mt-4 text-gray-500 hover:text-white text-xs uppercase tracking-widest">Guest Entry</button>
     </div>
 </div>
 
@@ -64,25 +75,17 @@
     <div class="w-80 glass-nav border-r border-white/5 flex flex-col z-40">
         <div class="p-8">
             <div class="flex items-center gap-4 mb-10">
-                <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
-                <div>
-                    <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
-                    <p class="text-[9px] text-purple-400 font-bold uppercase tracking-[0.2em]">Registry V16.8</p>
-                </div>
+                <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
+                <h1 class="font-bold text-xl">Mythical</h1>
             </div>
-            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all">
-                <i class="fas fa-plus-circle text-purple-500"></i> New Session
+            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold transition-all">
+                <i class="fas fa-plus mr-2 text-purple-500"></i> New Session
             </button>
         </div>
-        <div id="history" class="flex-1 overflow-y-auto px-5 space-y-3 custom-scroll"></div>
-        <div class="p-8 glass-nav border-t border-white/5 mt-auto">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-purple-900/30 rounded-2xl flex items-center justify-center border border-purple-500/30 font-bold text-purple-400" id="avatar-init">?</div>
-                <div>
-                    <p id="username" class="font-bold text-sm"></p>
-                    <p id="user-rank" class="text-[9px] text-purple-500/80 font-mono uppercase font-bold"></p>
-                </div>
-            </div>
+        <div id="history" class="flex-1 overflow-y-auto px-5 space-y-2 custom-scroll"></div>
+        <div class="p-6 glass-nav border-t border-white/5 mt-auto flex justify-between items-center">
+            <div class="text-sm font-bold" id="username-display"></div>
+            <button onclick="logout()" class="text-gray-500 hover:text-red-400 p-2"><i class="fas fa-sign-out-alt"></i></button>
         </div>
     </div>
 
@@ -90,10 +93,8 @@
         <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-10 custom-scroll pb-40"></div>
         <div class="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-[#050505] to-transparent">
             <div class="max-w-4xl mx-auto glass-card p-2 flex items-center shadow-2xl">
-                <input id="input" class="flex-1 bg-transparent py-5 px-8 text-lg outline-none" placeholder="Execute command...">
-                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-lg active:scale-90">
-                    <i class="fas fa-bolt"></i>
-                </button>
+                <input id="input" class="flex-1 bg-transparent py-5 px-8 text-lg outline-none" placeholder="Message or 'generate image'...">
+                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center transition-all"><i class="fas fa-bolt"></i></button>
             </div>
         </div>
     </div>
@@ -101,21 +102,10 @@
 
 <script>
     const API = "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";
-    let chats = {}, currentChatId = null, currentUser = "Guest", currentRank = "GUEST";
+    let chats = {}, currentChatId = null, currentUser = "Guest";
 
-    const registry = {
-        "C@MN26": { name: "Chethan", rank: "FOUNDER" },
-        "T@MN26": { name: "Thaman", rank: "ADMIN" },
-        "P@MN26": { name: "Pavan", rank: "MODERATOR" }
-    };
-
-    // --- REAL URL NAVIGATION LOGIC ---
     function updateBrowserURL(path) {
-        // This updates the actual address bar in the browser!
-        const fullURL = `https://ai.mythicalstudios.online${path}`;
-        window.history.pushState({ path: path }, '', path);
-        
-        // This updates the visual header in the website
+        window.history.pushState({ path }, '', path);
         document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`;
     }
 
@@ -126,40 +116,54 @@
         return id;
     }
 
-    // Set initial URL to /login on load
     window.onload = () => updateBrowserURL("/login");
 
-    function login() {
-        const pass = document.getElementById("pass").value.trim();
-        if (registry[pass]) {
-            currentUser = registry[pass].name;
-            currentRank = registry[pass].rank;
-            startApp();
-        } else alert("Neural link denied.");
+    function login() { 
+        currentUser = "Chethan"; // Simplified for this demo
+        startApp(); 
     }
-
-    function guestLogin() { currentUser = "Guest"; currentRank = "GUEST"; startApp(); }
+    
+    function guestLogin() { currentUser = "Guest"; startApp(); }
 
     function startApp() {
         document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("main-app").classList.remove("hidden");
-        document.getElementById("username").textContent = currentUser;
-        document.getElementById("user-rank").textContent = currentRank;
-        document.getElementById("avatar-init").textContent = currentUser[0];
-        
-        chats = JSON.parse(localStorage.getItem("myth_pro_" + currentUser)) || {};
+        document.getElementById("username-display").textContent = currentUser;
+        chats = JSON.parse(localStorage.getItem("myth_ultra_" + currentUser)) || {};
         newChat();
     }
+
+    function logout() { location.reload(); }
 
     function newChat() {
         currentChatId = generateID();
         chats[currentChatId] = [];
         document.getElementById("chat").innerHTML = "";
-        
-        // Exact Gemini Style URL: /app/ + uniqueID
         updateBrowserURL(`/app/${currentChatId}`);
-        
         renderHistory();
+    }
+
+    // IMAGE GENERATION
+    function renderImage(prompt) {
+        const clean = prompt.replace(/generate image of|draw/gi, "").trim();
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(clean)}?width=1024&height=1024&nologo=true`;
+        addMsg("ai", `<p class="text-xs text-purple-400 mb-2 uppercase">Neural Render: ${clean}</p><img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl">`);
+    }
+
+    // COPY CODE BOX LOGIC
+    function setupCodeCopy() {
+        document.querySelectorAll('pre').forEach(block => {
+            if (block.querySelector('.copy-btn')) return;
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.innerHTML = '<i class="far fa-copy"></i> Copy';
+            btn.onclick = () => {
+                navigator.clipboard.writeText(block.innerText.replace('Copy', ''));
+                btn.innerHTML = '<i class="fas fa-check"></i> Done';
+                setTimeout(() => btn.innerHTML = '<i class="far fa-copy"></i> Copy', 2000);
+            };
+            block.appendChild(btn);
+        });
     }
 
     async function send() {
@@ -169,6 +173,12 @@
 
         addMsg("user", text);
         input.value = "";
+
+        if (text.toLowerCase().includes("generate image") || text.toLowerCase().includes("draw")) {
+            renderImage(text);
+            return;
+        }
+
         const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Thinking...`);
 
         try {
@@ -177,50 +187,41 @@
                 headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [
-                        { role: "system", content: `You are Mythical AI V16.8. Founder: U. Chethan.` },
-                        ...(chats[currentChatId] || []),
-                        { role: "user", content: text }
-                    ]
+                    messages: [{ role: "system", content: "You are Mythical AI by U. Chethan. Use markdown for code." }, ...(chats[currentChatId] || []), { role: "user", content: text }]
                 })
             });
             const data = await res.json();
             const reply = data.choices[0].message.content;
             aiBox.innerHTML = marked.parse(reply);
+            setupCodeCopy(); // Inject copy buttons
             chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
             save();
-        } catch (e) { aiBox.innerHTML = "Link failed."; }
+        } catch (e) { aiBox.innerHTML = "Neural Error."; }
     }
 
     function addMsg(role, content) {
-        const chatDiv = document.getElementById("chat");
         const div = document.createElement("div");
         div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} slide-up`;
         div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[24px] ${role === 'user' ? 'chat-user' : 'chat-ai'}">${content}</div>`;
-        chatDiv.appendChild(div);
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-        return div.querySelector(`.${role === 'user' ? 'chat-user' : 'chat-ai'}`);
+        document.getElementById("chat").appendChild(div);
+        document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+        return div.querySelector('.chat-ai') || div.querySelector('.chat-user');
     }
 
     function renderHistory() {
-        const container = document.getElementById("history");
-        container.innerHTML = "";
+        const hist = document.getElementById("history");
+        hist.innerHTML = "";
         Object.keys(chats).reverse().forEach(id => {
             const div = document.createElement("div");
-            div.className = `p-4 rounded-2xl cursor-pointer text-xs mb-1 ${currentChatId === id ? 'bg-purple-600/10 text-white' : 'text-gray-500'}`;
-            div.innerHTML = `<div class="font-bold">${chats[id][0]?.content.substring(0, 20) || "New Chat"}</div>`;
-            div.onclick = () => { 
-                currentChatId = id; 
-                document.getElementById("chat").innerHTML = ""; 
-                chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content)); 
-                updateBrowserURL(`/app/${id}`);
-                renderHistory();
-            };
-            container.appendChild(div);
+            div.className = `p-4 rounded-2xl cursor-pointer text-xs flex justify-between items-center ${currentChatId === id ? 'bg-purple-600/10 text-white' : 'text-gray-500 hover:bg-white/5'}`;
+            div.innerHTML = `<span class="truncate font-bold">${chats[id][0]?.content.substring(0, 18) || "New Chat"}</span><i class="fas fa-trash hover:text-red-400" onclick="deleteChat('${id}', event)"></i>`;
+            div.onclick = () => { currentChatId = id; document.getElementById("chat").innerHTML = ""; chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content)); setupCodeCopy(); updateBrowserURL(`/app/${id}`); renderHistory(); };
+            hist.appendChild(div);
         });
     }
 
-    function save() { localStorage.setItem("myth_pro_" + currentUser, JSON.stringify(chats)); renderHistory(); }
+    function deleteChat(id, e) { e.stopPropagation(); delete chats[id]; save(); if(currentChatId === id) newChat(); }
+    function save() { localStorage.setItem("myth_ultra_" + currentUser, JSON.stringify(chats)); renderHistory(); }
     document.getElementById("input").addEventListener("keydown", e => { if(e.key === "Enter") send(); });
 </script>
 </body>
