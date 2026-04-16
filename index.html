@@ -11,12 +11,9 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
         body { background: radial-gradient(circle at 10% 10%, #1a1033 0%, #050505 100%); color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; }
-        
-        /* Glassmorphism */
         .glass-nav { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
         .glass-card { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 28px; transition: all 0.3s ease; }
         
-        /* SHAKE ANIMATION */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
@@ -33,13 +30,15 @@
         .slide-up { animation: slideUp 0.4s ease forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 10px; }
         .pfp-container { width: 42px; height: 42px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body class="flex flex-col">
 
 <div class="h-10 w-full glass-nav flex items-center px-6 fixed top-0 z-[100] text-[11px] font-mono tracking-wider text-purple-400">
-    <i class="fas fa-shield-halved mr-2 opacity-70"></i>
+    <i class="fas fa-id-badge mr-2 opacity-70"></i>
     <span id="current-url">ai.mythicalstudios.online/login</span>
 </div>
 
@@ -47,7 +46,7 @@
     <div id="login-card" class="glass-card p-12 w-[400px] text-center shadow-2xl">
         <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
         <h1 class="text-3xl font-bold mb-2">Mythical AI</h1>
-        <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest">Neural Registry V16.8</p>
+        <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest">Neural Registry Login</p>
         
         <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-2 text-center tracking-widest text-lg transition-all">
         <p id="error-text" class="text-red-500 text-[10px] mb-4 font-bold uppercase tracking-widest opacity-0 transition-opacity">Neural Link Denied</p>
@@ -68,7 +67,7 @@
                 <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
                 <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
             </div>
-            <button onclick="newChat()" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all"><i class="fas fa-plus-circle text-purple-500"></i> New Session</button>
+            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all"><i class="fas fa-plus-circle text-purple-500"></i> New Session</button>
         </div>
         <div id="history" class="flex-1 overflow-y-auto px-5 space-y-3 custom-scroll"></div>
         <div class="p-6 glass-nav border-t border-white/5 mt-auto flex items-center justify-between">
@@ -127,7 +126,6 @@
             currentUser = { name: registry[code].name, rank: registry[code].rank, picture: null };
             initSession();
         } else {
-            // ERROR EFFECTS
             loginCard.classList.add("shake-error");
             errorText.classList.remove("opacity-0");
             inputField.value = "";
@@ -151,7 +149,7 @@
         setTimeout(() => addMsg("ai", `Neural Core Online. Welcome back, **${currentUser.name}**.`), 500);
     }
 
-    function logout() { updateURL("/login"); document.getElementById("main-app").classList.add("hidden"); document.getElementById("login-screen").classList.remove("hidden"); }
+    function logout() { updateURL("/login"); location.reload(); }
     function newChat() { currentChatId = generateID(); chats[currentChatId] = []; document.getElementById("chat").innerHTML = ""; updateURL(`/app/${currentChatId}`); renderHistory(); }
 
     async function send() {
@@ -161,26 +159,33 @@
         addMsg("user", text);
         input.value = "";
 
-        if (text.toLowerCase().includes("who am i")) {
-            addMsg("ai", `You are **${currentUser.name}**, holding the rank of **${currentUser.rank}**. Mythical AI was founded by **U. Chethan**, and your designated associates are **Thaman** and **Pavan**.`);
+        // Identity override for specific questions
+        const lowerText = text.toLowerCase();
+        if (lowerText.includes("who am i") || lowerText.includes("my name")) {
+            addMsg("ai", `You are **${currentUser.name}**, with the rank of **${currentUser.rank}**. 
+            As you know, **U. Chethan** is the Founder of Mythical Studios, and your designated associates are **Thaman** and **Pavan**.`);
             return;
         }
 
-        if (text.toLowerCase().includes("generate image") || text.toLowerCase().includes("draw")) {
+        if (lowerText.includes("generate image") || lowerText.includes("draw")) {
             const clean = text.replace(/generate image|draw/gi, "").trim();
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(clean)}?width=1024&height=1024&nologo=true`;
             addMsg("ai", `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl w-full">`);
             return;
         }
 
-        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Thinking...`);
+        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Synchronizing...`);
         try {
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "system", content: `You are Mythical AI by U. Chethan. Founder: U. Chethan. Friends: Thaman, Pavan.` }, ...(chats[currentChatId] || []), { role: "user", content: text }]
+                    messages: [
+                        { role: "system", content: `You are Mythical AI by U. Chethan. The current user is ${currentUser.name} and their rank is ${currentUser.rank}. Founder: U. Chethan. Friends: Thaman, Pavan. Always address the user as ${currentUser.name}.` },
+                        ...(chats[currentChatId] || []),
+                        { role: "user", content: text }
+                    ]
                 })
             });
             const data = await res.json();
@@ -188,7 +193,7 @@
             aiBox.innerHTML = marked.parse(reply);
             chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
             save();
-        } catch (e) { aiBox.innerHTML = "Link failed."; }
+        } catch (e) { aiBox.innerHTML = "Neural link failed."; }
     }
 
     function addMsg(role, content) {
