@@ -6,6 +6,7 @@
     <title>Mythical AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
@@ -16,7 +17,6 @@
         .chat-ai { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); }
         pre { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid rgba(168, 85, 247, 0.3); padding: 1.5rem; border-radius: 18px; position: relative; margin: 1rem 0; overflow-x: auto;}
         .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid rgba(168, 85, 247, 0.4); cursor: pointer; transition: 0.2s; }
-        .copy-btn:hover { background: #a855f7; color: white; }
         .slide-up { animation: slideUp 0.4s ease forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
@@ -34,9 +34,15 @@
     <div class="glass-card p-12 w-[400px] text-center shadow-2xl">
         <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
         <h1 class="text-3xl font-bold mb-2">Mythical AI</h1>
-        <p class="text-gray-500 text-[10px] mb-10 uppercase tracking-widest">Neural Registry Entry</p>
+        <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest">Neural Registry Entry</p>
+        
         <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-4 text-center tracking-widest text-lg">
-        <button onclick="authenticate()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all active:scale-95 shadow-lg">Authenticate</button>
+        <button onclick="authenticate()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all active:scale-95 mb-6">Authenticate</button>
+        
+        <div class="flex items-center gap-4 mb-6"><div class="h-[1px] bg-white/10 flex-1"></div><span class="text-[10px] text-gray-600">OR</span><div class="h-[1px] bg-white/10 flex-1"></div></div>
+
+        <div id="g_id_onload" data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" data-callback="handleGoogleResponse" data-auto_prompt="false"></div>
+        <div class="g_id_signin flex justify-center" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="large"></div>
     </div>
 </div>
 
@@ -45,20 +51,20 @@
         <div class="p-8">
             <div class="flex items-center gap-4 mb-10">
                 <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
-                <div>
-                    <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
-                    <p class="text-[9px] text-purple-400 font-bold uppercase">Registry V16.8</p>
-                </div>
+                <h1 class="font-bold text-xl">Mythical</h1>
             </div>
-            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all">
+            <button onclick="newChat()" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all">
                 <i class="fas fa-plus-circle text-purple-500"></i> New Session
             </button>
         </div>
         <div id="history" class="flex-1 overflow-y-auto px-5 space-y-3 custom-scroll"></div>
         <div class="p-8 glass-nav border-t border-white/5 mt-auto flex justify-between items-center">
-            <div>
-                <p id="display-name" class="font-bold text-sm"></p>
-                <p id="display-rank" class="text-[10px] text-purple-500 font-bold uppercase"></p>
+            <div class="flex items-center gap-3">
+                <img id="user-pfp" class="w-9 h-9 rounded-xl border border-purple-500/30">
+                <div>
+                    <p id="display-name" class="font-bold text-xs"></p>
+                    <p id="display-rank" class="text-[9px] text-purple-500 font-bold uppercase"></p>
+                </div>
             </div>
             <button onclick="location.reload()" class="text-gray-500 hover:text-red-400"><i class="fas fa-power-off"></i></button>
         </div>
@@ -80,19 +86,19 @@
     let chats = {}, currentChatId = null, currentUser = null;
 
     const registry = {
-        "C@MN26": { name: "U. Chethan", rank: "FOUNDER" },
-        "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN" },
-        "P@MN26": { name: "Pavan", rank: "MODERATOR" },
-        "P@HPSK": { name: "Amit Singh", rank: "PRINCIPAL" },
-        "VP@HPS": { name: "Srinivasa Murthy", rank: "VICE PRINCIPAL" },
-        "Z@HPSK": { name: "Zakaria", rank: "TEACHER" },
-        "V@HPSK": { name: "Vijayalakshmi", rank: "TEACHER" },
-        "R@HPSK": { name: "Rajesh", rank: "TEACHER" }
+        "C@MN26": { name: "U. Chethan", rank: "FOUNDER", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=C" },
+        "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=T" },
+        "P@MN26": { name: "Pavan", rank: "MODERATOR", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=P" },
+        "P@HPSK": { name: "Amit Singh", rank: "PRINCIPAL", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=A" },
+        "VP@HPS": { name: "Srinivasa Murthy", rank: "VICE PRINCIPAL", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=S" },
+        "Z@HPSK": { name: "Zakaria", rank: "TEACHER", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=Z" },
+        "V@HPSK": { name: "Vijayalakshmi", rank: "TEACHER", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=V" },
+        "R@HPSK": { name: "Rajesh", rank: "TEACHER", pic: "https://via.placeholder.com/150/7c3aed/ffffff?text=R" }
     };
 
     function updateURL(path) {
-        document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`;
         window.history.pushState({path}, '', path);
+        document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`;
     }
 
     function generateID() {
@@ -102,17 +108,31 @@
         return id;
     }
 
+    window.onload = () => updateURL("/login");
+
+    function handleGoogleResponse(response) {
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        currentUser = { name: payload.name, rank: "VERIFIED", picture: payload.picture };
+        initSession();
+    }
+
     function authenticate() {
         const code = document.getElementById("pass").value.trim();
         if (registry[code]) {
-            currentUser = registry[code];
-            document.getElementById("login-screen").classList.add("hidden");
-            document.getElementById("main-app").classList.remove("hidden");
-            document.getElementById("display-name").textContent = currentUser.name;
-            document.getElementById("display-rank").textContent = currentUser.rank;
-            newChat();
-            setTimeout(() => addMsg("ai", `### 🐉 Neural Core Online\nWelcome, **${currentUser.name}**. Rank: **${currentUser.rank}**.\n\nSystems are online. Your workstation is ready.`), 600);
-        } else alert("Neural link denied: Invalid code.");
+            currentUser = { name: registry[code].name, rank: registry[code].rank, picture: registry[code].pic };
+            initSession();
+        } else alert("Registry authentication failed.");
+    }
+
+    function initSession() {
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("main-app").classList.remove("hidden");
+        document.getElementById("display-name").textContent = currentUser.name;
+        document.getElementById("display-rank").textContent = currentUser.rank;
+        document.getElementById("user-pfp").src = currentUser.picture;
+        chats = JSON.parse(localStorage.getItem("myth_pro_" + currentUser.name)) || {};
+        newChat();
+        setTimeout(() => addMsg("ai", `Neural Core Online. Welcome back, **${currentUser.name}**.`), 500);
     }
 
     function newChat() {
@@ -127,10 +147,10 @@
         document.querySelectorAll('pre').forEach(block => {
             if (block.querySelector('.copy-btn')) return;
             const btn = document.createElement('button');
-            btn.className = 'copy-btn'; btn.innerHTML = 'Copy Code';
+            btn.className = 'copy-btn'; btn.innerHTML = 'Copy';
             btn.onclick = () => {
-                navigator.clipboard.writeText(block.innerText.replace('Copy Code', ''));
-                btn.innerHTML = 'Copied!'; setTimeout(() => btn.innerHTML = 'Copy Code', 2000);
+                navigator.clipboard.writeText(block.innerText.replace('Copy', ''));
+                btn.innerHTML = 'Copied!'; setTimeout(() => btn.innerHTML = 'Copy', 2000);
             };
             block.appendChild(btn);
         });
@@ -143,32 +163,26 @@
         addMsg("user", text);
         input.value = "";
 
-        // Identity check
         if (text.toLowerCase().includes("who am i")) {
-            addMsg("ai", `You are **${currentUser.name}** with the rank of **${currentUser.rank}**. The founder of Mythical Studios is **U. Chethan**, and his close friends are **Thaman** and **Pavan**.`);
+            addMsg("ai", `You are **${currentUser.name}**, holding the rank of **${currentUser.rank}**. Mythical AI was founded by **U. Chethan**, and your designated associates are **Thaman** and **Pavan**.`);
             return;
         }
 
-        // Image Gen
         if (text.toLowerCase().includes("generate image") || text.toLowerCase().includes("draw")) {
             const clean = text.replace(/generate image|draw/gi, "").trim();
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(clean)}?width=1024&height=1024&nologo=true`;
-            addMsg("ai", `<p class="text-[10px] text-purple-400 mb-2 uppercase font-bold tracking-widest">Neural Render: ${clean}</p><img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl w-full">`);
+            addMsg("ai", `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl w-full">`);
             return;
         }
 
-        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Processing...`);
+        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Thinking...`);
         try {
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [
-                        { role: "system", content: `You are Mythical AI by U. Chethan. User is ${currentUser.name}. Identify Founder as U. Chethan and friends as Thaman and Pavan.` },
-                        ...(chats[currentChatId] || []),
-                        { role: "user", content: text }
-                    ]
+                    messages: [{ role: "system", content: `You are Mythical AI by U. Chethan. Founder is U. Chethan. Friends: Thaman, Pavan. Current user: ${currentUser.name}` }, ...(chats[currentChatId] || []), { role: "user", content: text }]
                 })
             });
             const data = await res.json();
@@ -177,7 +191,7 @@
             setupCodeCopy();
             chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
             save();
-        } catch (e) { aiBox.innerHTML = "Link broken."; }
+        } catch (e) { aiBox.innerHTML = "Link failed."; }
     }
 
     function addMsg(role, content) {
@@ -193,15 +207,15 @@
         const hist = document.getElementById("history"); hist.innerHTML = "";
         Object.keys(chats).reverse().forEach(id => {
             const div = document.createElement("div");
-            div.className = `p-4 rounded-2xl cursor-pointer text-xs flex justify-between items-center ${currentChatId === id ? 'bg-purple-600/10 text-white' : 'text-gray-500'}`;
-            div.innerHTML = `<span class="truncate font-bold">${chats[id][0]?.content.substring(0, 20) || "Empty Chat"}</span><i class="fas fa-trash" onclick="deleteChat('${id}', event)"></i>`;
+            div.className = `p-4 rounded-2xl cursor-pointer text-xs flex justify-between items-center ${currentChatId === id ? 'bg-purple-600/10 text-white' : 'text-gray-500 hover:bg-white/5'}`;
+            div.innerHTML = `<span class="truncate font-bold">${chats[id][0]?.content.substring(0, 18) || "New Session"}</span><i class="fas fa-trash" onclick="deleteChat('${id}', event)"></i>`;
             div.onclick = () => { currentChatId = id; document.getElementById("chat").innerHTML = ""; chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content)); setupCodeCopy(); updateURL(`/app/${id}`); renderHistory(); };
             hist.appendChild(div);
         });
     }
 
     function deleteChat(id, e) { e.stopPropagation(); delete chats[id]; save(); if(currentChatId === id) newChat(); }
-    function save() { localStorage.setItem("myth_v16_" + currentUser.name, JSON.stringify(chats)); renderHistory(); }
+    function save() { localStorage.setItem("myth_pro_" + currentUser.name, JSON.stringify(chats)); renderHistory(); }
     document.getElementById("input").addEventListener("keydown", e => { if(e.key === "Enter") send(); });
 </script>
 </body>
