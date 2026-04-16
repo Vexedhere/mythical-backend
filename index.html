@@ -1,435 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mythical AI </title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-<style>
-    body { 
-        background: #0a0a0a; 
-        color: white; 
-        font-family: 'Inter', system-ui, sans-serif;
-    }
-    .chat-user { 
-        background: linear-gradient(135deg, #7c3aed, #a855f7);
-        box-shadow: 0 4px 15px -2px rgba(124, 58, 237, 0.3);
-    }
-    .chat-ai { 
-        background: #1f2937;
-        border: 1px solid #374151;
-    }
-    .message-bubble { animation: fadeIn 0.3s ease forwards; }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .sidebar-chat:hover { background: #1f2937; }
-    .active-chat {
-        background: #312e81;
-        border-left: 4px solid #a855f7;
-    }
-    pre {
-        position: relative;
-        background: #111827;
-        border-radius: 12px;
-        padding: 16px;
-        margin: 12px 0;
-        overflow-x: auto;
-        border: 1px solid #374151;
-    }
-    .copy-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #1f2937;
-        color: #9ca3af;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        border: 1px solid #4b5563;
-    }
-    .copy-btn:hover { background: #374151; color: white; }
-    .copy-btn.copied { background: #10b981; color: white; border-color: #10b981; }
-
-    .url-bar {
-        background: #111827;
-        border-bottom: 1px solid #374151;
-        font-family: 'SF Mono', monospace;
-        font-size: 0.95rem;
-        color: #a855f7;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythical AI | V16.8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        body { background: #0a0a0a; color: white; font-family: 'Inter', sans-serif; }
+        .chat-user { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); }
+        .chat-ai { background: #1f2937; border: 1px solid #374151; }
+        .message-bubble { animation: fadeIn 0.3s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .active-chat { background: #312e81; border-left: 4px solid #a855f7; }
+        pre { background: #111827; border-radius: 12px; padding: 16px; margin: 12px 0; border: 1px solid #374151; position: relative; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: #1f2937; color: #9ca3af; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; border: 1px solid #4b5563; cursor: pointer; }
+        .url-bar { background: #111827; border-bottom: 1px solid #374151; font-family: monospace; color: #a855f7; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+    </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
-<!-- LOGIN SCREEN -->
 <div id="login-screen" class="fixed inset-0 flex items-center justify-center bg-black z-50">
-  <div class="bg-[#111] p-10 rounded-3xl w-96 text-center shadow-2xl border border-purple-500/20">
-    <div class="flex justify-center mb-6">
-      <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-violet-600 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
-        🐉
-      </div>
+    <div class="bg-[#111] p-10 rounded-3xl w-96 text-center border border-purple-500/20 shadow-2xl">
+        <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-violet-600 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">Mythical AI</h1>
+        <p class="text-gray-400 mb-8 italic">"Knowledge is the ultimate myth."</p>
+        <input id="pass" type="password" placeholder="Enter passcode" class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none mb-4">
+        <button onclick="login()" class="w-full bg-purple-600 hover:bg-purple-700 p-4 rounded-2xl font-bold transition-all active:scale-95">Authenticate</button>
+        <button onclick="guestLogin()" class="w-full mt-3 text-gray-500 hover:text-white transition-all">Guest Access</button>
     </div>
-    <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">
-      Mythical AI
-    </h1>
-    <p class="text-gray-400 mb-2">Neural Registry • V16.8</p>
-    <div class="url-bar px-5 py-3 rounded-2xl text-center mb-8">
-      ai.mythicalstudios.online/login
-    </div>
-    
-    <input id="pass" placeholder="Enter passcode" 
-      class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none text-lg mb-4">
-    
-    <button onclick="login()" 
-      class="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 p-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
-      Authenticate
-    </button>
-    
-    <button onclick="guestLogin()" 
-      class="w-full mt-3 text-gray-400 hover:text-white p-4 rounded-2xl font-medium transition-all">
-      Continue as Guest
-    </button>
-  </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="main-app" class="flex h-full w-full hidden flex-col">
-
-  <!-- Top URL Bar -->
-  <div class="url-bar h-11 w-full flex items-center px-6 fixed top-0 z-50">
-    <span id="current-url">ai.mythicalstudios.online/login</span>
-  </div>
-
-  <div class="flex flex-1 pt-11">
-
-    <!-- SIDEBAR -->
-    <div id="sidebar" class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col">
-      <div class="p-5 border-b border-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
-          <div>
-            <h1 class="text-2xl font-bold tracking-tight">Mythical AI</h1>
-            <p class="text-xs text-purple-400 font-medium">Neural Registry • V16.8</p>
-          </div>
-        </div>
-      </div>
-
-      <button onclick="newChat()" 
-        class="mx-5 mt-6 mb-4 flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 py-3.5 rounded-2xl font-semibold transition-all active:scale-95 shadow-lg shadow-purple-500/30">
-        <i class="fas fa-plus"></i> New Conversation
-      </button>
-
-      <div class="px-5 text-xs font-medium text-gray-500 mb-2 mt-4">HISTORY</div>
-      <div id="history" class="flex-1 overflow-y-auto px-3 space-y-1 custom-scroll"></div>
-
-      <div class="p-5 border-t border-gray-800 mt-auto">
-        <div class="flex items-center gap-3 text-sm">
-          <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-lg">🐉</div>
-          <div>
-            <p id="username" class="font-medium"></p>
-            <p id="user-rank" class="text-xs text-purple-400"></p>
-          </div>
-        </div>
-      </div>
+    <div class="url-bar h-10 w-full flex items-center px-6 fixed top-0 z-50 text-sm">
+        <span id="current-url">ai.mythicalstudios.online/loading...</span>
     </div>
 
-    <!-- CHAT AREA -->
-    <div class="flex-1 flex flex-col">
-      <div class="h-16 border-b border-gray-800 flex items-center px-6 bg-[#0a0a0a]">
-        <div class="flex items-center gap-3">
-          <div class="text-xl">🐉</div>
-          <div>
-            <div id="chat-title" class="font-semibold text-lg">Mythical AI</div>
-            <div class="text-xs text-purple-400">Designed & Founded by U. Chethan</div>
-          </div>
-        </div>
-      </div>
-
-      <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scroll bg-[#0a0a0a]"></div>
-
-      <div class="p-6 border-t border-gray-800 bg-[#0a0a0a]">
-        <div class="max-w-4xl mx-auto">
-          <div class="relative">
-            <input id="input" 
-              class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-3xl py-5 px-7 pr-16 text-lg outline-none transition-all"
-              placeholder="Ask Mythical AI anything...">
-            <button onclick="send()" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90">
-              <i class="fas fa-paper-plane"></i>
+    <div class="flex flex-1 pt-10">
+        <div class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col">
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
+                    <div>
+                        <h1 class="font-bold">Mythical AI</h1>
+                        <p class="text-[10px] text-purple-400 tracking-widest uppercase">Registry V16.8</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="newChat()" class="mx-5 mt-6 bg-gradient-to-r from-purple-600 to-violet-600 p-3.5 rounded-xl font-semibold shadow-lg shadow-purple-500/20 active:scale-95 transition-all">
+                <i class="fas fa-plus mr-2"></i>New Session
             </button>
-          </div>
-          <p class="text-center text-xs text-gray-500 mt-4">Mythical AI • Designed & Founded by U. Chethan</p>
+            <div id="history" class="flex-1 overflow-y-auto mt-4 px-3 space-y-1 custom-scroll"></div>
+            <div class="p-5 border-t border-gray-800 bg-[#0c0c0c]">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-purple-900 rounded-full flex items-center justify-center text-xs border border-purple-500">MC</div>
+                    <div class="text-sm">
+                        <p id="username" class="font-bold"></p>
+                        <p id="user-rank" class="text-[10px] text-purple-500 font-mono uppercase"></p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <div class="flex-1 flex flex-col relative">
+            <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scroll pb-32"></div>
+            
+            <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent">
+                <div class="max-w-4xl mx-auto relative">
+                    <input id="input" class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-2xl py-5 px-7 pr-16 text-lg outline-none transition-all shadow-2xl" placeholder="Message Mythical AI...">
+                    <button onclick="send()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-12 h-12 rounded-xl flex items-center justify-center transition-all">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <p class="text-center text-[10px] text-gray-600 mt-4 uppercase tracking-[0.2em]">Designed & Founded by U. Chethan</p>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-// ==================== CONFIG ====================
 const API = "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";
-
-let chats = {};
-let currentChatId = null;
-let currentUser = "Guest";
-let currentRank = "GUEST";
+let chats = {}, currentChatId = null, currentUser = "Guest", currentRank = "GUEST";
 
 const registry = {
     "C@MN26": { name: "Chethan", rank: "FOUNDER" },
     "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN" },
-    "P@MN26": { name: "Pavan", rank: "MODERATOR" },
-    "P@HPSK": { name: "Amit Singh", rank: "PRINCIPAL" },
-    "VP@HPS": { name: "Srinivasa Murthy", rank: "VICE PRINCIPAL" },
-    "Z@HPSK": { name: "Zakaria", rank: "TEACHER" },
-    "V@HPSK": { name: "Vijayalakshmi", rank: "TEACHER" },
-    "R@HPSK": { name: "Rajesh", rank: "TEACHER" }
+    "P@MN26": { name: "Pavan", rank: "MODERATOR" }
 };
 
-// ==================== URL MANAGEMENT ====================
-function generateChatId() {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let id = "";
-  for (let i = 0; i < 23; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return id;
-}
-
-function updateURL(path) {
-  document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`;
-  history.pushState({ path: path }, "", `?path=${encodeURIComponent(path)}`);
-}
-
-function getPathFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("path") || "/login";
-}
-
-// ==================== LOGIN ====================
 function login() {
-  const pass = document.getElementById("pass").value.trim();
-  if (registry[pass]) {
-    currentUser = registry[pass].name;
-    currentRank = registry[pass].rank;
-    startApp();
-  } else {
-    alert("Invalid passcode. Access denied.");
-  }
+    const pass = document.getElementById("pass").value.trim();
+    if (registry[pass]) {
+        currentUser = registry[pass].name;
+        currentRank = registry[pass].rank;
+        startApp();
+    } else { alert("Access Denied."); }
 }
 
-function guestLogin() {
-  currentUser = "Guest";
-  currentRank = "GUEST";
-  startApp();
-}
+function guestLogin() { currentUser = "Guest"; currentRank = "GUEST"; startApp(); }
 
 function startApp() {
-  document.getElementById("login-screen").style.display = "none";
-  document.getElementById("main-app").classList.remove("hidden");
-
-  document.getElementById("username").textContent = currentUser;
-  document.getElementById("user-rank").textContent = currentRank;
-
-  chats = JSON.parse(localStorage.getItem("myth_" + currentUser)) || {};
-
-  // Load from URL or create new chat
-  const currentPath = getPathFromURL();
-  if (currentPath.startsWith("/chat/") && currentPath.length > 6) {
-    const idFromUrl = currentPath.substring(6); // remove "/chat/"
-    if (chats[idFromUrl]) {
-      loadChat(idFromUrl);
-    } else {
-      newChat();
-    }
-  } else {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("main-app").classList.remove("hidden");
+    document.getElementById("username").textContent = currentUser;
+    document.getElementById("user-rank").textContent = currentRank;
+    chats = JSON.parse(localStorage.getItem("myth_" + currentUser)) || {};
     newChat();
-  }
-
-  renderHistory();
 }
 
-// ==================== SYSTEM PROMPT ====================
 function getSystemPrompt() {
-  return `You are Mythical AI, Designed and Founded by U. Chethan.
-Your friends are Thaman and Pavan.
-
-Current logged-in user: **${currentUser}** (${currentRank})
-
-- Always address the user by name: "${currentUser}"
-- Be helpful, wise, and slightly mysterious.`;
+    return `You are Mythical AI (V16.8), the core intelligence of Mythical Studios.
+    Developed by: U. Chethan. Team: Thaman, Pavan.
+    User: ${currentUser} (${currentRank}).
+    Style: Professional, elite, concise, and helpful. Always address the user by name.`;
 }
 
-// ==================== COPY CODE ====================
-function addCopyButtons() {
-  document.querySelectorAll('pre:not(:has(.copy-btn))').forEach(pre => {
-    const btn = document.createElement('button');
-    btn.className = 'copy-btn flex items-center gap-1 text-xs';
-    btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
-    btn.onclick = () => {
-      const code = pre.querySelector('code').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        btn.innerHTML = `<i class="fas fa-check"></i> Copied!`;
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.innerHTML = `<i class="fas fa-copy"></i> Copy`;
-          btn.classList.remove('copied');
-        }, 2000);
-      });
-    };
-    pre.appendChild(btn);
-  });
-}
-
-// ==================== CHAT FUNCTIONS ====================
 async function send() {
-  const input = document.getElementById("input");
-  const text = input.value.trim();
-  if (!text) return;
+    const input = document.getElementById("input");
+    const text = input.value.trim();
+    if (!text) return;
 
-  addMsg("user", text);
-  input.value = "";
+    addMsg("user", text);
+    input.value = "";
+    const aiBox = addMsg("ai", `<i class="fas fa-spinner fa-spin mr-2"></i> Synchronizing...`);
 
-  const aiBox = addMsg("ai", `<div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i> Thinking...</div>`);
-
-  try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + API,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          { role: "system", content: getSystemPrompt() },
-          ...(chats[currentChatId] || []),
-          { role: "user", content: text }
-        ],
-        temperature: 0.85,
-        max_tokens: 2048
-      })
-    });
-
-    const data = await res.json();
-    const reply = data.choices[0].message.content;
-
-    aiBox.innerHTML = marked.parse(reply);
-    setTimeout(addCopyButtons, 100);
-
-    if (!chats[currentChatId]) chats[currentChatId] = [];
-    chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
-    save();
-  } catch (e) {
-    aiBox.innerHTML = `<span class="text-red-400">⚠️ Neural connection disrupted.</span>`;
-  }
+    try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: "llama-3.1-70b-versatile",
+                messages: [{role: "system", content: getSystemPrompt()}, ...(chats[currentChatId] || []), {role: "user", content: text}],
+                temperature: 0.6
+            })
+        });
+        const data = await res.json();
+        const reply = data.choices[0].message.content;
+        aiBox.innerHTML = marked.parse(reply);
+        
+        if (!chats[currentChatId]) chats[currentChatId] = [];
+        chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
+        save();
+    } catch (e) { aiBox.innerHTML = "Neural link failed."; }
 }
 
 function addMsg(role, content) {
-  const chatDiv = document.getElementById("chat");
-  const div = document.createElement("div");
-  div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} message-bubble`;
-  div.innerHTML = `
-    <div class="max-w-[80%]">
-      <div class="inline-block px-6 py-4 rounded-3xl ${
-        role === "user" ? "chat-user text-white rounded-br-none" : "chat-ai rounded-bl-none"
-      }">${content}</div>
-    </div>
-  `;
-  chatDiv.appendChild(div);
-  chatDiv.scrollTop = chatDiv.scrollHeight;
-
-  if (role === "ai") setTimeout(addCopyButtons, 150);
+    const chatDiv = document.getElementById("chat");
+    const div = document.createElement("div");
+    div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} message-bubble`;
+    div.innerHTML = `<div class="max-w-[85%] px-6 py-4 rounded-2xl ${role === 'user' ? 'chat-user' : 'chat-ai'}">${content}</div>`;
+    chatDiv.appendChild(div);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+    return div.querySelector('.chat-ai') || div.querySelector('.chat-user');
 }
 
-// ==================== CHAT MANAGEMENT ====================
 function newChat() {
-  currentChatId = generateChatId();
-  chats[currentChatId] = [];
-  
-  document.getElementById("chat").innerHTML = "";
-  updateURL(`/chat/${currentChatId}`);
-  
-  document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
-  
-  save();
-  renderHistory();
-}
-
-function loadChat(chatId) {
-  currentChatId = chatId;
-  document.getElementById("chat").innerHTML = "";
-  
-  (chats[chatId] || []).forEach(m => {
-    addMsg(m.role === "user" ? "user" : "ai", 
-           m.role === "assistant" ? marked.parse(m.content) : m.content);
-  });
-
-  updateURL(`/chat/${chatId}`);
-  document.getElementById("chat-title").innerHTML = `Mythical AI <span class="text-purple-400 text-sm">(V16.8)</span>`;
+    currentChatId = Date.now().toString();
+    chats[currentChatId] = [];
+    document.getElementById("chat").innerHTML = "";
+    document.getElementById("current-url").textContent = `ai.mythicalstudios.online/chat/${currentChatId}`;
+    renderHistory();
 }
 
 function renderHistory() {
-  const container = document.getElementById("history");
-  container.innerHTML = "";
-
-  Object.keys(chats).reverse().forEach(id => {
-    const previewMsg = chats[id].find(m => m.role === "user")?.content || "New Chat";
-    const preview = previewMsg.length > 40 ? previewMsg.substring(0, 40) + "..." : previewMsg;
-
-    const div = document.createElement("div");
-    div.className = `sidebar-chat p-4 rounded-2xl cursor-pointer transition-all text-sm ${currentChatId === id ? 'active-chat' : ''}`;
-    div.innerHTML = `
-      <div class="font-medium text-gray-200 line-clamp-1">${preview}</div>
-      <div class="text-xs text-gray-500 mt-1">/chat/${id}</div>
-    `;
-    div.onclick = () => loadChat(id);
-    container.appendChild(div);
-  });
+    const hist = document.getElementById("history");
+    hist.innerHTML = "";
+    Object.keys(chats).reverse().forEach(id => {
+        const div = document.createElement("div");
+        div.className = `p-3 rounded-xl cursor-pointer text-sm mb-1 ${currentChatId === id ? 'active-chat' : 'hover:bg-gray-900'}`;
+        div.textContent = chats[id][0]?.content.substring(0, 30) || "Empty Session";
+        div.onclick = () => { currentChatId = id; document.getElementById("chat").innerHTML = ""; chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content)); renderHistory(); };
+        hist.appendChild(div);
+    });
 }
 
-function save() {
-  localStorage.setItem("myth_" + currentUser, JSON.stringify(chats));
-  renderHistory();
-}
+function save() { localStorage.setItem("myth_" + currentUser, JSON.stringify(chats)); renderHistory(); }
 
-// Browser back/forward support
-window.addEventListener('popstate', () => {
-  const path = getPathFromURL();
-  if (path === "/login") {
-    // If somehow back to login (rare)
-    document.getElementById("main-app").classList.add("hidden");
-    document.getElementById("login-screen").style.display = "flex";
-  } else if (path.startsWith("/chat/")) {
-    const id = path.substring(6);
-    if (chats[id]) {
-      loadChat(id);
-    } else {
-      newChat();
-    }
-  }
-});
-
-// Enter key
-document.getElementById("input").addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    send();
-  }
-});
+document.getElementById("input").addEventListener("keydown", e => { if(e.key === "Enter") send(); });
 </script>
-
-<style>
-.custom-scroll::-webkit-scrollbar { width: 6px; }
-.custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 20px; }
-.line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-</style>
-
 </body>
 </html>
