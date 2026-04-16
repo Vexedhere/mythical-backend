@@ -3,183 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI | V16.8</title>
+    <title>Mythical AI | By Chethan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        body { background: #0a0a0a; color: white; font-family: 'Inter', sans-serif; }
-        .chat-user { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); }
-        .chat-ai { background: #1f2937; border: 1px solid #374151; }
-        .message-bubble { animation: fadeIn 0.3s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .active-chat { background: #312e81; border-left: 4px solid #a855f7; }
-        pre { background: #111827; border-radius: 12px; padding: 16px; margin: 12px 0; border: 1px solid #374151; position: relative; }
-        .copy-btn { position: absolute; top: 10px; right: 10px; background: #1f2937; color: #9ca3af; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; border: 1px solid #4b5563; cursor: pointer; }
-        .url-bar { background: #111827; border-bottom: 1px solid #374151; font-family: monospace; color: #a855f7; }
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        
+        body { 
+            background: radial-gradient(circle at 0% 0%, #1a1033 0%, #050505 100%); 
+            color: white; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+        }
+
+        /* Glassmorphism Core */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-sidebar {
+            background: rgba(10, 10, 10, 0.4);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 28px;
+        }
+
+        .chat-user { 
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(168, 85, 247, 0.7)); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-ai { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Input Glass */
+        .input-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        /* Animations */
+        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 10px; }
+
+        pre { 
+            background: rgba(0, 0, 0, 0.5) !important; 
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            padding: 1.25rem;
+            border-radius: 14px;
+        }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body class="flex flex-col overflow-hidden">
 
-<div id="login-screen" class="fixed inset-0 flex items-center justify-center bg-black z-50">
-    <div class="bg-[#111] p-10 rounded-3xl w-96 text-center border border-purple-500/20 shadow-2xl">
-        <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-violet-600 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
-        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">Mythical AI</h1>
-        <p class="text-gray-400 mb-8 italic">"Knowledge is the ultimate myth."</p>
-        <input id="pass" type="password" placeholder="Enter passcode" class="w-full p-4 rounded-2xl bg-black border border-gray-700 focus:border-purple-500 outline-none mb-4">
-        <button onclick="login()" class="w-full bg-purple-600 hover:bg-purple-700 p-4 rounded-2xl font-bold transition-all active:scale-95">Authenticate</button>
-        <button onclick="guestLogin()" class="w-full mt-3 text-gray-500 hover:text-white transition-all">Guest Access</button>
+<div class="h-10 w-full glass-nav flex items-center px-6 fixed top-0 z-[100] text-[11px] font-mono tracking-wider text-purple-400">
+    <i class="fas fa-shield-halved mr-2 opacity-70"></i>
+    <span id="current-url">ai.mythicalstudios.online/login</span>
+</div>
+
+<div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[90] bg-black/80 backdrop-blur-md">
+    <div class="glass-card p-12 w-[400px] text-center shadow-2xl border-white/5">
+        <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-2xl shadow-purple-500/20">🐉</div>
+        <h1 class="text-3xl font-bold tracking-tight mb-1">Mythical AI</h1>
+        <p class="text-gray-500 text-sm mb-10">Neural Core Authentication</p>
+        <input id="pass" type="password" placeholder="Registry Passcode" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-4 transition-all text-center">
+        <button onclick="login()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all active:scale-95">Authenticate</button>
+        <button onclick="guestLogin()" class="w-full mt-4 text-gray-500 hover:text-white text-xs tracking-widest uppercase">Guest Access</button>
     </div>
 </div>
 
-<div id="main-app" class="flex h-full w-full hidden flex-col">
-    <div class="url-bar h-10 w-full flex items-center px-6 fixed top-0 z-50 text-sm">
-        <span id="current-url">ai.mythicalstudios.online/loading...</span>
-    </div>
-
-    <div class="flex flex-1 pt-10">
-        <div class="w-72 bg-[#0f0f0f] border-r border-gray-800 flex flex-col">
-            <div class="p-6 border-b border-gray-800">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
-                    <div>
-                        <h1 class="font-bold">Mythical AI</h1>
-                        <p class="text-[10px] text-purple-400 tracking-widest uppercase">Registry V16.8</p>
-                    </div>
+<div id="main-app" class="hidden flex h-full pt-10">
+    
+    <div class="w-80 glass-sidebar flex flex-col z-40">
+        <div class="p-8">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-11 h-11 bg-gradient-to-tr from-purple-600 to-violet-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
+                <div>
+                    <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
+                    <p class="text-[9px] text-purple-400 font-bold uppercase tracking-[0.2em]">Registry V16.8</p>
                 </div>
             </div>
-            <button onclick="newChat()" class="mx-5 mt-6 bg-gradient-to-r from-purple-600 to-violet-600 p-3.5 rounded-xl font-semibold shadow-lg shadow-purple-500/20 active:scale-95 transition-all">
-                <i class="fas fa-plus mr-2"></i>New Session
+            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all group">
+                <i class="fas fa-plus-circle text-purple-500 group-hover:scale-110 transition-transform"></i> New Session
             </button>
-            <div id="history" class="flex-1 overflow-y-auto mt-4 px-3 space-y-1 custom-scroll"></div>
-            <div class="p-5 border-t border-gray-800 bg-[#0c0c0c]">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-purple-900 rounded-full flex items-center justify-center text-xs border border-purple-500">MC</div>
-                    <div class="text-sm">
-                        <p id="username" class="font-bold"></p>
-                        <p id="user-rank" class="text-[10px] text-purple-500 font-mono uppercase"></p>
-                    </div>
+        </div>
+
+        <div id="history" class="flex-1 overflow-y-auto px-5 space-y-3 custom-scroll"></div>
+
+        <div class="p-8 glass-nav border-t border-white/5 mt-auto">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-purple-900/30 rounded-2xl flex items-center justify-center border border-purple-500/30 font-bold text-purple-400" id="avatar-init">?</div>
+                <div>
+                    <p id="username" class="font-bold text-sm tracking-wide"></p>
+                    <p id="user-rank" class="text-[9px] text-purple-500/80 font-mono uppercase font-bold"></p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="flex-1 flex flex-col relative">
-            <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scroll pb-32"></div>
-            
-            <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent">
-                <div class="max-w-4xl mx-auto relative">
-                    <input id="input" class="w-full bg-[#1a1a1a] border border-gray-700 focus:border-purple-500 rounded-2xl py-5 px-7 pr-16 text-lg outline-none transition-all shadow-2xl" placeholder="Message Mythical AI...">
-                    <button onclick="send()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600 hover:bg-purple-700 w-12 h-12 rounded-xl flex items-center justify-center transition-all">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-                <p class="text-center text-[10px] text-gray-600 mt-4 uppercase tracking-[0.2em]">Designed & Founded by U. Chethan</p>
+    <div class="flex-1 flex flex-col relative">
+        <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-10 custom-scroll pb-40">
             </div>
+
+        <div class="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-[#050505] via-[#050505e6] to-transparent">
+            <div class="max-w-4xl mx-auto input-container p-2 flex items-center shadow-2xl">
+                <input id="input" class="flex-1 bg-transparent py-5 px-8 text-lg outline-none placeholder:text-gray-600" placeholder="Execute command or ask anything...">
+                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-lg shadow-purple-600/20 active:scale-90">
+                    <i class="fas fa-bolt"></i>
+                </button>
+            </div>
+            <p class="text-center text-[8px] text-gray-700 mt-5 tracking-[0.5em] uppercase font-bold">Neural Engine • Designed by U. Chethan</p>
         </div>
     </div>
 </div>
 
 <script>
-const API = "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";
-let chats = {}, currentChatId = null, currentUser = "Guest", currentRank = "GUEST";
+    const API = "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";
+    let chats = {}, currentChatId = null, currentUser = "Guest", currentRank = "GUEST";
 
-const registry = {
-    "C@MN26": { name: "Chethan", rank: "FOUNDER" },
-    "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN" },
-    "P@MN26": { name: "Pavan", rank: "MODERATOR" }
-};
+    const registry = {
+        "C@MN26": { name: "Chethan", rank: "FOUNDER" },
+        "T@MN26": { name: "Thaman", rank: "ADMIN" },
+        "P@MN26": { name: "Pavan", rank: "MODERATOR" }
+    };
 
-function login() {
-    const pass = document.getElementById("pass").value.trim();
-    if (registry[pass]) {
-        currentUser = registry[pass].name;
-        currentRank = registry[pass].rank;
-        startApp();
-    } else { alert("Access Denied."); }
-}
+    function updateURL(path) {
+        document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`;
+    }
 
-function guestLogin() { currentUser = "Guest"; currentRank = "GUEST"; startApp(); }
+    function generateID() {
+        const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        let id = "";
+        for (let i = 0; i < 23; i++) id += chars[Math.floor(Math.random() * chars.length)];
+        return id;
+    }
 
-function startApp() {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("main-app").classList.remove("hidden");
-    document.getElementById("username").textContent = currentUser;
-    document.getElementById("user-rank").textContent = currentRank;
-    chats = JSON.parse(localStorage.getItem("myth_" + currentUser)) || {};
-    newChat();
-}
+    function login() {
+        const pass = document.getElementById("pass").value.trim();
+        if (registry[pass]) {
+            currentUser = registry[pass].name;
+            currentRank = registry[pass].rank;
+            startApp();
+        } else alert("Neural link denied: Invalid credentials.");
+    }
 
-function getSystemPrompt() {
-    return `You are Mythical AI (V16.8), the core intelligence of Mythical Studios.
-    Developed by: U. Chethan. Team: Thaman, Pavan.
-    User: ${currentUser} (${currentRank}).
-    Style: Professional, elite, concise, and helpful. Always address the user by name.`;
-}
+    function guestLogin() { currentUser = "Guest"; currentRank = "GUEST"; startApp(); }
 
-async function send() {
-    const input = document.getElementById("input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMsg("user", text);
-    input.value = "";
-    const aiBox = addMsg("ai", `<i class="fas fa-spinner fa-spin mr-2"></i> Synchronizing...`);
-
-    try {
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: "llama-3.1-70b-versatile",
-                messages: [{role: "system", content: getSystemPrompt()}, ...(chats[currentChatId] || []), {role: "user", content: text}],
-                temperature: 0.6
-            })
-        });
-        const data = await res.json();
-        const reply = data.choices[0].message.content;
-        aiBox.innerHTML = marked.parse(reply);
+    function startApp() {
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("main-app").classList.remove("hidden");
+        document.getElementById("username").textContent = currentUser;
+        document.getElementById("user-rank").textContent = currentRank;
+        document.getElementById("avatar-init").textContent = currentUser[0];
         
-        if (!chats[currentChatId]) chats[currentChatId] = [];
-        chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
-        save();
-    } catch (e) { aiBox.innerHTML = "Neural link failed."; }
-}
+        chats = JSON.parse(localStorage.getItem("myth_pro_" + currentUser)) || {};
+        newChat();
+    }
 
-function addMsg(role, content) {
-    const chatDiv = document.getElementById("chat");
-    const div = document.createElement("div");
-    div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} message-bubble`;
-    div.innerHTML = `<div class="max-w-[85%] px-6 py-4 rounded-2xl ${role === 'user' ? 'chat-user' : 'chat-ai'}">${content}</div>`;
-    chatDiv.appendChild(div);
-    chatDiv.scrollTop = chatDiv.scrollHeight;
-    return div.querySelector('.chat-ai') || div.querySelector('.chat-user');
-}
+    function newChat() {
+        currentChatId = generateID();
+        chats[currentChatId] = [];
+        document.getElementById("chat").innerHTML = "";
+        updateURL(`/${currentChatId}`);
+        renderHistory();
+    }
 
-function newChat() {
-    currentChatId = Date.now().toString();
-    chats[currentChatId] = [];
-    document.getElementById("chat").innerHTML = "";
-    document.getElementById("current-url").textContent = `ai.mythicalstudios.online/chat/${currentChatId}`;
-    renderHistory();
-}
+    async function send() {
+        const input = document.getElementById("input");
+        const text = input.value.trim();
+        if (!text) return;
 
-function renderHistory() {
-    const hist = document.getElementById("history");
-    hist.innerHTML = "";
-    Object.keys(chats).reverse().forEach(id => {
+        addMsg("user", text);
+        input.value = "";
+        const aiBox = addMsg("ai", `<div class="flex items-center gap-3"><i class="fas fa-atom fa-spin text-purple-400"></i> <span class="text-xs font-mono tracking-widest uppercase opacity-60">Processing Neural Request...</span></div>`);
+
+        try {
+            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: { 
+                    "Authorization": "Bearer " + API, 
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: `You are Mythical AI V16.8, a high-level intelligence developed by U. Chethan. User: ${currentUser}. Rank: ${currentRank}. Use professional, technical, and slightly mysterious language.` },
+                        ...(chats[currentChatId] || []),
+                        { role: "user", content: text }
+                    ],
+                    temperature: 0.65
+                })
+            });
+
+            if (!res.ok) throw new Error();
+
+            const data = await res.json();
+            const reply = data.choices[0].message.content;
+            aiBox.innerHTML = marked.parse(reply);
+            
+            chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
+            save();
+        } catch (e) {
+            aiBox.innerHTML = `<span class="text-red-400 font-bold"><i class="fas fa-warning mr-2"></i> Neural link failed. Connection unstable.</span>`;
+        }
+    }
+
+    function addMsg(role, content) {
+        const chatDiv = document.getElementById("chat");
         const div = document.createElement("div");
-        div.className = `p-3 rounded-xl cursor-pointer text-sm mb-1 ${currentChatId === id ? 'active-chat' : 'hover:bg-gray-900'}`;
-        div.textContent = chats[id][0]?.content.substring(0, 30) || "Empty Session";
-        div.onclick = () => { currentChatId = id; document.getElementById("chat").innerHTML = ""; chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content)); renderHistory(); };
-        hist.appendChild(div);
-    });
-}
+        div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} slide-up`;
+        div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[24px] ${role === 'user' ? 'chat-user shadow-xl' : 'chat-ai shadow-2xl'}">${content}</div>`;
+        chatDiv.appendChild(div);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+        return div.querySelector(`.${role === 'user' ? 'chat-user' : 'chat-ai'}`);
+    }
 
-function save() { localStorage.setItem("myth_" + currentUser, JSON.stringify(chats)); renderHistory(); }
+    function renderHistory() {
+        const container = document.getElementById("history");
+        container.innerHTML = "";
+        Object.keys(chats).reverse().forEach(id => {
+            const div = document.createElement("div");
+            div.className = `p-4 rounded-2xl cursor-pointer text-xs transition-all border border-transparent ${currentChatId === id ? 'bg-purple-600/10 border-purple-500/20 text-white' : 'text-gray-500 hover:bg-white/5'}`;
+            const label = chats[id][0]?.content.substring(0, 28) || "Initial Contact";
+            div.innerHTML = `<div class="font-bold mb-1">${label}...</div><div class="opacity-30 font-mono text-[9px] tracking-tight">ID: ${id}</div>`;
+            div.onclick = () => {
+                currentChatId = id;
+                document.getElementById("chat").innerHTML = "";
+                chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content));
+                updateURL(`/${id}`);
+                renderHistory();
+            };
+            container.appendChild(div);
+        });
+    }
 
-document.getElementById("input").addEventListener("keydown", e => { if(e.key === "Enter") send(); });
+    function save() { 
+        localStorage.setItem("myth_pro_" + currentUser, JSON.stringify(chats)); 
+        renderHistory(); 
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => { if(e.key === "Enter") send(); });
 </script>
 </body>
 </html>
