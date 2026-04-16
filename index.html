@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI</title>
+    <title>Mythical AI V17.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -12,169 +12,166 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
         body { background: radial-gradient(circle at 10% 10%, #1a1033 0%, #050505 100%); color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; }
         .glass-nav { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-card { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 28px; transition: all 0.3s ease; }
+        .glass-card { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(35px); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 30px; }
         
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
-        }
-        .shake-error { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: rgba(239, 68, 68, 0.5) !important; }
+        /* Code Block Styling */
+        pre { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid rgba(168, 85, 247, 0.3); padding: 1.5rem; border-radius: 18px; position: relative; margin: 1rem 0; overflow-x: auto; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; border: 1px solid rgba(168, 85, 247, 0.4); cursor: pointer; transition: 0.2s; z-index: 10; }
+        .copy-btn:hover { background: #a855f7; color: white; }
 
-        .chat-user { background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(168, 85, 247, 0.7)); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .chat-ai { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); }
+        .chat-user { background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(168, 85, 247, 0.7)); border: 1px solid rgba(255,255,255,0.1); }
+        .chat-ai { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
-        pre { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid rgba(168, 85, 247, 0.3); padding: 1.5rem; border-radius: 18px; position: relative; margin: 1rem 0; overflow-x: auto;}
-        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid rgba(168, 85, 247, 0.4); cursor: pointer; }
-        
+        #media-preview-container { display: none; margin-bottom: 12px; padding: 8px; background: rgba(168, 85, 247, 0.05); border: 1px dashed rgba(168, 85, 247, 0.3); border-radius: 16px; }
         .slide-up { animation: slideUp 0.4s ease forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 10px; }
-        .pfp-container { width: 42px; height: 42px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body class="flex flex-col">
 
 <div class="h-10 w-full glass-nav flex items-center px-6 fixed top-0 z-[100] text-[11px] font-mono tracking-wider text-purple-400">
-    <i class="fas fa-id-badge mr-2 opacity-70"></i>
+    <i class="fas fa-eye mr-2 opacity-70"></i>
     <span id="current-url">ai.mythicalstudios.online/login</span>
 </div>
 
 <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[90] bg-black/95 backdrop-blur-3xl">
-    <div id="login-card" class="glass-card p-12 w-[400px] text-center shadow-2xl">
+    <div id="login-card" class="glass-card p-12 w-[400px] text-center shadow-2xl border-white/5">
         <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
         <h1 class="text-3xl font-bold mb-2">Mythical AI</h1>
-        <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest">Neural Registry Login</p>
-        
-        <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-2 text-center tracking-widest text-lg transition-all">
-        <p id="error-text" class="text-red-500 text-[10px] mb-4 font-bold uppercase tracking-widest opacity-0 transition-opacity">Neural Link Denied</p>
-        
-        <button onclick="authenticate()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all active:scale-95 mb-6">Authenticate</button>
-        
-        <div class="flex items-center gap-4 mb-6"><div class="h-[1px] bg-white/10 flex-1"></div><span class="text-[10px] text-gray-600">OR</span><div class="h-[1px] bg-white/10 flex-1"></div></div>
-
-        <div id="g_id_onload" data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" data-callback="handleGoogleResponse" data-auto_prompt="false"></div>
-        <div class="g_id_signin flex justify-center" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="large"></div>
+        <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest">Neural Registry V17.8</p>
+        <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-6 text-center text-lg tracking-widest transition-all">
+        <button onclick="authenticate()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all shadow-lg mb-6">Authenticate</button>
+        <div id="g_id_onload" data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" data-callback="handleGoogleResponse"></div>
+        <div class="g_id_signin flex justify-center" data-type="standard"></div>
     </div>
 </div>
 
 <div id="main-app" class="hidden flex h-full pt-10">
-    <div class="w-80 glass-nav border-r border-white/5 flex flex-col z-40">
+    <div class="w-80 glass-nav border-r border-white/5 flex flex-col z-40 bg-black/10">
         <div class="p-8">
-            <div class="flex items-center gap-4 mb-10">
-                <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
-                <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
-            </div>
-            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all"><i class="fas fa-plus-circle text-purple-500"></i> New Session</button>
+            <h1 class="font-bold text-xl mb-10 flex items-center gap-4"><div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">🐉</div> Mythical</h1>
+            <button onclick="newChat()" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl font-bold hover:bg-white/10 transition-all"><i class="fas fa-plus-circle text-purple-500 mr-2"></i> New Session</button>
         </div>
         <div id="history" class="flex-1 overflow-y-auto px-5 space-y-3 custom-scroll"></div>
         <div class="p-6 glass-nav border-t border-white/5 mt-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="pfp-container">
+                <div class="w-10 h-10 rounded-xl border border-purple-500/30 overflow-hidden bg-white/5 flex items-center justify-center">
                     <img id="user-pfp" class="w-full h-full object-cover hidden">
-                    <i id="pfp-icon" class="fas fa-dragon text-purple-400 text-xl"></i>
+                    <i id="pfp-icon" class="fas fa-dragon text-purple-400"></i>
                 </div>
                 <div><p id="display-name" class="font-bold text-sm truncate w-32"></p><p id="display-rank" class="text-[9px] text-purple-500 font-bold uppercase"></p></div>
             </div>
-            <button onclick="logout()" class="text-gray-500 hover:text-red-400 p-2"><i class="fas fa-power-off"></i></button>
+            <button onclick="location.reload()" class="text-gray-500 hover:text-red-400"><i class="fas fa-power-off"></i></button>
         </div>
     </div>
+
     <div class="flex-1 flex flex-col relative">
-        <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-10 custom-scroll pb-40"></div>
+        <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-40"></div>
         <div class="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-[#050505] to-transparent">
-            <div class="max-w-4xl mx-auto glass-card p-2 flex items-center shadow-2xl">
-                <input id="input" class="flex-1 bg-transparent py-5 px-8 text-lg outline-none" placeholder="Message or 'generate image'...">
-                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-lg active:scale-90"><i class="fas fa-bolt"></i></button>
+            <div class="max-w-4xl mx-auto glass-card p-4 shadow-2xl border-white/5">
+                <div id="media-preview-container" class="flex items-center gap-4">
+                    <img id="media-preview" class="w-14 h-14 object-cover rounded-xl border border-white/10">
+                    <span class="text-[10px] text-purple-400 font-mono truncate max-w-[200px]" id="media-name"></span>
+                    <button onclick="clearMedia()" class="text-red-400 hover:text-red-300 ml-auto p-2"><i class="fas fa-times"></i></button>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <label class="p-3 bg-white/5 hover:bg-white/10 rounded-xl cursor-pointer transition-all">
+                        <i class="fas fa-paperclip text-purple-400"></i>
+                        <input type="file" id="media-input" class="hidden" accept="image/*" onchange="handleMedia(this)">
+                    </label>
+                    <input id="input" class="flex-1 bg-transparent py-3 text-lg outline-none placeholder:text-gray-600" placeholder="Ask, Generate, or Upload Image...">
+                    <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all"><i class="fas fa-paper-plane"></i></button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // SPA REFRESH HANDLER
+    // --- SPA HANDLER ---
     (function(l) { if (l.search[1] === 'p') { var decoded = l.search.slice(3).replace(/~and~/g, '&').split('&'); if (decoded[0].length > 0) { window.history.replaceState(null, null, l.pathname.slice(0, -1) + (decoded[0] ? '/' + decoded[0] : '') + (decoded[1] ? '?' + decoded[1] : '') + l.hash); } } }(window.location));
 
     const API = "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";
-    let chats = {}, currentChatId = null, currentUser = null;
+    let chats = {}, currentChatId = null, currentUser = null, selectedMedia = null;
 
     const registry = {
         "C@MN26": { name: "U. Chethan", rank: "FOUNDER" },
-        "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN" },
+        "T@MN26": { name: "Thaman", rank: "ADMIN" },
         "P@MN26": { name: "Pavan", rank: "MODERATOR" },
-        "P@HPSK": { name: "Amit Singh", rank: "PRINCIPAL" },
-        "VP@HPS": { name: "Srinivasa Murthy", rank: "VICE PRINCIPAL" },
-        "Z@HPSK": { name: "Zakaria", rank: "TEACHER" },
-        "V@HPSK": { name: "Vijayalakshmi", rank: "TEACHER" },
-        "R@HPSK": { name: "Rajesh", rank: "TEACHER" }
+        "P@HPSK": { name: "Amit Singh", rank: "PRINCIPAL" }
     };
 
-    function updateURL(path) { window.history.pushState({path}, '', path); document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`; }
-    function generateID() { const chars = "abcdefghijklmnopqrstuvwxyz0123456789"; let id = ""; for (let i = 0; i < 23; i++) id += chars[Math.floor(Math.random() * chars.length)]; return id; }
-    window.onload = () => updateURL("/login");
-
+    function updateURL(path) { window.history.pushState({}, '', path); document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`; }
+    function authenticate() { const code = document.getElementById("pass").value.trim(); if (registry[code]) { currentUser = registry[code]; initSession(); } else alert("Registry Denied."); }
     function handleGoogleResponse(response) { const payload = JSON.parse(atob(response.credential.split('.')[1])); currentUser = { name: payload.name, rank: "VERIFIED", picture: payload.picture }; initSession(); }
-
-    function authenticate() {
-        const inputField = document.getElementById("pass");
-        const loginCard = document.getElementById("login-card");
-        const errorText = document.getElementById("error-text");
-        const code = inputField.value.trim();
-
-        if (registry[code]) {
-            currentUser = { name: registry[code].name, rank: registry[code].rank, picture: null };
-            initSession();
-        } else {
-            loginCard.classList.add("shake-error");
-            errorText.classList.remove("opacity-0");
-            inputField.value = "";
-            setTimeout(() => {
-                loginCard.classList.remove("shake-error");
-                errorText.classList.add("opacity-0");
-            }, 500);
-        }
-    }
 
     function initSession() {
         document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("main-app").classList.remove("hidden");
         document.getElementById("display-name").textContent = currentUser.name;
         document.getElementById("display-rank").textContent = currentUser.rank;
-        const pfpImg = document.getElementById("user-pfp");
-        const pfpIcon = document.getElementById("pfp-icon");
-        if(currentUser.picture) { pfpImg.src = currentUser.picture; pfpImg.classList.remove("hidden"); pfpIcon.classList.add("hidden"); }
-        chats = JSON.parse(localStorage.getItem("myth_pro_" + currentUser.name)) || {};
+        if(currentUser.picture) { document.getElementById("user-pfp").src = currentUser.picture; document.getElementById("user-pfp").classList.remove("hidden"); document.getElementById("pfp-icon").classList.add("hidden"); }
         newChat();
-        setTimeout(() => addMsg("ai", `Neural Core Online. Welcome back, **${currentUser.name}**.`), 500);
     }
 
-    function logout() { updateURL("/login"); location.reload(); }
-    function newChat() { currentChatId = generateID(); chats[currentChatId] = []; document.getElementById("chat").innerHTML = ""; updateURL(`/app/${currentChatId}`); renderHistory(); }
+    function newChat() { currentChatId = Math.random().toString(36).substring(7); chats[currentChatId] = []; document.getElementById("chat").innerHTML = ""; updateURL(`/app/${currentChatId}`); }
+
+    // --- UPDATED COPY BUTTON LOGIC ---
+    function setupCodeCopy() {
+        document.querySelectorAll('pre').forEach(block => {
+            if (block.querySelector('.copy-btn')) return;
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.innerHTML = '<i class="far fa-copy mr-2"></i>Copy';
+            btn.onclick = () => {
+                const code = block.querySelector('code') ? block.querySelector('code').innerText : block.innerText.replace('Copy', '');
+                navigator.clipboard.writeText(code);
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i>Done';
+                setTimeout(() => btn.innerHTML = '<i class="far fa-copy mr-2"></i>Copy', 2000);
+            };
+            block.appendChild(btn);
+        });
+    }
+
+    function handleMedia(input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedMedia = e.target.result;
+                document.getElementById("media-preview").src = selectedMedia;
+                document.getElementById("media-name").textContent = file.name;
+                document.getElementById("media-preview-container").style.display = "flex";
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function clearMedia() {
+        selectedMedia = null;
+        document.getElementById("media-input").value = "";
+        document.getElementById("media-preview-container").style.display = "none";
+    }
 
     async function send() {
         const input = document.getElementById("input");
         const text = input.value.trim();
-        if (!text) return;
-        addMsg("user", text);
+        if (!text && !selectedMedia) return;
+
+        let userDisplay = text;
+        if(selectedMedia) userDisplay = `<div class="mb-4 bg-white/5 p-2 rounded-xl border border-white/10"><img src="${selectedMedia}" class="max-w-full h-auto rounded-lg"></div>${text}`;
+        
+        addMsg("user", userDisplay);
+        const tempText = text;
+        const tempMedia = selectedMedia;
+        clearMedia();
         input.value = "";
 
-        // Identity override for specific questions
-        const lowerText = text.toLowerCase();
-        if (lowerText.includes("who am i") || lowerText.includes("my name")) {
-            addMsg("ai", `You are **${currentUser.name}**, with the rank of **${currentUser.rank}**. 
-            As you know, **U. Chethan** is the Founder of Mythical Studios, and your designated associates are **Thaman** and **Pavan**.`);
-            return;
-        }
-
-        if (lowerText.includes("generate image") || lowerText.includes("draw")) {
-            const clean = text.replace(/generate image|draw/gi, "").trim();
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(clean)}?width=1024&height=1024&nologo=true`;
-            addMsg("ai", `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl w-full">`);
-            return;
-        }
-
-        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Synchronizing...`);
+        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Reading Data...`);
+        
         try {
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
@@ -182,43 +179,25 @@
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
                     messages: [
-                        { role: "system", content: `You are Mythical AI by U. Chethan. The current user is ${currentUser.name} and their rank is ${currentUser.rank}. Founder: U. Chethan. Friends: Thaman, Pavan. Always address the user as ${currentUser.name}.` },
-                        ...(chats[currentChatId] || []),
-                        { role: "user", content: text }
+                        { role: "system", content: `You are Mythical AI by U. Chethan. The user is ${currentUser.name}. If they upload an image, you can "see" it. Provide clean code blocks with markdown.` },
+                        { role: "user", content: tempMedia ? `[USER UPLOADED ATTACHMENT: ${tempMedia.substring(0, 50)}...] ${tempText}` : tempText }
                     ]
                 })
             });
             const data = await res.json();
-            const reply = data.choices[0].message.content;
-            aiBox.innerHTML = marked.parse(reply);
-            chats[currentChatId].push({role: "user", content: text}, {role: "assistant", content: reply});
-            save();
-        } catch (e) { aiBox.innerHTML = "Neural link failed."; }
+            aiBox.innerHTML = marked.parse(data.choices[0].message.content);
+            setupCodeCopy(); // RE-INJECT COPY BUTTONS AFTER RENDER
+        } catch (e) { aiBox.innerHTML = "Neural Error."; }
     }
 
     function addMsg(role, content) {
         const div = document.createElement("div");
         div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} slide-up`;
-        div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[24px] ${role === 'user' ? 'chat-user shadow-xl' : 'chat-ai shadow-2xl'}">${content}</div>`;
+        div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[24px] ${role === 'user' ? 'chat-user' : 'chat-ai'} shadow-2xl">${content}</div>`;
         document.getElementById("chat").appendChild(div);
         document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
         return div.querySelector('.chat-ai') || div.querySelector('.chat-user');
     }
-
-    function renderHistory() {
-        const hist = document.getElementById("history"); hist.innerHTML = "";
-        Object.keys(chats).reverse().forEach(id => {
-            const div = document.createElement("div");
-            div.className = `p-4 rounded-2xl cursor-pointer text-xs flex justify-between items-center ${currentChatId === id ? 'bg-purple-600/10 text-white border border-purple-500/20' : 'text-gray-500 hover:bg-white/5'}`;
-            div.innerHTML = `<span class="truncate font-bold">${chats[id][0]?.content.substring(0, 18) || "New Chat"}</span><i class="fas fa-trash" onclick="deleteChat('${id}', event)"></i>`;
-            div.onclick = () => { currentChatId = id; document.getElementById("chat").innerHTML = ""; chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content)); updateURL(`/app/${id}`); renderHistory(); };
-            hist.appendChild(div);
-        });
-    }
-
-    function deleteChat(id, e) { e.stopPropagation(); delete chats[id]; save(); if(currentChatId === id) newChat(); }
-    function save() { localStorage.setItem("myth_pro_" + currentUser.name, JSON.stringify(chats)); renderHistory(); }
-    document.getElementById("input").addEventListener("keydown", e => { if(e.key === "Enter") send(); });
 </script>
 </body>
 </html>
