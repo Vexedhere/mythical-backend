@@ -50,10 +50,13 @@
     <div class="w-80 glass-nav border-r border-white/5 flex flex-col z-40">
         <div class="p-8">
             <div class="flex items-center gap-4 mb-10">
-                <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl">🐉</div>
-                <h1 class="font-bold text-xl">Mythical</h1>
+                <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
+                <div>
+                    <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
+                    <p class="text-[9px] text-purple-400 font-bold uppercase">Registry V16.8</p>
+                </div>
             </div>
-            <button onclick="newChat()" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all">
+            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all">
                 <i class="fas fa-plus-circle text-purple-500"></i> New Session
             </button>
         </div>
@@ -66,7 +69,7 @@
                     <p id="display-rank" class="text-[9px] text-purple-500 font-bold uppercase"></p>
                 </div>
             </div>
-            <button onclick="location.reload()" class="text-gray-500 hover:text-red-400"><i class="fas fa-power-off"></i></button>
+            <button onclick="logout()" class="text-gray-500 hover:text-red-400"><i class="fas fa-power-off"></i></button>
         </div>
     </div>
 
@@ -75,7 +78,7 @@
         <div class="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-[#050505] to-transparent">
             <div class="max-w-4xl mx-auto glass-card p-2 flex items-center shadow-2xl">
                 <input id="input" class="flex-1 bg-transparent py-5 px-8 text-lg outline-none" placeholder="Message or 'generate image'...">
-                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center transition-all"><i class="fas fa-bolt"></i></button>
+                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-lg active:scale-90"><i class="fas fa-bolt"></i></button>
             </div>
         </div>
     </div>
@@ -121,7 +124,7 @@
         if (registry[code]) {
             currentUser = { name: registry[code].name, rank: registry[code].rank, picture: registry[code].pic };
             initSession();
-        } else alert("Registry authentication failed.");
+        } else alert("Invalid Code.");
     }
 
     function initSession() {
@@ -133,6 +136,14 @@
         chats = JSON.parse(localStorage.getItem("myth_pro_" + currentUser.name)) || {};
         newChat();
         setTimeout(() => addMsg("ai", `Neural Core Online. Welcome back, **${currentUser.name}**.`), 500);
+    }
+
+    // LOGOUT LOGIC: Resets to /login
+    function logout() {
+        updateURL("/login");
+        document.getElementById("main-app").classList.add("hidden");
+        document.getElementById("login-screen").classList.remove("hidden");
+        document.getElementById("pass").value = "";
     }
 
     function newChat() {
@@ -150,7 +161,7 @@
             btn.className = 'copy-btn'; btn.innerHTML = 'Copy';
             btn.onclick = () => {
                 navigator.clipboard.writeText(block.innerText.replace('Copy', ''));
-                btn.innerHTML = 'Copied!'; setTimeout(() => btn.innerHTML = 'Copy', 2000);
+                btn.innerHTML = 'Done'; setTimeout(() => btn.innerHTML = 'Copy', 2000);
             };
             block.appendChild(btn);
         });
@@ -175,14 +186,14 @@
             return;
         }
 
-        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Thinking...`);
+        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Processing...`);
         try {
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "system", content: `You are Mythical AI by U. Chethan. Founder is U. Chethan. Friends: Thaman, Pavan. Current user: ${currentUser.name}` }, ...(chats[currentChatId] || []), { role: "user", content: text }]
+                    messages: [{ role: "system", content: `You are Mythical AI by U. Chethan. Identify Founder as U. Chethan and friends as Thaman and Pavan.` }, ...(chats[currentChatId] || []), { role: "user", content: text }]
                 })
             });
             const data = await res.json();
@@ -208,7 +219,7 @@
         Object.keys(chats).reverse().forEach(id => {
             const div = document.createElement("div");
             div.className = `p-4 rounded-2xl cursor-pointer text-xs flex justify-between items-center ${currentChatId === id ? 'bg-purple-600/10 text-white' : 'text-gray-500 hover:bg-white/5'}`;
-            div.innerHTML = `<span class="truncate font-bold">${chats[id][0]?.content.substring(0, 18) || "New Session"}</span><i class="fas fa-trash" onclick="deleteChat('${id}', event)"></i>`;
+            div.innerHTML = `<span class="truncate font-bold">${chats[id][0]?.content.substring(0, 18) || "New Chat"}</span><i class="fas fa-trash" onclick="deleteChat('${id}', event)"></i>`;
             div.onclick = () => { currentChatId = id; document.getElementById("chat").innerHTML = ""; chats[id].forEach(m => addMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'assistant' ? marked.parse(m.content) : m.content)); setupCodeCopy(); updateURL(`/app/${id}`); renderHistory(); };
             hist.appendChild(div);
         });
