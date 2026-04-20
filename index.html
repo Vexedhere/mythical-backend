@@ -3,44 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI |By Chethan /title>
+    <title>Mythical AI | Pro Ecosystem</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
-        body { background: radial-gradient(circle at 10% 10%, #1a1033 0%, #050505 100%); color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; }
+        body { background: radial-gradient(circle at 10% 10%, #1a1033 0%, #050505 100%); color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; margin: 0; }
         .glass-nav { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
         .glass-card { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(30px); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 28px; }
         .chat-user { background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(168, 85, 247, 0.7)); border-radius: 24px 24px 4px 24px; }
         .chat-ai { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 24px 24px 24px 4px; }
-        .sidebar-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-closed { width: 0 !important; min-width: 0 !important; opacity: 0; pointer-events: none; overflow: hidden; margin-right: -20rem; }
+        .sidebar-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 320px; }
+        .sidebar-closed { width: 0 !important; opacity: 0; pointer-events: none; margin-left: -320px; }
         .plan-badge { padding: 2px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
         #upgrade-modal { display: none; }
         .modal-open { display: flex !important; }
         .slide-up { animation: slideUp 0.4s ease forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        pre { background: rgba(0, 0, 0, 0.5) !important; padding: 1rem; border-radius: 12px; margin: 10px 0; overflow-x: auto; border: 1px solid rgba(255,255,255,0.1); }
+        pre { background: rgba(0, 0, 0, 0.5) !important; padding: 1rem; border-radius: 12px; margin: 10px 0; overflow-x: auto; border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; }
     </style>
 </head>
-<body class="flex flex-col">
+<body class="flex flex-col h-screen">
 
 <div class="h-12 w-full glass-nav flex items-center justify-between px-6 fixed top-0 z-[100]">
     <div class="flex items-center gap-4">
         <button onclick="toggleSidebar()" class="text-purple-400 hover:text-white transition-all">
             <i class="fas fa-bars-staggered text-lg"></i>
         </button>
-        <span class="text-[11px] font-mono text-purple-400/60 uppercase tracking-widest" id="current-url">ai.mythicalstudios.online</span>
+        <span class="text-[10px] font-mono text-purple-400/60 uppercase tracking-widest">ai.mythicalstudios.online</span>
     </div>
     <div id="sub-badge-container" class="hidden"><span id="user-plan-tag" class="plan-badge"></span></div>
 </div>
 
 <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[110] bg-black">
-    <div class="glass-card p-12 w-[400px] text-center border-purple-500/30">
-        <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-2xl">🐉</div>
-        <h1 class="text-2xl font-bold mb-8 uppercase tracking-widest">Neural Link</h1>
+    <div class="glass-card p-10 w-[380px] text-center border-purple-500/30">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6">🐉</div>
+        <h1 class="text-2xl font-bold mb-6 tracking-tight">Neural Link</h1>
         <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-6 text-center">
         <button onclick="authenticate()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold mb-6 transition-all">Connect</button>
         <div class="flex items-center gap-4 mb-6"><div class="h-[1px] bg-white/10 flex-1"></div><span class="text-[10px] text-gray-600">OR</span><div class="h-[1px] bg-white/10 flex-1"></div></div>
@@ -52,24 +52,24 @@
 <div id="upgrade-modal" class="fixed inset-0 z-[150] items-center justify-center bg-black/90 backdrop-blur-md p-4">
     <div class="glass-card max-w-2xl w-full p-10 border-purple-500/50 relative">
         <button onclick="closeUpgrade()" class="absolute top-6 right-6 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
-        <h2 class="text-3xl font-bold text-center mb-8">Neural Capacity Plans</h2>
+        <h2 class="text-3xl font-bold text-center mb-10">Neural Capacity</h2>
         <div class="grid md:grid-cols-2 gap-8">
             <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                <h3 class="text-xl font-bold mb-2">Plus Plan</h3>
-                <p class="text-purple-400 font-bold text-2xl mb-6">$4.99</p>
-                <a href="https://creator.tebex.io/packages/7404038" target="_blank" class="block text-center w-full bg-white/10 py-3 rounded-xl hover:bg-white/20 transition-all font-bold">Select Plus</a>
+                <h3 class="text-xl font-bold mb-1">Plus Plan</h3>
+                <p class="text-purple-400 font-bold text-xl mb-6">$4.99</p>
+                <a href="https://creator.tebex.io/packages/7404038" target="_blank" class="block text-center w-full bg-white/10 py-3 rounded-xl hover:bg-white/20 font-bold transition-all">Get Plus</a>
             </div>
             <div class="bg-purple-600/10 p-6 rounded-3xl border-2 border-purple-500">
-                <h3 class="text-xl font-bold mb-2">Pro Plan</h3>
-                <p class="text-purple-400 font-bold text-2xl mb-6">$9.99</p>
-                <a href="https://creator.tebex.io/packages/7404040" target="_blank" class="block text-center w-full bg-purple-600 py-3 rounded-xl hover:bg-purple-700 transition-all font-bold">Select Pro</a>
+                <h3 class="text-xl font-bold mb-1">Pro Plan</h3>
+                <p class="text-purple-400 font-bold text-xl mb-6">$9.99</p>
+                <a href="https://creator.tebex.io/packages/7404040" target="_blank" class="block text-center w-full bg-purple-600 py-3 rounded-xl hover:bg-purple-700 font-bold transition-all">Get Pro</a>
             </div>
         </div>
     </div>
 </div>
 
-<div id="main-app" class="hidden flex h-full pt-12">
-    <div id="sidebar" class="w-80 glass-nav border-r border-white/5 flex flex-col z-40 sidebar-transition">
+<div id="main-app" class="hidden flex h-full pt-12 overflow-hidden">
+    <div id="sidebar" class="sidebar-transition glass-nav border-r border-white/5 flex flex-col z-40">
         <div class="p-6">
             <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-xl font-bold flex items-center justify-center gap-3">
                 <i class="fas fa-plus text-purple-500"></i> New Session
@@ -80,26 +80,26 @@
             <button id="upgrade-btn" onclick="openUpgrade()" class="w-full py-2 mb-4 rounded-lg text-[10px] font-black tracking-widest border border-purple-500/40 text-purple-400 hover:bg-purple-600 hover:text-white transition-all uppercase">Upgrade to Pro</button>
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
+                    <div class="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30 overflow-hidden">
                         <img id="user-pfp" class="w-full h-full object-cover hidden">
-                        <i id="pfp-icon" class="fas fa-shield-halved text-purple-400"></i>
+                        <i id="pfp-icon" class="fas fa-dragon text-purple-400"></i>
                     </div>
                     <div class="overflow-hidden">
                         <p id="display-name" class="font-bold text-[11px] truncate w-24"></p>
                         <p id="display-rank" class="text-[8px] text-purple-500 font-black uppercase"></p>
                     </div>
                 </div>
-                <button onclick="logout()" class="text-gray-600 hover:text-red-500 transition-colors"><i class="fas fa-power-off"></i></button>
+                <button onclick="logout()" class="text-gray-600 hover:text-red-500"><i class="fas fa-power-off"></i></button>
             </div>
         </div>
     </div>
 
-    <div class="flex-1 flex flex-col relative">
-        <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 pb-40"></div>
+    <div class="flex-1 flex flex-col relative h-full">
+        <div id="chat" class="flex-1 overflow-y-auto p-8 space-y-8 pb-48"></div>
         <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-[#050505] to-transparent">
             <div class="max-w-4xl mx-auto glass-card p-2 flex items-center shadow-2xl border-white/5">
-                <input id="input" class="flex-1 bg-transparent py-4 px-6 outline-none text-lg" placeholder="Ask anything or 'generate image'...">
-                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all">
+                <input id="input" class="flex-1 bg-transparent py-4 px-6 outline-none text-lg" placeholder="Message or 'draw' something...">
+                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-12 h-12 rounded-2xl flex items-center justify-center transition-all">
                     <i class="fas fa-bolt"></i>
                 </button>
             </div>
@@ -137,14 +137,13 @@
         if (registry[code]) {
             currentUser = { ...registry[code], picture: null };
             initSession();
-        } else { alert("Link Refused: Invalid Code"); }
+        } else { alert("Registry Code Denied."); }
     }
 
     function initSession() {
         document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("main-app").classList.remove("hidden");
         document.getElementById("sub-badge-container").classList.remove("hidden");
-        
         document.getElementById("display-name").textContent = currentUser.name;
         document.getElementById("display-rank").textContent = currentUser.rank;
 
@@ -158,7 +157,7 @@
             tag.textContent = "PRO";
             tag.className = "plan-badge bg-amber-500 text-black";
             btn.textContent = "PRO UNLOCKED";
-            btn.classList.add("border-amber-500/50", "text-amber-500");
+            btn.classList.add("text-amber-500", "border-amber-500/50");
             btn.disabled = true;
         } else {
             tag.textContent = "BASIC";
@@ -171,7 +170,7 @@
         currentChatId = Date.now();
         chats[currentChatId] = [];
         document.getElementById("chat").innerHTML = "";
-        addMsg("ai", `Neural Link Established. Welcome, **${currentUser.name}**. Status: **${currentUser.rank}**.`);
+        addMsg("ai", `Neural Link Secure. Welcome back, **${currentUser.name}**.`);
     }
 
     async function send() {
@@ -182,14 +181,14 @@
         addMsg("user", text);
         input.value = "";
 
-        if (text.toLowerCase().includes("generate image") || text.toLowerCase().includes("draw")) {
-            const prompt = text.replace(/generate image|draw/gi, "").trim();
+        if (text.toLowerCase().includes("draw") || text.toLowerCase().includes("generate image")) {
+            const prompt = text.replace(/draw|generate image/gi, "").trim();
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
             addMsg("ai", `<img src="${url}" class="rounded-2xl border border-white/10 w-full shadow-2xl">`);
             return;
         }
 
-        const aiBox = addMsg("ai", `<i class="fas fa-spinner fa-spin text-purple-400"></i> Thinking...`);
+        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Linking...`);
         
         try {
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -208,7 +207,7 @@
             const reply = data.choices[0].message.content;
             aiBox.innerHTML = marked.parse(reply);
             chats[currentChatId].push({ role: "user", content: text }, { role: "assistant", content: reply });
-        } catch (e) { aiBox.innerHTML = "Neural link failed."; }
+        } catch (e) { aiBox.innerHTML = "Neural Error. Check Connection."; }
     }
 
     function addMsg(role, content) {
