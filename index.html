@@ -3,312 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI Dashboard</title>
+    <title>Mythical AI | Infinite SaaS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
-        body { background: radial-gradient(circle at 10% 10%, #1a1033 0%, #050505 100%); color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; }
-        .glass-nav { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-card { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 28px; transition: all 0.3s ease; }
         
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        :root { --p-color: #a855f7; --s-color: #6366f1; }
+        body { background: #020202; color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; }
+        
+        /* Smooth Parallax Background */
+        .bg-mesh {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+            z-index: -1;
         }
-        .shake-error { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: rgba(239, 68, 68, 0.5) !important; }
 
-        .chat-user { background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(168, 85, 247, 0.7)); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .chat-ai { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); }
-        
-        pre { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid rgba(168, 85, 247, 0.3); padding: 1.5rem; border-radius: 18px; position: relative; margin: 1rem 0; overflow-x: auto;}
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 10px; }
-        .pfp-container { width: 42px; height: 42px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); }
+        .glass-nav { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-card { background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 32px; transition: all 0.5s ease; }
+        .glass-card:hover { border-color: rgba(168, 85, 247, 0.5); transform: translateY(-8px); box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+
+        /* The Pulse Animation */
+        .pulse-line {
+            height: 2px; width: 100%; background: linear-gradient(90deg, transparent, var(--p-color), transparent);
+            position: relative; overflow: hidden;
+        }
+        .pulse-line::after {
+            content: ""; position: absolute; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, white, transparent);
+            animation: pulse-move 2s infinite;
+        }
+        @keyframes pulse-move { to { left: 100%; } }
+
+        .chat-user { background: linear-gradient(135deg, #7c3aed, #4f46e5); box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3); }
+        .chat-ai { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
 <body class="flex flex-col">
+    <div class="bg-mesh"></div>
 
-<div class="h-10 w-full glass-nav flex items-center px-6 fixed top-0 z-[100] text-[11px] font-mono tracking-wider text-purple-400">
-    <i class="fas fa-id-badge mr-2 opacity-70"></i>
-    <span id="current-url">ai.mythicalstudios.online/login</span>
-</div>
-
-<div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[90] bg-black/95 backdrop-blur-3xl">
-    <div id="login-card" class="glass-card p-12 w-[400px] text-center shadow-2xl">
-        <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
-        <h1 class="text-3xl font-bold mb-2">Mythical AI</h1>
-        <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest">Neural Registry Login</p>
-        
-        <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-2 text-center tracking-widest text-lg transition-all">
-        <p id="error-text" class="text-red-500 text-[10px] mb-4 font-bold uppercase tracking-widest opacity-0">Neural Link Denied</p>
-        
-        <button onclick="authenticate()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all active:scale-95 mb-6">Authenticate</button>
-        
-        <div class="flex items-center gap-4 mb-6"><div class="h-[1px] bg-white/10 flex-1"></div><span class="text-[10px] text-gray-600">OR</span><div class="h-[1px] bg-white/10 flex-1"></div></div>
-
-        <div id="g_id_onload" data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" data-callback="handleGoogleResponse" data-auto_prompt="false"></div>
-        <div class="g_id_signin flex justify-center" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="large"></div>
-    </div>
-</div>
-
-<div id="main-app" class="hidden flex h-full pt-10">
-    <div class="w-80 glass-nav border-r border-white/5 flex flex-col z-40">
-        <div class="p-8">
-            <div class="flex items-center gap-4 mb-6">
-                <div class="w-11 h-11 bg-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
-                <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
-            </div>
-            <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all mb-4"><i class="fas fa-plus-circle text-purple-500"></i> New Session</button>
-            <button onclick="showPricing()" class="w-full bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/30 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all"><i class="fas fa-crown text-yellow-500"></i> Upgrade Bandwidth</button>
-        </div>
-        <div id="history" class="flex-1 overflow-y-auto px-5 space-y-3 custom-scroll"></div>
-        <div class="p-6 glass-nav border-t border-white/5 mt-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="pfp-container">
-                    <img id="user-pfp" class="w-full h-full object-cover hidden">
-                    <i id="pfp-icon" class="fas fa-dragon text-purple-400 text-xl"></i>
-                </div>
-                <div><p id="display-name" class="font-bold text-sm truncate w-32"></p><p id="display-rank" class="text-[9px] text-purple-500 font-bold uppercase"></p></div>
-            </div>
-            <button onclick="logout()" class="text-gray-500 hover:text-red-400 p-2"><i class="fas fa-power-off"></i></button>
-        </div>
-    </div>
-
-    <div id="chat-container" class="flex-1 flex flex-col relative">
-        <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-10 custom-scroll pb-40"></div>
-        <div class="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-[#050505] to-transparent">
-            <div class="max-w-4xl mx-auto glass-card p-2 flex items-center shadow-2xl">
-                <input id="input" class="flex-1 bg-transparent py-5 px-8 text-lg outline-none" placeholder="Message or 'generate image'...">
-                <button onclick="send()" class="bg-purple-600 hover:bg-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-lg active:scale-90"><i class="fas fa-bolt"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <div id="pricing-screen" class="hidden fixed inset-0 flex items-center justify-center p-10 bg-[#050505]/95 backdrop-blur-3xl z-50 overflow-y-auto">
-        <button onclick="hidePricing()" class="absolute top-10 right-10 text-gray-500 hover:text-white text-2xl"><i class="fas fa-times"></i></button>
-        
-        <div class="text-center w-full max-w-6xl">
-            <h2 class="text-4xl font-bold mb-2">Neural Tier Selection</h2>
-            <p class="text-gray-500 mb-12">Upgrade your computational bandwidth</p>
+    <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[100] bg-black">
+        <div class="animate__animated animate__zoomIn glass-card p-12 w-[420px] text-center">
+            <div class="w-20 h-20 bg-white/5 rounded-[2rem] flex items-center justify-center text-4xl mx-auto mb-6 border border-white/10">🐉</div>
+            <h1 class="text-3xl font-bold tracking-tighter mb-2">Mythical AI</h1>
+            <p class="text-purple-500 text-[10px] uppercase tracking-[0.4em] mb-10 font-bold">Unrestricted Access</p>
             
-            <div class="flex gap-8 justify-center items-stretch">
-                <div class="glass-card p-10 border-purple-500/20 w-96 text-center flex flex-col">
-                    <h3 class="text-xl font-bold mb-2">PLUS</h3>
-                    <p class="text-gray-400 text-sm mb-6">Enhanced Cognitive Ability</p>
-                    <p class="text-5xl font-bold mb-8">₹300<span class="text-sm text-gray-500">/mo</span></p>
-                    
-                    <ul class="text-left text-sm space-y-4 mb-12 text-gray-300 flex-1">
-                        <li><i class="fas fa-check text-purple-500 mr-2"></i> 50 Image Generations / Day</li>
-                        <li><i class="fas fa-check text-purple-500 mr-2"></i> Priority Neural Processing</li>
-                        <li><i class="fas fa-check text-purple-500 mr-2"></i> Llama 3.3 70B Versatile</li>
-                        <li><i class="fas fa-check text-purple-500 mr-2"></i> Context Window: 32k Tokens</li>
-                    </ul>
-                    
-                    <button onclick="openCart('Plus', 300)" class="w-full bg-purple-600 py-4 rounded-xl font-bold hover:scale-105 transition-transform active:scale-95">Get Plus</button>
+            <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-4 text-center transition-all">
+            <button onclick="authenticate()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-4 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-95 mb-6">Enter Nebula</button>
+            
+            <div id="g_id_onload" data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" data-callback="handleGoogleResponse"></div>
+            <div class="g_id_signin flex justify-center" data-type="standard" data-theme="filled_black"></div>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden flex h-full pt-10">
+        <aside class="w-80 glass-nav border-r border-white/5 flex flex-col p-6">
+            <div class="flex items-center gap-3 mb-12">
+                <div class="text-2xl font-bold tracking-tighter uppercase">Mythical<span class="text-purple-500">.</span></div>
+            </div>
+
+            <nav class="space-y-4">
+                <button onclick="newChat()" class="w-full text-left p-4 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3">
+                    <div class="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center"><i class="fas fa-plus text-xs text-purple-400"></i></div>
+                    New Session
+                </button>
+                <button onclick="showPricing()" class="w-full text-left p-4 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3">
+                    <div class="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center"><i class="fas fa-crown text-xs text-yellow-400"></i></div>
+                    Premium Tiers
+                </button>
+            </nav>
+
+            <div class="mt-12 p-6 glass-card border-none bg-white/[0.03]">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-[10px] font-bold text-gray-500 tracking-widest uppercase">System Load</span>
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 </div>
-                
-                <div class="glass-card p-10 border-indigo-500 w-96 text-center relative overflow-hidden flex flex-col scale-105">
-                    <div class="absolute top-0 right-0 bg-indigo-500 text-[10px] px-4 py-1 font-bold tracking-widest">POPULAR</div>
-                    <h3 class="text-xl font-bold mb-2">PRO</h3>
-                    <p class="text-gray-400 text-sm mb-6">Maximum Neural Overclock</p>
-                    <p class="text-5xl font-bold mb-8">₹500<span class="text-sm text-gray-500">/mo</span></p>
-                    
-                    <ul class="text-left text-sm space-y-4 mb-12 text-gray-200 flex-1">
-                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> 1000 Image Generations / Day</li>
-                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Zero Queuing - Realtime Output</li>
-                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Veo Video Generation (Coming Soon)</li>
-                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Context Window: 128k Tokens</li>
-                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Early Access to New Models</li>
+                <div class="pulse-line"></div>
+                <div class="mt-4 flex flex-col gap-1">
+                    <span id="plan-badge" class="text-xs font-bold text-purple-400 tracking-wider">UNLIMITED ACCESS</span>
+                    <span class="text-[9px] text-gray-600 font-bold">ALL SYSTEMS NOMINAL</span>
+                </div>
+            </div>
+
+            <div id="history" class="mt-8 flex-1 overflow-y-auto space-y-2 text-xs custom-scroll"></div>
+
+            <div class="mt-auto pt-6 flex items-center justify-between border-t border-white/5">
+                <div class="flex items-center gap-3">
+                    <img id="user-pfp" class="w-10 h-10 rounded-xl border border-purple-500/30 hidden">
+                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-purple-600/10 flex items-center justify-center text-purple-400 border border-purple-500/20"><i class="fas fa-user-ninja"></i></div>
+                    <div><p id="display-name" class="font-bold text-sm truncate w-24">Developer</p><p id="display-rank" class="text-[8px] text-purple-500 font-bold uppercase tracking-widest">FOUNDER</p></div>
+                </div>
+                <button onclick="logout()" class="text-gray-600 hover:text-red-500 transition-colors"><i class="fas fa-power-off"></i></button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col relative">
+            <div id="chat" class="flex-1 overflow-y-auto p-12 space-y-10 custom-scroll pb-40"></div>
+            
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
+                <div class="glass-card p-2 flex items-center border-white/10 shadow-[0_0_50px_-12px_rgba(168,85,247,0.3)]">
+                    <input id="input" class="flex-1 bg-transparent py-4 px-6 text-md outline-none" placeholder="Initiate neural request...">
+                    <button onclick="send()" class="bg-white text-black px-8 py-4 rounded-2xl transition-all active:scale-95 font-bold text-xs uppercase tracking-widest">
+                        EXECUTE
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="pricing-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-3xl p-6">
+        <button onclick="hidePricing()" class="absolute top-10 right-10 text-white/30 hover:text-white transition-colors"><i class="fas fa-times text-2xl"></i></button>
+        
+        <div class="text-center w-full max-w-5xl animate__animated animate__zoomIn">
+            <h2 class="text-5xl font-bold mb-3 tracking-tighter">Expand Your Horizon</h2>
+            <p class="text-gray-500 mb-16 text-lg">Support the Mythical Ecosystem</p>
+            
+            <div class="flex gap-10 justify-center items-stretch">
+                <div class="glass-card p-12 w-96 flex flex-col hover:border-purple-500/50">
+                    <h3 class="text-2xl font-bold mb-6">PLUS TIER</h3>
+                    <div class="text-5xl font-bold mb-10">₹300<span class="text-sm text-gray-600">/mo</span></div>
+                    <ul class="text-left space-y-5 text-sm text-gray-400 mb-12 flex-1">
+                        <li><i class="fas fa-check text-purple-500 mr-3"></i> Priority Queue Access</li>
+                        <li><i class="fas fa-check text-purple-500 mr-3"></i> 4K Image Generation</li>
+                        <li><i class="fas fa-check text-purple-500 mr-3"></i> Extended Context Window</li>
                     </ul>
-                    
-                    <button onclick="openCart('Pro', 500)" class="w-full bg-indigo-600 py-4 rounded-xl font-bold hover:scale-105 transition-transform active:scale-95">Get Pro</button>
+                    <button onclick="window.open('https://rzp.io/rzp/dskoEE0f')" class="w-full border border-purple-500/50 py-4 rounded-2xl font-bold hover:bg-purple-600 transition-all">UPGRADE NOW</button>
+                </div>
+
+                <div class="glass-card p-12 w-96 bg-gradient-to-b from-purple-900/10 to-transparent border-purple-500 scale-110 shadow-2xl shadow-purple-500/10 flex flex-col">
+                    <div class="bg-purple-600 text-[10px] py-1 px-4 rounded-full w-max mx-auto mb-6 font-bold tracking-widest">MOST POWERFUL</div>
+                    <h3 class="text-2xl font-bold mb-6">PRO TIER</h3>
+                    <div class="text-5xl font-bold mb-10">₹500<span class="text-sm text-gray-600">/mo</span></div>
+                    <ul class="text-left space-y-5 text-sm text-gray-200 mb-12 flex-1">
+                        <li><i class="fas fa-crown text-yellow-400 mr-3"></i> Unlimited Parallel Tasks</li>
+                        <li><i class="fas fa-check text-purple-400 mr-3"></i> Early Beta Feature Access</li>
+                        <li><i class="fas fa-check text-purple-400 mr-3"></i> API Direct Integration</li>
+                    </ul>
+                    <button onclick="window.open('https://rzp.io/rzp/dskoEE0f')" class="w-full bg-purple-600 py-4 rounded-2xl font-bold shadow-lg shadow-purple-500/20 hover:scale-105 transition-all">GO PRO</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div id="cart-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-[200] flex items-center justify-center">
-    <div class="glass-card p-8 w-[400px]">
-        <h2 class="text-xl font-bold mb-4">Finalize Registry Upgrade</h2>
-        <div class="flex justify-between mb-2">
-            <span id="cart-item-name" class="text-gray-400">Plan</span>
-            <span id="cart-item-price" class="font-bold">₹0</span>
-        </div>
-        <div class="h-[1px] bg-white/10 my-4"></div>
-        <input id="coupon-input" type="text" placeholder="Coupon Code (e.g. Chetan90)" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl mb-2 outline-none focus:border-purple-500 text-center uppercase tracking-widest">
-        <button onclick="applyCoupon()" class="w-full text-[10px] text-purple-400 font-bold mb-6 hover:text-purple-300 uppercase tracking-wider">Validate Coupon</button>
-        <div class="flex justify-between text-2xl font-bold mb-8">
-            <span>Total:</span>
-            <span id="cart-total" class="text-green-400">₹0</span>
-        </div>
-        <button id="pay-btn" onclick="initiatePayment()" class="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 active:scale-95 transition-all">Proceed to Payment</button>
-        <button onclick="closeCart()" class="w-full mt-4 text-gray-500 text-sm hover:text-white transition-colors">Cancel Transaction</button>
-    </div>
-</div>
+    <script>
+        const API = "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";
+        let currentUser = null;
 
-<script>
-    // Integration parameters
-    const API = "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";
-    const BACKEND_URL = "http://localhost:3000";
-    const RAZORPAY_TEST_KEY = "rzp_test_Sg8ccqB0U7mzIy";
+        function authenticate() {
+            const pass = document.getElementById("pass").value;
+            if(pass === "C@MN26") {
+                currentUser = { name: "U. Chethan", rank: "FOUNDER" };
+                initSession();
+            } else { alert("Registry Denial."); }
+        }
 
-    let chats = {}, currentChatId = null, currentUser = null;
-    let currentCart = { plan: "", originalPrice: 0, finalPrice: 0 };
-
-    const registry = {
-        "C@MN26": { name: "U. Chethan", rank: "FOUNDER" },
-        "T@MN26": { name: "Thaman Devapuram", rank: "ADMIN" },
-        "P@MN26": { name: "Pavan", rank: "MODERATOR" }
-    };
-
-    function updateURL(path) { document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`; }
-    function generateID() { return Math.random().toString(36).substring(2, 15); }
-
-    // Authentication Logic (Google & Registry)
-    function handleGoogleResponse(response) {
-        const payload = JSON.parse(atob(response.credential.split('.')[1]));
-        currentUser = { name: payload.name, rank: "VERIFIED", picture: payload.picture };
-        initSession();
-    }
-
-    function authenticate() {
-        const code = document.getElementById("pass").value.trim();
-        if (registry[code]) {
-            currentUser = { name: registry[code].name, rank: registry[code].rank, picture: null };
+        function handleGoogleResponse(res) {
+            const payload = JSON.parse(atob(res.credential.split('.')[1]));
+            currentUser = { name: payload.name, rank: "VERIFIED", picture: payload.picture };
             initSession();
-        } else {
-            document.getElementById("login-card").classList.add("shake-error");
-            setTimeout(() => document.getElementById("login-card").classList.remove("shake-error"), 500);
         }
-    }
 
-    function initSession() {
-        document.getElementById("login-screen").classList.add("hidden");
-        document.getElementById("main-app").classList.remove("hidden");
-        document.getElementById("display-name").textContent = currentUser.name;
-        document.getElementById("display-rank").textContent = currentUser.rank;
-        const pfpImg = document.getElementById("user-pfp");
-        const pfpIcon = document.getElementById("pfp-icon");
-        if(currentUser.picture) { pfpImg.src = currentUser.picture; pfpImg.classList.remove("hidden"); pfpIcon.classList.add("hidden"); }
-        newChat();
-    }
-
-    // Pricing & Cart Logic
-    function showPricing() { document.getElementById("pricing-screen").classList.remove("hidden"); }
-    function hidePricing() { document.getElementById("pricing-screen").classList.add("hidden"); }
-
-    function openCart(plan, price) {
-        currentCart = { plan, originalPrice: price, finalPrice: price };
-        document.getElementById('cart-item-name').innerText = plan + " Tier";
-        document.getElementById('cart-item-price').innerText = "₹" + price;
-        document.getElementById('cart-total').innerText = "₹" + price;
-        document.getElementById('cart-modal').classList.remove('hidden');
-    }
-
-    function closeCart() { document.getElementById('cart-modal').classList.add('hidden'); }
-
-    function applyCoupon() {
-        const code = document.getElementById('coupon-input').value.trim();
-        if (code === "Chetan90") {
-            currentCart.finalPrice = currentCart.originalPrice * 0.1;
-            document.getElementById('cart-total').innerText = "₹" + currentCart.finalPrice;
-            alert("90% Discount Applied by Founder!");
-        } else { alert("Invalid Code"); }
-    }
-
-    async function initiatePayment() {
-        const payBtn = document.getElementById('pay-btn');
-        payBtn.disabled = true;
-        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Syncing...';
-
-        try {
-            // 1. Create Order via Backend
-            const response = await fetch(`${BACKEND_URL}/api/create-order`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: currentCart.finalPrice, plan: currentCart.plan })
-            });
-            const order = await response.json();
-
-            // 2. Setup Razorpay Modal
-            const options = {
-                "key": RAZORPAY_TEST_KEY, 
-                "amount": order.amount,
-                "name": "Mythical AI",
-                "description": `${currentCart.plan} Neural Upgrade`,
-                "order_id": order.id,
-                "handler": async function (res) {
-                    // 3. Verify Payment
-                    const v = await fetch(`${BACKEND_URL}/api/verify-payment`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(res)
-                    });
-                    const result = await v.json();
-                    if(result.success) { alert(`Neural Rank Updated to ${currentCart.plan.toUpperCase()}!`); location.reload(); }
+        function initSession() {
+            document.getElementById("login-screen").classList.add("animate__fadeOut");
+            setTimeout(() => {
+                document.getElementById("login-screen").classList.add("hidden");
+                document.getElementById("main-app").classList.remove("hidden");
+                document.getElementById("display-name").innerText = currentUser.name;
+                document.getElementById("display-rank").innerText = currentUser.rank;
+                if(currentUser.picture) {
+                    document.getElementById("user-pfp").src = currentUser.picture;
+                    document.getElementById("user-pfp").classList.remove("hidden");
+                    document.getElementById("pfp-fallback").classList.add("hidden");
                 }
-            };
-            new Razorpay(options).open();
-        } catch (e) { alert("Backend Terminal Offline. Please run 'node server.js'"); }
-        finally { payBtn.disabled = false; payBtn.innerText = 'Proceed to Payment'; }
-    }
-
-    // Chat & Image Generation Logic
-    async function send() {
-        const input = document.getElementById("input");
-        const text = input.value.trim();
-        if (!text) return;
-        addMsg("user", text);
-        input.value = "";
-
-        const lowerText = text.toLowerCase();
-        
-        // FEATURE: Image Generation
-        if (lowerText.includes("generate image") || lowerText.includes("draw") || lowerText.includes("create image")) {
-            const aiBox = addMsg("ai", `<i class="fas fa-magic fa-spin text-purple-400 mr-2"></i> Manifesting image...`);
-            // Standardize prompt by removing triggers
-            const clean = text.replace(/generate image|draw|create image/gi, "").trim();
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(clean)}?width=1024&height=1024&nologo=true`;
-            // Pollinations returns a direct image link. Embed it in an <img> tag.
-            aiBox.innerHTML = `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl w-full mt-2" alt="Generated Output">`;
-            return;
+                triggerWelcome();
+            }, 500);
         }
 
-        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400 mr-2"></i> Syncing...`);
-        try {
-            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "llama-3.3-70b-versatile",
-                    messages: [
-                        { role: "system", content: `You are Mythical AI by U. Chethan. User: ${currentUser.name}. Rank: ${currentUser.rank}. Founder: U. Chethan.` }, 
-                        { role: "user", content: text }
-                    ]
-                })
-            });
-            const data = await res.json();
-            aiBox.innerHTML = marked.parse(data.choices[0].message.content);
-        } catch (e) { aiBox.innerHTML = "Neural link failed."; }
-    }
+        function triggerWelcome() {
+            const msg = `### 🐉 Core Initialized\nNeural link established for **${currentUser.name}**.\n\nSystems are operating at peak efficiency. No limits detected. What is your command?`;
+            addMsg("ai", "");
+            let i = 0;
+            const target = document.querySelector('.chat-ai:last-child');
+            function type() {
+                if (i < msg.length) {
+                    target.innerHTML = marked.parse(msg.substring(0, i + 1));
+                    i++;
+                    setTimeout(type, 15);
+                }
+            }
+            type();
+        }
 
-    function addMsg(role, content) {
-        const div = document.createElement("div");
-        div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} mb-6`;
-        div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[24px] ${role === 'user' ? 'chat-user' : 'chat-ai'}">${content}</div>`;
-        document.getElementById("chat").appendChild(div);
-        document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
-        return div.querySelector('.chat-ai');
-    }
+        async function send() {
+            const input = document.getElementById("input");
+            const text = input.value.trim();
+            if(!text) return;
+            addMsg("user", text);
+            input.value = "";
 
-    function newChat() { document.getElementById("chat").innerHTML = ""; hidePricing(); }
-    function logout() { location.reload(); }
-</script>
+            if(text.toLowerCase().includes("generate image")) {
+                const prompt = text.replace(/generate image/gi, "").trim();
+                const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+                addMsg("ai", `<img src="${url}" class="rounded-[2rem] border border-white/5 shadow-2xl animate__animated animate__fadeIn">`);
+                return;
+            }
+
+            const aiBox = addMsg("ai", `<i class="fas fa-circle-notch fa-spin text-purple-400 opacity-50"></i> Processing...`);
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{ role: "system", content: "You are the limitless Mythical AI." }, { role: "user", content: text }]
+                    })
+                });
+                const data = await res.json();
+                aiBox.innerHTML = marked.parse(data.choices[0].message.content);
+            } catch (e) { aiBox.innerHTML = "Neural Failure."; }
+        }
+
+        function addMsg(role, content) {
+            const div = document.createElement("div");
+            div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeInUp`;
+            div.innerHTML = `<div class="max-w-[75%] px-8 py-5 rounded-[2.5rem] ${role === 'user' ? 'chat-user' : 'chat-ai'}">${content}</div>`;
+            document.getElementById("chat").appendChild(div);
+            document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+            return div.querySelector('.chat-ai');
+        }
+
+        function showPricing() { document.getElementById("pricing-screen").classList.remove("hidden"); }
+        function hidePricing() { document.getElementById("pricing-screen").classList.add("hidden"); }
+        function logout() { location.reload(); }
+        function newChat() { document.getElementById("chat").innerHTML = ""; triggerWelcome(); }
+    </script>
 </body>
 </html>
