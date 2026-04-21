@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mythical AI - Premium</title>
+    <title>Mythical AI Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -43,9 +43,16 @@
         <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">🐉</div>
         <h1 class="text-3xl font-bold mb-2">Mythical AI</h1>
         <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest">Neural Registry Login</p>
+        
         <input id="pass" type="password" placeholder="Registry Code" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-purple-500 outline-none mb-2 text-center tracking-widest text-lg transition-all">
         <p id="error-text" class="text-red-500 text-[10px] mb-4 font-bold uppercase tracking-widest opacity-0">Neural Link Denied</p>
+        
         <button onclick="authenticate()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-xl font-bold transition-all active:scale-95 mb-6">Authenticate</button>
+        
+        <div class="flex items-center gap-4 mb-6"><div class="h-[1px] bg-white/10 flex-1"></div><span class="text-[10px] text-gray-600">OR</span><div class="h-[1px] bg-white/10 flex-1"></div></div>
+
+        <div id="g_id_onload" data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" data-callback="handleGoogleResponse" data-auto_prompt="false"></div>
+        <div class="g_id_signin flex justify-center" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="large"></div>
     </div>
 </div>
 
@@ -57,12 +64,15 @@
                 <h1 class="font-bold text-xl tracking-tight">Mythical</h1>
             </div>
             <button onclick="newChat()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all mb-4"><i class="fas fa-plus-circle text-purple-500"></i> New Session</button>
-            <button onclick="showPricing()" class="w-full bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/30 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all"><i class="fas fa-crown text-yellow-500"></i> Upgrade Plan</button>
+            <button onclick="showPricing()" class="w-full bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/30 p-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all"><i class="fas fa-crown text-yellow-500"></i> Upgrade Bandwidth</button>
         </div>
         <div id="history" class="flex-1 overflow-y-auto px-5 space-y-3 custom-scroll"></div>
         <div class="p-6 glass-nav border-t border-white/5 mt-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="pfp-container"><i id="pfp-icon" class="fas fa-dragon text-purple-400 text-xl"></i></div>
+                <div class="pfp-container">
+                    <img id="user-pfp" class="w-full h-full object-cover hidden">
+                    <i id="pfp-icon" class="fas fa-dragon text-purple-400 text-xl"></i>
+                </div>
                 <div><p id="display-name" class="font-bold text-sm truncate w-32"></p><p id="display-rank" class="text-[9px] text-purple-500 font-bold uppercase"></p></div>
             </div>
             <button onclick="logout()" class="text-gray-500 hover:text-red-400 p-2"><i class="fas fa-power-off"></i></button>
@@ -79,21 +89,45 @@
         </div>
     </div>
 
-    <div id="pricing-screen" class="hidden flex-1 flex flex-col items-center justify-center p-10 bg-[#050505]/95 backdrop-blur-3xl z-50 overflow-y-auto">
+    <div id="pricing-screen" class="hidden fixed inset-0 flex items-center justify-center p-10 bg-[#050505]/95 backdrop-blur-3xl z-50 overflow-y-auto">
         <button onclick="hidePricing()" class="absolute top-10 right-10 text-gray-500 hover:text-white text-2xl"><i class="fas fa-times"></i></button>
-        <h2 class="text-4xl font-bold mb-2">Neural Tier Selection</h2>
-        <p class="text-gray-500 mb-12">Upgrade your computational bandwidth</p>
-        <div class="flex gap-8 max-w-5xl">
-            <div class="glass-card p-10 border-purple-500/20 w-80 text-center">
-                <h3 class="text-xl font-bold mb-4">PLUS</h3>
-                <p class="text-5xl font-bold mb-8">₹300<span class="text-sm text-gray-500">/mo</span></p>
-                <button onclick="openCart('Plus', 300)" class="w-full bg-purple-600 py-4 rounded-xl font-bold hover:scale-105 transition-transform">Get Plus</button>
-            </div>
-            <div class="glass-card p-10 border-indigo-500 w-80 text-center relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-indigo-500 text-[10px] px-4 py-1 font-bold">POPULAR</div>
-                <h3 class="text-xl font-bold mb-4">PRO</h3>
-                <p class="text-5xl font-bold mb-8">₹500<span class="text-sm text-gray-500">/mo</span></p>
-                <button onclick="openCart('Pro', 500)" class="w-full bg-indigo-600 py-4 rounded-xl font-bold hover:scale-105 transition-transform">Get Pro</button>
+        
+        <div class="text-center w-full max-w-6xl">
+            <h2 class="text-4xl font-bold mb-2">Neural Tier Selection</h2>
+            <p class="text-gray-500 mb-12">Upgrade your computational bandwidth</p>
+            
+            <div class="flex gap-8 justify-center items-stretch">
+                <div class="glass-card p-10 border-purple-500/20 w-96 text-center flex flex-col">
+                    <h3 class="text-xl font-bold mb-2">PLUS</h3>
+                    <p class="text-gray-400 text-sm mb-6">Enhanced Cognitive Ability</p>
+                    <p class="text-5xl font-bold mb-8">₹300<span class="text-sm text-gray-500">/mo</span></p>
+                    
+                    <ul class="text-left text-sm space-y-4 mb-12 text-gray-300 flex-1">
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i> 50 Image Generations / Day</li>
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i> Priority Neural Processing</li>
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i> Llama 3.3 70B Versatile</li>
+                        <li><i class="fas fa-check text-purple-500 mr-2"></i> Context Window: 32k Tokens</li>
+                    </ul>
+                    
+                    <button onclick="openCart('Plus', 300)" class="w-full bg-purple-600 py-4 rounded-xl font-bold hover:scale-105 transition-transform active:scale-95">Get Plus</button>
+                </div>
+                
+                <div class="glass-card p-10 border-indigo-500 w-96 text-center relative overflow-hidden flex flex-col scale-105">
+                    <div class="absolute top-0 right-0 bg-indigo-500 text-[10px] px-4 py-1 font-bold tracking-widest">POPULAR</div>
+                    <h3 class="text-xl font-bold mb-2">PRO</h3>
+                    <p class="text-gray-400 text-sm mb-6">Maximum Neural Overclock</p>
+                    <p class="text-5xl font-bold mb-8">₹500<span class="text-sm text-gray-500">/mo</span></p>
+                    
+                    <ul class="text-left text-sm space-y-4 mb-12 text-gray-200 flex-1">
+                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> 1000 Image Generations / Day</li>
+                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Zero Queuing - Realtime Output</li>
+                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Veo Video Generation (Coming Soon)</li>
+                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Context Window: 128k Tokens</li>
+                        <li><i class="fas fa-check text-indigo-400 mr-2"></i> Early Access to New Models</li>
+                    </ul>
+                    
+                    <button onclick="openCart('Pro', 500)" class="w-full bg-indigo-600 py-4 rounded-xl font-bold hover:scale-105 transition-transform active:scale-95">Get Pro</button>
+                </div>
             </div>
         </div>
     </div>
@@ -107,19 +141,23 @@
             <span id="cart-item-price" class="font-bold">₹0</span>
         </div>
         <div class="h-[1px] bg-white/10 my-4"></div>
-        <input id="coupon-input" type="text" placeholder="Coupon Code" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl mb-2 outline-none focus:border-purple-500 text-center uppercase tracking-widest">
-        <button onclick="applyCoupon()" class="w-full text-[10px] text-purple-400 font-bold mb-6 hover:text-purple-300">VALIDATE COUPON</button>
+        <input id="coupon-input" type="text" placeholder="Coupon Code (e.g. Chetan90)" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl mb-2 outline-none focus:border-purple-500 text-center uppercase tracking-widest">
+        <button onclick="applyCoupon()" class="w-full text-[10px] text-purple-400 font-bold mb-6 hover:text-purple-300 uppercase tracking-wider">Validate Coupon</button>
         <div class="flex justify-between text-2xl font-bold mb-8">
             <span>Total:</span>
             <span id="cart-total" class="text-green-400">₹0</span>
         </div>
         <button id="pay-btn" onclick="initiatePayment()" class="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 active:scale-95 transition-all">Proceed to Payment</button>
-        <button onclick="closeCart()" class="w-full mt-4 text-gray-500 text-sm hover:text-white">Cancel Transaction</button>
+        <button onclick="closeCart()" class="w-full mt-4 text-gray-500 text-sm hover:text-white transition-colors">Cancel Transaction</button>
     </div>
 </div>
 
 <script>
-    const API = "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";
+    // Integration parameters
+    const API = "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";
+    const BACKEND_URL = "http://localhost:3000";
+    const RAZORPAY_TEST_KEY = "rzp_test_Sg8ccqB0U7mzIy";
+
     let chats = {}, currentChatId = null, currentUser = null;
     let currentCart = { plan: "", originalPrice: 0, finalPrice: 0 };
 
@@ -132,10 +170,17 @@
     function updateURL(path) { document.getElementById("current-url").textContent = `ai.mythicalstudios.online${path}`; }
     function generateID() { return Math.random().toString(36).substring(2, 15); }
 
+    // Authentication Logic (Google & Registry)
+    function handleGoogleResponse(response) {
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        currentUser = { name: payload.name, rank: "VERIFIED", picture: payload.picture };
+        initSession();
+    }
+
     function authenticate() {
         const code = document.getElementById("pass").value.trim();
         if (registry[code]) {
-            currentUser = { name: registry[code].name, rank: registry[code].rank };
+            currentUser = { name: registry[code].name, rank: registry[code].rank, picture: null };
             initSession();
         } else {
             document.getElementById("login-card").classList.add("shake-error");
@@ -148,9 +193,13 @@
         document.getElementById("main-app").classList.remove("hidden");
         document.getElementById("display-name").textContent = currentUser.name;
         document.getElementById("display-rank").textContent = currentUser.rank;
+        const pfpImg = document.getElementById("user-pfp");
+        const pfpIcon = document.getElementById("pfp-icon");
+        if(currentUser.picture) { pfpImg.src = currentUser.picture; pfpImg.classList.remove("hidden"); pfpIcon.classList.add("hidden"); }
         newChat();
     }
 
+    // Pricing & Cart Logic
     function showPricing() { document.getElementById("pricing-screen").classList.remove("hidden"); }
     function hidePricing() { document.getElementById("pricing-screen").classList.add("hidden"); }
 
@@ -176,36 +225,41 @@
     async function initiatePayment() {
         const payBtn = document.getElementById('pay-btn');
         payBtn.disabled = true;
-        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
+        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Syncing...';
 
         try {
-            const response = await fetch('http://localhost:3000/api/create-order', {
+            // 1. Create Order via Backend
+            const response = await fetch(`${BACKEND_URL}/api/create-order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: currentCart.finalPrice, plan: currentCart.plan })
             });
             const order = await response.json();
 
+            // 2. Setup Razorpay Modal
             const options = {
-                "key": "rzp_test_Sg8ccqB0U7mzIy", 
+                "key": RAZORPAY_TEST_KEY, 
                 "amount": order.amount,
                 "name": "Mythical AI",
+                "description": `${currentCart.plan} Neural Upgrade`,
                 "order_id": order.id,
                 "handler": async function (res) {
-                    const v = await fetch('http://localhost:3000/api/verify-payment', {
+                    // 3. Verify Payment
+                    const v = await fetch(`${BACKEND_URL}/api/verify-payment`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(res)
                     });
                     const result = await v.json();
-                    if(result.success) { alert("Payment Verified. Rank Upgraded!"); location.reload(); }
+                    if(result.success) { alert(`Neural Rank Updated to ${currentCart.plan.toUpperCase()}!`); location.reload(); }
                 }
             };
             new Razorpay(options).open();
-        } catch (e) { alert("Backend Offline. Run 'node server.js'"); }
+        } catch (e) { alert("Backend Terminal Offline. Please run 'node server.js'"); }
         finally { payBtn.disabled = false; payBtn.innerText = 'Proceed to Payment'; }
     }
 
+    // Chat & Image Generation Logic
     async function send() {
         const input = document.getElementById("input");
         const text = input.value.trim();
@@ -213,14 +267,30 @@
         addMsg("user", text);
         input.value = "";
 
-        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400"></i> Thinking...`);
+        const lowerText = text.toLowerCase();
+        
+        // FEATURE: Image Generation
+        if (lowerText.includes("generate image") || lowerText.includes("draw") || lowerText.includes("create image")) {
+            const aiBox = addMsg("ai", `<i class="fas fa-magic fa-spin text-purple-400 mr-2"></i> Manifesting image...`);
+            // Standardize prompt by removing triggers
+            const clean = text.replace(/generate image|draw|create image/gi, "").trim();
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(clean)}?width=1024&height=1024&nologo=true`;
+            // Pollinations returns a direct image link. Embed it in an <img> tag.
+            aiBox.innerHTML = `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl w-full mt-2" alt="Generated Output">`;
+            return;
+        }
+
+        const aiBox = addMsg("ai", `<i class="fas fa-atom fa-spin text-purple-400 mr-2"></i> Syncing...`);
         try {
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "system", content: `User: ${currentUser.name}. Rank: ${currentUser.rank}. Founder: U. Chethan.` }, { role: "user", content: text }]
+                    messages: [
+                        { role: "system", content: `You are Mythical AI by U. Chethan. User: ${currentUser.name}. Rank: ${currentUser.rank}. Founder: U. Chethan.` }, 
+                        { role: "user", content: text }
+                    ]
                 })
             });
             const data = await res.json();
@@ -230,7 +300,7 @@
 
     function addMsg(role, content) {
         const div = document.createElement("div");
-        div.className = `flex ${role === "user" ? "justify-end" : "justify-start"}`;
+        div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} mb-6`;
         div.innerHTML = `<div class="max-w-[85%] px-8 py-5 rounded-[24px] ${role === 'user' ? 'chat-user' : 'chat-ai'}">${content}</div>`;
         document.getElementById("chat").appendChild(div);
         document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
