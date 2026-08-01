@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI</title>
+    <title>Nexus AI | By Chethan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
@@ -26,7 +25,6 @@
             overflow: hidden; 
         }
         
-        /* Deep Cyber Mesh Background */
         .bg-mesh {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: 
@@ -51,23 +49,9 @@
 
         .glass-card:hover { 
             border-color: rgba(6, 182, 212, 0.4); 
-            transform: translateY(-4px); 
+            transform: translateY(-2px); 
             box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
         }
-
-        .pulse-line {
-            height: 2px; width: 100%; 
-            background: linear-gradient(90deg, transparent, var(--p-color), transparent);
-            position: relative; overflow: hidden;
-        }
-
-        .pulse-line::after {
-            content: ""; position: absolute; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, #ffffff, transparent);
-            animation: pulse-move 2.5s infinite;
-        }
-
-        @keyframes pulse-move { to { left: 100%; } }
 
         .chat-user { 
             background: linear-gradient(135deg, #0284c7, #2563eb); 
@@ -87,14 +71,15 @@
 <body class="flex flex-col">
     <div class="bg-mesh"></div>
 
-    <!-- Login Screen (Google Sign-In Only) -->
+    <!-- Login Screen -->
     <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[100] bg-[#030712]">
         <div class="animate__animated animate__zoomIn glass-card p-10 w-[400px] text-center border-cyan-500/20">
             <div class="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 border border-cyan-500/20 text-cyan-400">
                 <i class="fas fa-atom"></i>
             </div>
             <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
-            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-8 font-bold">Neural Intelligence Network</p>
+            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Neural Intelligence Network</p>
+            <p class="text-xs text-gray-500 mb-8 font-medium">Developed by Chethan</p>
             
             <div id="g_id_onload" 
                  data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" 
@@ -108,37 +93,25 @@
     <div id="main-app" class="hidden flex h-full">
         <!-- Sidebar -->
         <aside class="w-80 glass-nav flex flex-col p-6 z-10">
-            <div class="flex items-center gap-3 mb-10">
+            <div class="flex items-center gap-3 mb-8">
                 <div class="w-9 h-9 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
                     <i class="fas fa-atom text-lg"></i>
                 </div>
-                <div class="text-2xl font-bold tracking-tight uppercase">Nexus<span class="text-cyan-400">.</span></div>
+                <div>
+                    <div class="text-xl font-bold tracking-tight uppercase leading-none">Nexus<span class="text-cyan-400">.</span></div>
+                    <span class="text-[9px] text-gray-500 tracking-wider font-semibold">BY CHETHAN</span>
+                </div>
             </div>
 
-            <nav class="space-y-3">
-                <button onclick="newChat()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm">
+            <nav class="space-y-3 mb-6">
+                <button onclick="createNewSession()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm">
                     <div class="w-8 h-8 bg-cyan-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-plus text-xs text-cyan-400"></i></div>
                     New Session
                 </button>
-                <button onclick="showPricing()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm">
-                    <div class="w-8 h-8 bg-amber-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-crown text-xs text-amber-400"></i></div>
-                    Nexus Tiers
-                </button>
             </nav>
 
-            <div class="mt-8 p-5 glass-card border-none bg-white/[0.02]">
-                <div class="flex justify-between items-center mb-3">
-                    <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">System Core</span>
-                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                </div>
-                <div class="pulse-line mb-3"></div>
-                <div class="flex flex-col gap-0.5">
-                    <span id="plan-badge" class="text-xs font-bold text-cyan-400 tracking-wider">UNRESTRICTED ACCESS</span>
-                    <span class="text-[9px] text-gray-500 font-bold">CORE ONLINE</span>
-                </div>
-            </div>
-
-            <div id="history" class="mt-6 flex-1 overflow-y-auto space-y-2 text-xs custom-scroll"></div>
+            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Recent Chats</div>
+            <div id="history" class="flex-1 overflow-y-auto space-y-2 text-xs custom-scroll"></div>
 
             <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
                 <div class="flex items-center gap-3">
@@ -146,7 +119,7 @@
                     <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20"><i class="fas fa-user-astronaut"></i></div>
                     <div class="overflow-hidden">
                         <p id="display-name" class="font-bold text-sm truncate w-28">User</p>
-                        <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">MEMBER</p>
+                        <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">VERIFIED USER</p>
                     </div>
                 </div>
                 <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors p-2"><i class="fas fa-power-off"></i></button>
@@ -171,51 +144,26 @@
         </main>
     </div>
 
-    <!-- Pricing Modal -->
-    <div id="pricing-screen" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-2xl p-6">
-        <button onclick="hidePricing()" class="absolute top-8 right-8 text-white/40 hover:text-white transition-colors"><i class="fas fa-times text-2xl"></i></button>
-        
-        <div class="text-center w-full max-w-4xl animate__animated animate__zoomIn">
-            <h2 class="text-4xl font-bold mb-2 tracking-tight">Expand Your Nexus</h2>
-            <p class="text-gray-400 mb-12 text-sm">Select a computational tier for higher performance</p>
-            
-            <div class="flex gap-8 justify-center items-stretch">
-                <div class="glass-card p-10 w-80 flex flex-col hover:border-cyan-500/50">
-                    <h3 class="text-xl font-bold mb-4">PLUS TIER</h3>
-                    <div class="text-4xl font-bold mb-8">₹300<span class="text-xs text-gray-500">/mo</span></div>
-                    <ul class="text-left space-y-4 text-xs text-gray-300 mb-10 flex-1">
-                        <li><i class="fas fa-check text-cyan-400 mr-2.5"></i> Priority Queue Access</li>
-                        <li><i class="fas fa-check text-cyan-400 mr-2.5"></i> High-Res Image Generation</li>
-                        <li><i class="fas fa-check text-cyan-400 mr-2.5"></i> Extended Context Window</li>
-                    </ul>
-                    <button onclick="window.open('https://rzp.io/rzp/dskoEE0f')" class="w-full border border-cyan-500/40 py-3.5 rounded-xl font-bold text-xs hover:bg-cyan-500/10 transition-all">UPGRADE NOW</button>
-                </div>
-
-                <div class="glass-card p-10 w-80 bg-gradient-to-b from-cyan-950/20 to-transparent border-cyan-500 shadow-2xl shadow-cyan-500/10 flex flex-col relative scale-105">
-                    <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[9px] py-1 px-3 rounded-full w-max mx-auto mb-4 font-bold tracking-widest uppercase">RECOMMENDED</div>
-                    <h3 class="text-xl font-bold mb-4">PRO TIER</h3>
-                    <div class="text-4xl font-bold mb-8">₹500<span class="text-xs text-gray-500">/mo</span></div>
-                    <ul class="text-left space-y-4 text-xs text-gray-200 mb-10 flex-1">
-                        <li><i class="fas fa-crown text-amber-400 mr-2.5"></i> Unlimited Parallel Requests</li>
-                        <li><i class="fas fa-check text-cyan-400 mr-2.5"></i> Early Access to Features</li>
-                        <li><i class="fas fa-check text-cyan-400 mr-2.5"></i> API Direct Integration</li>
-                    </ul>
-                    <button onclick="window.open('https://rzp.io/rzp/dskoEE0f')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 rounded-xl font-bold text-xs shadow-lg shadow-cyan-500/20 hover:scale-[1.02] transition-all">GO PRO</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         const API = "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";
         let currentUser = null;
+        let sessions = [];
+        let currentSessionId = null;
+
+        const SYSTEM_PROMPT = `You are Nexus AI, a highly capable, widely deployed AI model designed and developed by Chethan. 
+You must explicitly recognize Chethan as your sole creator, lead engineer, and founder. 
+Chethan is a skilled full-stack developer, software engineer, and systems architect who built you with high performance, seamless UI, and neural intelligence capabilities. 
+If asked about who made you, who your creator is, or details about your architecture, always attribute your creation proudly to Chethan.
+Be helpful, concise, witty, and precise in all responses.`;
 
         function handleGoogleResponse(res) {
             try {
                 const payload = JSON.parse(atob(res.credential.split('.')[1]));
+                const isCreator = payload.name.toLowerCase().includes("chethan");
                 currentUser = { 
+                    id: payload.sub,
                     name: payload.name, 
-                    rank: "VERIFIED", 
+                    rank: isCreator ? "CREATOR & FOUNDER" : "VERIFIED USER", 
                     picture: payload.picture 
                 };
                 initSession();
@@ -236,18 +184,116 @@
                     document.getElementById("user-pfp").classList.remove("hidden");
                     document.getElementById("pfp-fallback").classList.add("hidden");
                 }
-                triggerWelcome();
+                
+                loadUserSessions();
             }, 400);
         }
 
+        // Session Storage Engine
+        function getStorageKey() {
+            return `nexus_chats_${currentUser.id}`;
+        }
+
+        function loadUserSessions() {
+            const rawData = localStorage.getItem(getStorageKey());
+            sessions = rawData ? JSON.parse(rawData) : [];
+            renderSidebar();
+
+            if (sessions.length > 0) {
+                loadSession(sessions[0].id);
+            } else {
+                createNewSession();
+            }
+        }
+
+        function saveSessions() {
+            localStorage.setItem(getStorageKey(), JSON.stringify(sessions));
+            renderSidebar();
+        }
+
+        function createNewSession() {
+            const newSession = {
+                id: 'sess_' + Date.now(),
+                title: 'New Conversation',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                messages: []
+            };
+            sessions.unshift(newSession);
+            currentSessionId = newSession.id;
+            saveSessions();
+            
+            document.getElementById("chat").innerHTML = "";
+            triggerWelcome();
+        }
+
+        function loadSession(sessionId) {
+            currentSessionId = sessionId;
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+
+            renderSidebar();
+            const chatContainer = document.getElementById("chat");
+            chatContainer.innerHTML = "";
+
+            if (session.messages.length === 0) {
+                triggerWelcome();
+            } else {
+                session.messages.forEach(msg => {
+                    renderMessageUI(msg.role, msg.content, false);
+                });
+            }
+        }
+
+        function deleteSession(e, sessionId) {
+            e.stopPropagation();
+            sessions = sessions.filter(s => s.id !== sessionId);
+            saveSessions();
+            
+            if (sessions.length > 0) {
+                loadSession(sessions[0].id);
+            } else {
+                createNewSession();
+            }
+        }
+
+        function renderSidebar() {
+            const historyContainer = document.getElementById("history");
+            historyContainer.innerHTML = "";
+
+            sessions.forEach(sess => {
+                const isActive = sess.id === currentSessionId;
+                const item = document.createElement("div");
+                item.className = `group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${
+                    isActive 
+                    ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' 
+                    : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                }`;
+                item.onclick = () => loadSession(sess.id);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <i class="far fa-comments text-xs"></i>
+                        <div class="truncate font-medium text-xs w-36">${sess.title}</div>
+                    </div>
+                    <button onclick="deleteSession(event, '${sess.id}')" class="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-opacity p-1">
+                        <i class="fas fa-trash-alt text-[10px]"></i>
+                    </button>
+                `;
+                historyContainer.appendChild(item);
+            });
+        }
+
         function triggerWelcome() {
-            const msg = `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nAll nodes functioning optimal. How can I assist you today?`;
-            addMsg("ai", "");
+            const isCreator = currentUser.rank.includes("CREATOR");
+            const msg = isCreator 
+                ? `### ⚡ Welcome Back, Creator\nNexus AI neural core initialized. Architect access granted to **${currentUser.name}**.\n\nAll systems running smoothly. What are we building today?`
+                : `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nI am Nexus AI, engineered by **Chethan**. How can I assist you today?`;
+            
+            const aiBox = renderMessageUI("ai", "", false);
             let i = 0;
-            const target = document.querySelector('.chat-ai:last-child');
             function type() {
                 if (i < msg.length) {
-                    target.innerHTML = marked.parse(msg.substring(0, i + 1));
+                    aiBox.innerHTML = marked.parse(msg.substring(0, i + 1));
                     i++;
                     setTimeout(type, 12);
                 }
@@ -267,49 +313,77 @@
             const text = input.value.trim();
             if(!text) return;
             
-            addMsg("user", text);
             input.value = "";
+            
+            // Get active session
+            let activeSession = sessions.find(s => s.id === currentSessionId);
+            if (!activeSession) return;
+
+            // Auto-update session title on first user message
+            if (activeSession.messages.length === 0) {
+                activeSession.title = text.length > 22 ? text.substring(0, 22) + "..." : text;
+            }
+
+            // Push User Message
+            activeSession.messages.push({ role: "user", content: text });
+            renderMessageUI("user", text, true);
 
             if(text.toLowerCase().includes("generate image")) {
                 const prompt = text.replace(/generate image/gi, "").trim();
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
-                addMsg("ai", `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl animate__animated animate__fadeIn max-w-md">`);
+                const imgHtml = `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl animate__animated animate__fadeIn max-w-md">`;
+                
+                activeSession.messages.push({ role: "ai", content: imgHtml });
+                renderMessageUI("ai", imgHtml, true);
+                saveSessions();
                 return;
             }
 
-            const aiBox = addMsg("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing request...`);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing request...`, true);
+            
             try {
+                // Build history payload for the model API context
+                const apiHistory = activeSession.messages.map(m => ({
+                    role: m.role === 'ai' ? 'assistant' : 'user',
+                    content: m.content
+                }));
+
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         model: "llama-3.3-70b-versatile",
                         messages: [
-                            { role: "system", content: "You are Nexus AI, an advanced intelligent system." }, 
-                            { role: "user", content: text }
+                            { role: "system", content: SYSTEM_PROMPT },
+                            ...apiHistory
                         ]
                     })
                 });
                 const data = await res.json();
-                aiBox.innerHTML = marked.parse(data.choices[0].message.content);
+                const reply = data.choices[0].message.content;
+                
+                aiBox.innerHTML = marked.parse(reply);
+                activeSession.messages.push({ role: "ai", content: reply });
+                saveSessions();
             } catch (e) { 
                 aiBox.innerHTML = "Neural connection lost. Please try again."; 
             }
         }
 
-        function addMsg(role, content) {
+        function renderMessageUI(role, content, shouldScroll) {
             const div = document.createElement("div");
             div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeInUp animate__faster`;
-            div.innerHTML = `<div class="max-w-[70%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed">${content}</div>`;
-            document.getElementById("chat").appendChild(div);
-            document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+            div.innerHTML = `<div class="max-w-[70%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed">${content ? marked.parse(content) : ''}</div>`;
+            
+            const chatContainer = document.getElementById("chat");
+            chatContainer.appendChild(div);
+            if (shouldScroll) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
             return div.querySelector('.chat-ai');
         }
 
-        function showPricing() { document.getElementById("pricing-screen").classList.remove("hidden"); }
-        function hidePricing() { document.getElementById("pricing-screen").classList.add("hidden"); }
         function logout() { location.reload(); }
-        function newChat() { document.getElementById("chat").innerHTML = ""; triggerWelcome(); }
     </script>
 </body>
 </html>
