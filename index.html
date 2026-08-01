@@ -146,22 +146,28 @@
 
     <script>
         const API = "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";
+        
+        // Exact email check for Creator status
+        const CREATOR_EMAIL = "monsterbeast2569@gmail.com"; 
+
         let currentUser = null;
         let sessions = [];
         let currentSessionId = null;
 
-        const SYSTEM_PROMPT = `You are Nexus AI, a highly capable, widely deployed AI model designed and developed by Chethan. 
-You must explicitly recognize Chethan as your sole creator, lead engineer, and founder. 
-Chethan is a skilled full-stack developer, software engineer, and systems architect who built you with high performance, seamless UI, and neural intelligence capabilities. 
-If asked about who made you, who your creator is, or details about your architecture, always attribute your creation proudly to Chethan.
-Be helpful, concise, witty, and precise in all responses.`;
+        const SYSTEM_PROMPT = `You are Nexus AI, an advanced, high-performance intelligent system.
+IMPORTANT: You should ONLY state or discuss that you were created, engineered, or developed by Chethan IF AND ONLY IF the user explicitly asks about who made you, created you, developed you, or asks for details regarding your author/creator/developer.
+Do NOT mention Chethan or your creation background in general responses, standard answers, greetings, or unrelated prompts. Stay focused strictly on the user's explicit question or task.`;
 
         function handleGoogleResponse(res) {
             try {
                 const payload = JSON.parse(atob(res.credential.split('.')[1]));
-                const isCreator = payload.name.toLowerCase().includes("chethan");
+                
+                // Strict email check
+                const isCreator = payload.email && payload.email.toLowerCase() === CREATOR_EMAIL.toLowerCase();
+                
                 currentUser = { 
                     id: payload.sub,
+                    email: payload.email,
                     name: payload.name, 
                     rank: isCreator ? "CREATOR & FOUNDER" : "VERIFIED USER", 
                     picture: payload.picture 
@@ -189,7 +195,6 @@ Be helpful, concise, witty, and precise in all responses.`;
             }, 400);
         }
 
-        // Session Storage Engine
         function getStorageKey() {
             return `nexus_chats_${currentUser.id}`;
         }
@@ -287,7 +292,7 @@ Be helpful, concise, witty, and precise in all responses.`;
             const isCreator = currentUser.rank.includes("CREATOR");
             const msg = isCreator 
                 ? `### ⚡ Welcome Back, Creator\nNexus AI neural core initialized. Architect access granted to **${currentUser.name}**.\n\nAll systems running smoothly. What are we building today?`
-                : `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nI am Nexus AI, engineered by **Chethan**. How can I assist you today?`;
+                : `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
             
             const aiBox = renderMessageUI("ai", "", false);
             let i = 0;
@@ -315,16 +320,13 @@ Be helpful, concise, witty, and precise in all responses.`;
             
             input.value = "";
             
-            // Get active session
             let activeSession = sessions.find(s => s.id === currentSessionId);
             if (!activeSession) return;
 
-            // Auto-update session title on first user message
             if (activeSession.messages.length === 0) {
                 activeSession.title = text.length > 22 ? text.substring(0, 22) + "..." : text;
             }
 
-            // Push User Message
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
@@ -342,7 +344,6 @@ Be helpful, concise, witty, and precise in all responses.`;
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing request...`, true);
             
             try {
-                // Build history payload for the model API context
                 const apiHistory = activeSession.messages.map(m => ({
                     role: m.role === 'ai' ? 'assistant' : 'user',
                     content: m.content
