@@ -105,7 +105,7 @@
                 </div>
             </div>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is a state-of-the-art neural platform engineered for seamless conversational workflows and automated task handling.
+                Nexus AI is a high-performance neural workspace engineered for automated task handling, custom intelligence, and intelligent workflows.
             </p>
             
             <div class="space-y-3">
@@ -396,12 +396,13 @@ Do NOT mention Chethan or your creation background in general responses, standar
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
+            // Handle image generation separately
             if(text.toLowerCase().includes("generate image")) {
                 const prompt = text.replace(/generate image/gi, "").trim();
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
                 const imgHtml = `<img src="${url}" class="rounded-2xl border border-white/10 shadow-2xl animate__animated animate__fadeIn max-w-md">`;
                 
-                activeSession.messages.push({ role: "ai", content: imgHtml });
+                activeSession.messages.push({ role: "ai", content: imgHtml, isRawHtml: true });
                 renderMessageUI("ai", imgHtml, true);
                 saveSessions();
                 return;
@@ -410,14 +411,20 @@ Do NOT mention Chethan or your creation background in general responses, standar
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing request...`, true);
             
             try {
-                const apiHistory = activeSession.messages.map(m => ({
-                    role: m.role === 'ai' ? 'assistant' : 'user',
-                    content: m.content
-                }));
+                // Filter out non-text/image entries from context sent to Groq
+                const apiHistory = activeSession.messages
+                    .filter(m => !m.isRawHtml && !m.content.startsWith("<img"))
+                    .map(m => ({
+                        role: m.role === 'ai' ? 'assistant' : 'user',
+                        content: m.content
+                    }));
 
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Authorization": "Bearer " + API, "Content-Type": "application/json" },
+                    headers: { 
+                        "Authorization": `Bearer ${API.trim()}`, 
+                        "Content-Type": "application/json" 
+                    },
                     body: JSON.stringify({
                         model: "llama-3.3-70b-versatile",
                         messages: [
@@ -426,14 +433,22 @@ Do NOT mention Chethan or your creation background in general responses, standar
                         ]
                     })
                 });
+
                 const data = await res.json();
+
+                if (!res.ok) {
+                    console.error("Groq API Error Details:", data);
+                    throw new Error(data.error?.message || `HTTP ${res.status}: ${res.statusText}`);
+                }
+
                 const reply = data.choices[0].message.content;
-                
                 aiBox.innerHTML = marked.parse(reply);
                 activeSession.messages.push({ role: "ai", content: reply });
                 saveSessions();
+
             } catch (e) { 
-                aiBox.innerHTML = "Neural connection lost. Please try again."; 
+                console.error("Full Connection Error:", e);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`; 
             }
         }
 
