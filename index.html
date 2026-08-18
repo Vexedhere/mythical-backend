@@ -109,7 +109,6 @@
             </p>
             
             <div class="space-y-3">
-                <!-- Chethan -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-bold text-sm">C</div>
@@ -120,7 +119,6 @@
                     </div>
                     <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Owner</span>
                 </div>
-                <!-- Vijay -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30 font-bold text-sm">V</div>
@@ -131,7 +129,6 @@
                     </div>
                     <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">Manager</span>
                 </div>
-                <!-- Venkat -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 font-bold text-sm">V</div>
@@ -209,6 +206,14 @@
         const API = "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";
         const CREATOR_EMAIL = "monsterbeast2569@gmail.com"; 
 
+        // Ordered list of models to try in sequence
+        const CANDIDATE_MODELS = [
+            "gemma2-9b-it",
+            "mixtral-8x7b-32768",
+            "llama-3.3-70b-specdec",
+            "llama-3.1-8b-instant"
+        ];
+
         let currentUser = null;
         let sessions = [];
         let currentSessionId = null;
@@ -256,7 +261,6 @@ Do NOT mention Chethan or your creation background in general responses, standar
                     document.getElementById("user-pfp").classList.remove("hidden");
                     document.getElementById("pfp-fallback").classList.add("hidden");
                 }
-                
                 loadUserSessions();
             }, 400);
         }
@@ -396,7 +400,6 @@ Do NOT mention Chethan or your creation background in general responses, standar
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
-            // Handle image generation separately
             if(text.toLowerCase().includes("generate image")) {
                 const prompt = text.replace(/generate image/gi, "").trim();
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
@@ -410,45 +413,52 @@ Do NOT mention Chethan or your creation background in general responses, standar
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing request...`, true);
             
-            try {
-                // Filter out non-text/image entries from context sent to Groq
-                const apiHistory = activeSession.messages
-                    .filter(m => !m.isRawHtml && !m.content.startsWith("<img"))
-                    .map(m => ({
-                        role: m.role === 'ai' ? 'assistant' : 'user',
-                        content: m.content
-                    }));
+            const apiHistory = activeSession.messages
+                .filter(m => !m.isRawHtml && !m.content.startsWith("<img"))
+                .map(m => ({
+                    role: m.role === 'ai' ? 'assistant' : 'user',
+                    content: m.content
+                }));
 
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${API.trim()}`, 
-                        "Content-Type": "application/json" 
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.1-8b-instant",
-                        messages: [
-                            { role: "system", content: SYSTEM_PROMPT },
-                            ...apiHistory
-                        ]
-                    })
-                });
+            let reply = null;
+            let lastError = null;
 
-                const data = await res.json();
+            // Attempt candidates until one responds successfully
+            for (const model of CANDIDATE_MODELS) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: { 
+                            "Authorization": `Bearer ${API.trim()}`, 
+                            "Content-Type": "application/json" 
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: SYSTEM_PROMPT },
+                                ...apiHistory
+                            ]
+                        })
+                    });
 
-                if (!res.ok) {
-                    console.error("Groq API Error Details:", data);
-                    throw new Error(data.error?.message || `HTTP ${res.status}: ${res.statusText}`);
+                    const data = await res.json();
+                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
+                        reply = data.choices[0].message.content;
+                        break;
+                    } else {
+                        lastError = data.error?.message || `HTTP ${res.status}`;
+                    }
+                } catch (e) {
+                    lastError = e.message;
                 }
+            }
 
-                const reply = data.choices[0].message.content;
+            if (reply) {
                 aiBox.innerHTML = marked.parse(reply);
                 activeSession.messages.push({ role: "ai", content: reply });
                 saveSessions();
-
-            } catch (e) { 
-                console.error("Full Connection Error:", e);
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`; 
+            } else {
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
             }
         }
 
