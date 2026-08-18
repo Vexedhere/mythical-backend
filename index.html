@@ -87,7 +87,6 @@
             </div>
             <div class="g_id_signin flex justify-center scale-105" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
             
-            <!-- Quick Bypass for Testing -->
             <button onclick="guestLogin()" class="mt-4 text-xs text-gray-500 hover:text-cyan-400 transition-colors">
                 Continue as Guest / Direct Test &rarr;
             </button>
@@ -110,7 +109,7 @@
                 </div>
             </div>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is an advanced intelligent system engineered for automated workflows and seamless neural conversations.
+                Nexus AI is an advanced intelligent system engineered for automated workflows, stream processing, and custom neural tasks.
             </p>
             
             <div class="space-y-3">
@@ -422,7 +421,8 @@ Do NOT mention Chethan or your creation background in general responses, standar
                 return;
             }
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing request...`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Connecting stream...`, true);
+            const chatContainer = document.getElementById("chat");
             
             const apiHistory = activeSession.messages
                 .filter(m => !m.isRawHtml && !m.content.startsWith("<img"))
@@ -432,7 +432,6 @@ Do NOT mention Chethan or your creation background in general responses, standar
                 }));
 
             try {
-                // High-performance OpenAI-compatible gateway without API key friction
                 const res = await fetch("https://text.pollinations.ai/", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -442,22 +441,35 @@ Do NOT mention Chethan or your creation background in general responses, standar
                             ...apiHistory
                         ],
                         model: "openai",
-                        seed: 42
+                        stream: true
                     })
                 });
 
                 if (!res.ok) {
-                    throw new Error(`Connection error HTTP ${res.status}`);
+                    throw new Error(`HTTP error ${res.status}`);
                 }
 
-                const reply = await res.text();
-                aiBox.innerHTML = marked.parse(reply);
-                activeSession.messages.push({ role: "ai", content: reply });
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullText = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
+                    
+                    aiBox.innerHTML = marked.parse(fullText);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+
+                activeSession.messages.push({ role: "ai", content: fullText });
                 saveSessions();
 
             } catch (e) {
-                console.error("Connection Error:", e);
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`;
+                console.error("Stream Connection Error:", e);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural stream failed:</span> ${e.message}`;
             }
         }
 
