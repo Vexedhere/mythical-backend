@@ -210,9 +210,15 @@
     </div>
 
     <script>
-        // Paste your working Groq API key here (from console.groq.com/keys)
-        const API = "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"; 
+        const API = "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";
         const CREATOR_EMAIL = "monsterbeast2569@gmail.com"; 
+
+        // Active replacement models per Groq's official deprecation schedule
+        const ACTIVE_MODELS = [
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "qwen/qwen3.6-27b"
+        ];
 
         let currentUser = null;
         let sessions = [];
@@ -425,59 +431,52 @@ Do NOT mention Chethan or your creation background in general responses, standar
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying Groq Neural Matrix...`, true);
             
-            try {
-                const apiHistory = activeSession.messages
-                    .filter(m => !m.isRawHtml && !m.content.startsWith("<img"))
-                    .map(m => ({
-                        role: m.role === 'ai' ? 'assistant' : 'user',
-                        content: m.content
-                    }));
+            const apiHistory = activeSession.messages
+                .filter(m => !m.isRawHtml && !m.content.startsWith("<img"))
+                .map(m => ({
+                    role: m.role === 'ai' ? 'assistant' : 'user',
+                    content: m.content
+                }));
 
-                // Candidate models to auto-try in sequence
-                const models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"];
-                let reply = null;
-                let lastError = null;
+            let reply = null;
+            let lastError = null;
 
-                for (const model of models) {
-                    try {
-                        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                            method: "POST",
-                            headers: { 
-                                "Authorization": `Bearer ${API.trim()}`, 
-                                "Content-Type": "application/json" 
-                            },
-                            body: JSON.stringify({
-                                model: model,
-                                messages: [
-                                    { role: "system", content: SYSTEM_PROMPT },
-                                    ...apiHistory
-                                ]
-                            })
-                        });
+            for (const model of ACTIVE_MODELS) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: { 
+                            "Authorization": `Bearer ${API.trim()}`, 
+                            "Content-Type": "application/json" 
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: SYSTEM_PROMPT },
+                                ...apiHistory
+                            ]
+                        })
+                    });
 
-                        const data = await res.json();
-                        if (res.ok && data.choices && data.choices[0]?.message?.content) {
-                            reply = data.choices[0].message.content;
-                            break;
-                        } else {
-                            lastError = data.error?.message || `HTTP ${res.status}`;
-                        }
-                    } catch (err) {
-                        lastError = err.message;
+                    const data = await res.json();
+                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
+                        reply = data.choices[0].message.content;
+                        break;
+                    } else {
+                        lastError = data.error?.message || `HTTP ${res.status}`;
                     }
+                } catch (err) {
+                    lastError = err.message;
                 }
+            }
 
-                if (reply) {
-                    aiBox.innerHTML = marked.parse(reply);
-                    activeSession.messages.push({ role: "ai", content: reply });
-                    saveSessions();
-                } else {
-                    throw new Error(lastError || "Failed to get response from Groq.");
-                }
-
-            } catch (e) { 
-                console.error("Groq Connection Error:", e);
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`; 
+            if (reply) {
+                aiBox.innerHTML = marked.parse(reply);
+                activeSession.messages.push({ role: "ai", content: reply });
+                saveSessions();
+            } else {
+                console.error("Groq Connection Error:", lastError);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
             }
         }
 
