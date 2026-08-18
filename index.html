@@ -87,9 +87,14 @@
             </div>
             <div class="g_id_signin flex justify-center scale-105" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
             
-            <button onclick="guestLogin()" class="mt-4 text-xs text-gray-500 hover:text-cyan-400 transition-colors">
-                Continue as Guest / Direct Test &rarr;
-            </button>
+            <div class="mt-6 flex flex-col gap-2">
+                <button onclick="simulateLogin('chethan131011.u@gmail.com', 'Chethan')" class="text-xs text-gray-400 hover:text-cyan-400 transition-colors">
+                    Login as Chethan (Owner) &rarr;
+                </button>
+                <button onclick="simulateLogin('malluruvijaysundhar@gmail.com', 'Vijay')" class="text-xs text-gray-400 hover:text-blue-400 transition-colors">
+                    Login as Vijay (Manager) &rarr;
+                </button>
+            </div>
         </div>
     </div>
 
@@ -181,7 +186,7 @@
             <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
                 <div class="flex items-center gap-3">
                     <img id="user-pfp" class="w-10 h-10 rounded-xl border border-cyan-500/30 hidden object-cover">
-                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20"><i class="fas fa-user-astronaut"></i></div>
+                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 font-bold">U</div>
                     <div class="overflow-hidden">
                         <p id="display-name" class="font-bold text-sm truncate w-28">User</p>
                         <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">VERIFIED USER</p>
@@ -211,9 +216,29 @@
 
     <script>
         const API = "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";
-        const CREATOR_EMAIL = "monsterbeast2569@gmail.com"; 
 
-        // Active replacement models per Groq's official deprecation schedule
+        // Verified Email to Role & Designation mapping
+        const ROLE_CONFIG = {
+            "chethan131011.u@gmail.com": {
+                rank: "OWNER & FOUNDER",
+                badgeClass: "text-cyan-400",
+                roleTitle: "Owner",
+                defaultName: "Chethan"
+            },
+            "monsterbeast2569@gmail.com": {
+                rank: "OWNER & FOUNDER",
+                badgeClass: "text-cyan-400",
+                roleTitle: "Owner",
+                defaultName: "Chethan"
+            },
+            "malluruvijaysundhar@gmail.com": {
+                rank: "MANAGER",
+                badgeClass: "text-blue-400",
+                roleTitle: "Manager",
+                defaultName: "Vijay"
+            }
+        };
+
         const ACTIVE_MODELS = [
             "openai/gpt-oss-120b",
             "openai/gpt-oss-20b",
@@ -224,25 +249,45 @@
         let sessions = [];
         let currentSessionId = null;
 
-        const SYSTEM_PROMPT = `You are Nexus AI, an advanced, high-performance intelligent system.
-IMPORTANT: You should ONLY state or discuss that you were created, engineered, or developed by Chethan IF AND ONLY IF the user explicitly asks about who made you, created you, developed you, or asks for details regarding your author/creator/developer.
-Do NOT mention Chethan or your creation background in general responses, standard answers, greetings, or unrelated prompts. Stay focused strictly on the user's explicit question or task.`;
+        function getSystemPrompt() {
+            return `You are Nexus AI, an advanced, high-performance intelligent system.
+Current Active User Session:
+- User Name: ${currentUser?.name || "User"}
+- User Email: ${currentUser?.email || "Unknown"}
+- Designated Role / Rank: ${currentUser?.rank || "Verified User"}
+
+Guidelines:
+1. Address the user appropriately according to their rank and name when greeting or when relevant.
+2. If the user asks about who made you, developed you, or founded Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.
+3. Stay focused, efficient, and direct in answering technical and general requests.`;
+        }
 
         function toggleAboutModal(show) {
             const modal = document.getElementById("about-modal");
-            if (show) {
-                modal.classList.remove("hidden");
-            } else {
-                modal.classList.add("hidden");
-            }
+            if (show) modal.classList.remove("hidden");
+            else modal.classList.add("hidden");
         }
 
-        function guestLogin() {
+        function getUserRole(email) {
+            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
+            
+            const normalized = email.toLowerCase().trim();
+            for (const key in ROLE_CONFIG) {
+                if (normalized === key || normalized.startsWith(key.split("@")[0])) {
+                    return ROLE_CONFIG[key];
+                }
+            }
+            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
+        }
+
+        function simulateLogin(email, name) {
+            const roleInfo = getUserRole(email);
             currentUser = {
-                id: "guest_user",
-                email: "guest@nexus.ai",
-                name: "Chethan",
-                rank: "CREATOR & FOUNDER",
+                id: "sim_" + email.replace(/[^a-zA-Z0-9]/g, ""),
+                email: email,
+                name: name || roleInfo.defaultName,
+                rank: roleInfo.rank,
+                roleTitle: roleInfo.roleTitle,
                 picture: null
             };
             initSession();
@@ -251,13 +296,15 @@ Do NOT mention Chethan or your creation background in general responses, standar
         function handleGoogleResponse(res) {
             try {
                 const payload = JSON.parse(atob(res.credential.split('.')[1]));
-                const isCreator = payload.email && payload.email.toLowerCase() === CREATOR_EMAIL.toLowerCase();
+                const email = payload.email || "";
+                const roleInfo = getUserRole(email);
                 
                 currentUser = { 
                     id: payload.sub,
-                    email: payload.email,
-                    name: payload.name, 
-                    rank: isCreator ? "CREATOR & FOUNDER" : "VERIFIED USER", 
+                    email: email,
+                    name: payload.name || roleInfo.defaultName, 
+                    rank: roleInfo.rank,
+                    roleTitle: roleInfo.roleTitle,
                     picture: payload.picture 
                 };
                 initSession();
@@ -271,13 +318,31 @@ Do NOT mention Chethan or your creation background in general responses, standar
             setTimeout(() => {
                 document.getElementById("login-screen").classList.add("hidden");
                 document.getElementById("main-app").classList.remove("hidden");
-                document.getElementById("display-name").innerText = currentUser.name;
-                document.getElementById("display-rank").innerText = currentUser.rank;
-                if(currentUser.picture) {
+                
+                const nameEl = document.getElementById("display-name");
+                const rankEl = document.getElementById("display-rank");
+                const pfpFallback = document.getElementById("pfp-fallback");
+                
+                nameEl.innerText = currentUser.name;
+                rankEl.innerText = currentUser.rank;
+
+                if (currentUser.rank.includes("OWNER")) {
+                    rankEl.className = "text-[8px] text-cyan-400 font-bold uppercase tracking-widest";
+                } else if (currentUser.rank.includes("MANAGER")) {
+                    rankEl.className = "text-[8px] text-blue-400 font-bold uppercase tracking-widest";
+                } else {
+                    rankEl.className = "text-[8px] text-gray-400 font-bold uppercase tracking-widest";
+                }
+
+                if (currentUser.picture) {
                     document.getElementById("user-pfp").src = currentUser.picture;
                     document.getElementById("user-pfp").classList.remove("hidden");
-                    document.getElementById("pfp-fallback").classList.add("hidden");
+                    pfpFallback.classList.add("hidden");
+                } else {
+                    pfpFallback.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : "U";
+                    pfpFallback.classList.remove("hidden");
                 }
+                
                 loadUserSessions();
             }, 400);
         }
@@ -376,10 +441,14 @@ Do NOT mention Chethan or your creation background in general responses, standar
         }
 
         function triggerWelcome() {
-            const isCreator = currentUser.rank.includes("CREATOR");
-            const msg = isCreator 
-                ? `### ⚡ Welcome Back, Creator\nNexus AI neural core initialized. Architect access granted to **${currentUser.name}**.\n\nAll systems running smoothly. What are we building today?`
-                : `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
+            let msg = "";
+            if (currentUser.rank.includes("OWNER")) {
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI core initialized. Founder & root clearance granted to **${currentUser.name}**.\n\nAll neural pathways operational. What are we building today?`;
+            } else if (currentUser.rank.includes("MANAGER")) {
+                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
+            } else {
+                msg = `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
+            }
             
             const aiBox = renderMessageUI("ai", "", false);
             let i = 0;
@@ -452,7 +521,7 @@ Do NOT mention Chethan or your creation background in general responses, standar
                         body: JSON.stringify({
                             model: model,
                             messages: [
-                                { role: "system", content: SYSTEM_PROMPT },
+                                { role: "system", content: getSystemPrompt() },
                                 ...apiHistory
                             ]
                         })
