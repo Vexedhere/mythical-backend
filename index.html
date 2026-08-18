@@ -86,7 +86,7 @@
                  data-callback="handleGoogleResponse">
             </div>
             <div class="g_id_signin flex justify-center scale-105" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
-
+            
             <button onclick="guestLogin()" class="mt-4 text-xs text-gray-500 hover:text-cyan-400 transition-colors">
                 Continue as Guest / Direct Test &rarr;
             </button>
@@ -210,8 +210,8 @@
     </div>
 
     <script>
-        // Paste your free Google AI Studio Key here
-        const GEMINI_API_KEY = "AQ.Ab8RN6K5ZfuaWzvj0b5Zcr5KSwX22Ddccy9exS0z7xv5h_Kc0Q"; 
+        // Paste your working Groq API key here (from console.groq.com/keys)
+        const API = "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"; 
         const CREATOR_EMAIL = "monsterbeast2569@gmail.com"; 
 
         let currentUser = null;
@@ -423,44 +423,61 @@ Do NOT mention Chethan or your creation background in general responses, standar
                 return;
             }
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Connecting to Gemini Core...`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying Groq Neural Matrix...`, true);
             
             try {
-                // Map conversation history to Google Gemini schema
-                const contents = activeSession.messages
+                const apiHistory = activeSession.messages
                     .filter(m => !m.isRawHtml && !m.content.startsWith("<img"))
                     .map(m => ({
-                        role: m.role === 'ai' ? 'model' : 'user',
-                        parts: [{ text: m.content }]
+                        role: m.role === 'ai' ? 'assistant' : 'user',
+                        content: m.content
                     }));
 
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY.trim()}`;
+                // Candidate models to auto-try in sequence
+                const models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"];
+                let reply = null;
+                let lastError = null;
 
-                const res = await fetch(endpoint, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        systemInstruction: {
-                            parts: [{ text: SYSTEM_PROMPT }]
-                        },
-                        contents: contents
-                    })
-                });
+                for (const model of models) {
+                    try {
+                        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                            method: "POST",
+                            headers: { 
+                                "Authorization": `Bearer ${API.trim()}`, 
+                                "Content-Type": "application/json" 
+                            },
+                            body: JSON.stringify({
+                                model: model,
+                                messages: [
+                                    { role: "system", content: SYSTEM_PROMPT },
+                                    ...apiHistory
+                                ]
+                            })
+                        });
 
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error?.message || `HTTP ${res.status}: ${res.statusText}`);
+                        const data = await res.json();
+                        if (res.ok && data.choices && data.choices[0]?.message?.content) {
+                            reply = data.choices[0].message.content;
+                            break;
+                        } else {
+                            lastError = data.error?.message || `HTTP ${res.status}`;
+                        }
+                    } catch (err) {
+                        lastError = err.message;
+                    }
                 }
 
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
-                aiBox.innerHTML = marked.parse(reply);
-                activeSession.messages.push({ role: "ai", content: reply });
-                saveSessions();
+                if (reply) {
+                    aiBox.innerHTML = marked.parse(reply);
+                    activeSession.messages.push({ role: "ai", content: reply });
+                    saveSessions();
+                } else {
+                    throw new Error(lastError || "Failed to get response from Groq.");
+                }
 
-            } catch (e) {
-                console.error("Gemini Connection Error:", e);
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`;
+            } catch (e) { 
+                console.error("Groq Connection Error:", e);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`; 
             }
         }
 
