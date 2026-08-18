@@ -86,6 +86,11 @@
                  data-callback="handleGoogleResponse">
             </div>
             <div class="g_id_signin flex justify-center scale-105" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
+            
+            <!-- Quick Bypass for Testing -->
+            <button onclick="guestLogin()" class="mt-4 text-xs text-gray-500 hover:text-cyan-400 transition-colors">
+                Continue as Guest / Direct Test &rarr;
+            </button>
         </div>
     </div>
 
@@ -105,10 +110,11 @@
                 </div>
             </div>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is a high-performance neural workspace engineered for automated task handling, custom intelligence, and intelligent workflows.
+                Nexus AI is an advanced intelligent system engineered for automated workflows and seamless neural conversations.
             </p>
             
             <div class="space-y-3">
+                <!-- Chethan -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-bold text-sm">C</div>
@@ -119,6 +125,7 @@
                     </div>
                     <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Owner</span>
                 </div>
+                <!-- Vijay -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30 font-bold text-sm">V</div>
@@ -129,6 +136,7 @@
                     </div>
                     <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">Manager</span>
                 </div>
+                <!-- Venkat -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 font-bold text-sm">V</div>
@@ -203,16 +211,7 @@
     </div>
 
     <script>
-        const API = "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";
         const CREATOR_EMAIL = "monsterbeast2569@gmail.com"; 
-
-        // Ordered list of models to try in sequence
-        const CANDIDATE_MODELS = [
-            "gemma2-9b-it",
-            "mixtral-8x7b-32768",
-            "llama-3.3-70b-specdec",
-            "llama-3.1-8b-instant"
-        ];
 
         let currentUser = null;
         let sessions = [];
@@ -229,6 +228,17 @@ Do NOT mention Chethan or your creation background in general responses, standar
             } else {
                 modal.classList.add("hidden");
             }
+        }
+
+        function guestLogin() {
+            currentUser = {
+                id: "guest_user",
+                email: "guest@nexus.ai",
+                name: "Chethan",
+                rank: "CREATOR & FOUNDER",
+                picture: null
+            };
+            initSession();
         }
 
         function handleGoogleResponse(res) {
@@ -400,6 +410,7 @@ Do NOT mention Chethan or your creation background in general responses, standar
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
+            // Handle image generation
             if(text.toLowerCase().includes("generate image")) {
                 const prompt = text.replace(/generate image/gi, "").trim();
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
@@ -420,45 +431,33 @@ Do NOT mention Chethan or your creation background in general responses, standar
                     content: m.content
                 }));
 
-            let reply = null;
-            let lastError = null;
+            try {
+                // High-performance OpenAI-compatible gateway without API key friction
+                const res = await fetch("https://text.pollinations.ai/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: "system", content: SYSTEM_PROMPT },
+                            ...apiHistory
+                        ],
+                        model: "openai",
+                        seed: 42
+                    })
+                });
 
-            // Attempt candidates until one responds successfully
-            for (const model of CANDIDATE_MODELS) {
-                try {
-                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                        method: "POST",
-                        headers: { 
-                            "Authorization": `Bearer ${API.trim()}`, 
-                            "Content-Type": "application/json" 
-                        },
-                        body: JSON.stringify({
-                            model: model,
-                            messages: [
-                                { role: "system", content: SYSTEM_PROMPT },
-                                ...apiHistory
-                            ]
-                        })
-                    });
-
-                    const data = await res.json();
-                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
-                        reply = data.choices[0].message.content;
-                        break;
-                    } else {
-                        lastError = data.error?.message || `HTTP ${res.status}`;
-                    }
-                } catch (e) {
-                    lastError = e.message;
+                if (!res.ok) {
+                    throw new Error(`Connection error HTTP ${res.status}`);
                 }
-            }
 
-            if (reply) {
+                const reply = await res.text();
                 aiBox.innerHTML = marked.parse(reply);
                 activeSession.messages.push({ role: "ai", content: reply });
                 saveSessions();
-            } else {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
+
+            } catch (e) {
+                console.error("Connection Error:", e);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`;
             }
         }
 
