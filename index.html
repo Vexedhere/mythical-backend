@@ -86,15 +86,6 @@
                  data-callback="handleGoogleResponse">
             </div>
             <div class="g_id_signin flex justify-center scale-105" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
-            
-            <div class="mt-6 flex flex-col gap-2">
-                <button onclick="simulateLogin('chethan131011.u@gmail.com', 'Chethan')" class="text-xs text-gray-400 hover:text-cyan-400 transition-colors">
-                    Login as Chethan (Owner) &rarr;
-                </button>
-                <button onclick="simulateLogin('malluruvijaysundhar@gmail.com', 'Vijay')" class="text-xs text-gray-400 hover:text-blue-400 transition-colors">
-                    Login as Vijay (Manager) &rarr;
-                </button>
-            </div>
         </div>
     </div>
 
@@ -280,19 +271,6 @@ Guidelines:
             return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
         }
 
-        function simulateLogin(email, name) {
-            const roleInfo = getUserRole(email);
-            currentUser = {
-                id: "sim_" + email.replace(/[^a-zA-Z0-9]/g, ""),
-                email: email,
-                name: name || roleInfo.defaultName,
-                rank: roleInfo.rank,
-                roleTitle: roleInfo.roleTitle,
-                picture: null
-            };
-            initSession();
-        }
-
         function handleGoogleResponse(res) {
             try {
                 const payload = JSON.parse(atob(res.credential.split('.')[1]));
@@ -443,7 +421,7 @@ Guidelines:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI core initialized. Founder & root clearance granted to **${currentUser.name}**.\n\nAll neural pathways operational. What are we building today?`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI core initialized. Founder clearance granted to **${currentUser.name}**.\n\nAll neural pathways operational. What are we building today?`;
             } else if (currentUser.rank.includes("MANAGER")) {
                 msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
             } else {
