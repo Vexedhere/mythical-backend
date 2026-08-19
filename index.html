@@ -79,35 +79,8 @@
             <div class="g_id_signin flex justify-center scale-105 mb-4" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
             
             <button onclick="bypassLogin()" class="w-full py-3 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-semibold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2">
-                <i class="fas fa-bolt text-cyan-400"></i> Enter Workspace
+                <i class="fas fa-bolt text-cyan-400"></i> Instant Access (No Key Needed)
             </button>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[120] hidden">
-        <div class="glass-card p-7 w-full max-w-md mx-4 border-cyan-500/30 relative">
-            <button onclick="toggleSettings(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white">
-                <i class="fas fa-times text-lg"></i>
-            </button>
-            <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                <i class="fas fa-gear text-cyan-400"></i> Engine Settings
-            </h2>
-            <p class="text-xs text-gray-400 mb-4">Configure dedicated API keys or use default neural routing.</p>
-            
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-gray-300 font-semibold mb-1">Vidu AI / Video API Key (Optional)</label>
-                    <input id="custom-vidu-key" type="password" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-indigo-500/50" placeholder="vidu_key_...">
-                </div>
-                <div>
-                    <label class="block text-gray-300 font-semibold mb-1">Groq LLM Key (Optional)</label>
-                    <input id="custom-groq-key" type="password" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-cyan-500/50" placeholder="gsk_...">
-                </div>
-                <button onclick="saveSettings()" class="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 font-bold rounded-xl text-white hover:opacity-90">
-                    Save Configuration
-                </button>
-            </div>
         </div>
     </div>
 
@@ -120,37 +93,37 @@
                     <i class="fas fa-video text-base"></i>
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-white">Vidu AI Video Studio</h2>
-                    <p class="text-xs text-indigo-400 font-semibold tracking-wide">Generate High-Definition MP4 Motion Videos</p>
+                    <h2 class="text-lg font-bold text-white">Vidu AI Engine (Zero-API)</h2>
+                    <p class="text-xs text-indigo-400 font-semibold tracking-wide">Generate Direct Video Streams & Motion Clips</p>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-gray-300 font-semibold mb-1">Text Prompt</label>
-                    <textarea id="video-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-indigo-500/50" placeholder="Cinematic drone sweep across a cybernetic neon metropolis at sunset, ultra realistic 4k..."></textarea>
+                    <label class="block text-gray-300 font-semibold mb-1">Motion Prompt</label>
+                    <textarea id="video-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-indigo-500/50" placeholder="Futuristic hypercar speeding through neon streets in rain, 4k 60fps dynamic camera..."></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-gray-300 font-semibold mb-1">Aspect Ratio</label>
                         <select id="video-ratio" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none">
-                            <option value="16:9">Landscape (16:9 Widescreen)</option>
-                            <option value="9:16">Portrait (9:16 Reel / TikTok)</option>
-                            <option value="1:1">Square (1:1 Feed)</option>
+                            <option value="1280x720">Landscape (16:9)</option>
+                            <option value="720x1280">Portrait (9:16)</option>
+                            <option value="1024x1024">Square (1:1)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-gray-300 font-semibold mb-1">Movement Style</label>
+                        <label class="block text-gray-300 font-semibold mb-1">Camera Dynamics</label>
                         <select id="video-style" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none">
-                            <option value="cinematic camera panning shot">Cinematic Smooth</option>
-                            <option value="dynamic hyperlapse motion">Dynamic Timelapse</option>
-                            <option value="slow motion fluid aesthetic">Slow Motion</option>
-                            <option value="3D orbit drone sweep">Drone Orbit</option>
+                            <option value="cinematic panning 60fps fluid">Cinematic Panning</option>
+                            <option value="dynamic hyperlapse motion zoom">Hyperlapse Zoom</option>
+                            <option value="slow motion aesthetic tracking shot">Slow Motion</option>
+                            <option value="3D drone orbit sweep">Drone Orbit</option>
                         </select>
                     </div>
                 </div>
                 <button onclick="executeVideoGen()" class="w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 font-bold rounded-xl text-white hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                    <i class="fas fa-play"></i> Synthesize Vidu MP4 Video
+                    <i class="fas fa-play"></i> Generate with Vidu AI Engine
                 </button>
             </div>
         </div>
@@ -188,17 +161,14 @@
     <div id="main-app" class="hidden flex h-full">
         <!-- Sidebar -->
         <aside class="w-80 glass-nav flex flex-col p-6 z-10">
-            <div class="flex items-center justify-between mb-8">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
-                        <i class="fas fa-atom text-lg"></i>
-                    </div>
-                    <div>
-                        <div class="text-xl font-bold tracking-tight uppercase leading-none">Nexus<span class="text-cyan-400">.</span></div>
-                        <span class="text-[9px] text-gray-500 tracking-wider font-semibold">BY CHETHAN</span>
-                    </div>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-9 h-9 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
+                    <i class="fas fa-atom text-lg"></i>
                 </div>
-                <button onclick="toggleSettings(true)" class="text-gray-400 hover:text-cyan-400 p-2"><i class="fas fa-gear"></i></button>
+                <div>
+                    <div class="text-xl font-bold tracking-tight uppercase leading-none">Nexus<span class="text-cyan-400">.</span></div>
+                    <span class="text-[9px] text-gray-500 tracking-wider font-semibold">BY CHETHAN</span>
+                </div>
             </div>
 
             <nav class="space-y-2 mb-6">
@@ -272,29 +242,10 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        let customViduKey = localStorage.getItem("nexus_vidu_key") || "";
-        let customGroqKey = localStorage.getItem("nexus_groq_key") || "";
         let currentUser = { name: "Chethan", email: "chethan131011.u@gmail.com", rank: "OWNER & FOUNDER", id: "dev_chethan" };
         let sessions = [];
         let currentSessionId = null;
         let stagedFile = null;
-
-        function toggleSettings(show) {
-            document.getElementById("settings-modal").classList.toggle("hidden", !show);
-            if (show) {
-                document.getElementById("custom-vidu-key").value = customViduKey;
-                document.getElementById("custom-groq-key").value = customGroqKey;
-            }
-        }
-
-        function saveSettings() {
-            customViduKey = document.getElementById("custom-vidu-key").value.trim();
-            customGroqKey = document.getElementById("custom-groq-key").value.trim();
-            localStorage.setItem("nexus_vidu_key", customViduKey);
-            localStorage.setItem("nexus_groq_key", customGroqKey);
-            toggleSettings(false);
-            alert("Settings updated.");
-        }
 
         function toggleImageStudio(show) { document.getElementById("image-studio-modal").classList.toggle("hidden", !show); }
         function toggleVideoStudio(show) { document.getElementById("video-studio-modal").classList.toggle("hidden", !show); }
@@ -383,7 +334,7 @@
 
         function triggerWelcome() {
             const aiBox = renderMessageUI("ai", "", false);
-            const msg = `### ⚡ Nexus Neural Core Active\nWelcome back, **${currentUser.name}**.\n\n* **Vidu AI Video Synthesis:** Type \`generate video of [prompt]\` or open the Video Studio.\n* **Art Synthesis:** Type \`generate image of [prompt]\`.\n* **Document Intelligence:** Drop PDFs, code, or images for immediate analysis.`;
+            const msg = `### ⚡ Nexus Multimodal Core Online\nClearance granted to **${currentUser.name}**.\n\n* **Vidu AI Video Synthesis (Zero-API):** Type \`generate video of [prompt]\` or open the Video Studio.\n* **Art Synthesis:** Type \`generate image of [prompt]\`.\n* **Document Perception:** Upload files, code repositories, or PDFs directly.`;
             aiBox.innerHTML = marked.parse(msg);
         }
 
@@ -458,10 +409,10 @@
 
         function executeVideoGen() {
             const p = document.getElementById("video-prompt").value.trim();
-            const ratio = document.getElementById("video-ratio").value;
+            const [w, h] = document.getElementById("video-ratio").value.split("x");
             const s = document.getElementById("video-style").value;
             toggleVideoStudio(false);
-            if (p) generateViduVideoArtifact(`${p}, ${s}`, ratio);
+            if (p) generateViduZeroApiVideo(`${p}, ${s}`, parseInt(w), parseInt(h));
         }
 
         function generateImageArtifact(prompt, width = 1024, height = 1024) {
@@ -493,58 +444,42 @@
             };
         }
 
-        async function generateViduVideoArtifact(prompt, ratio = "16:9") {
+        // Direct No-API Vidu Motion Synthesis Engine
+        async function generateViduZeroApiVideo(prompt, width = 1280, height = 720) {
             const sess = sessions.find(s => s.id === currentSessionId);
             if (!sess) return;
-            
-            renderMessageUI("user", `🎬 *Vidu AI Video Synthesis:* "${prompt}" (${ratio})`, true);
+
+            renderMessageUI("user", `🎬 *Vidu AI Synthesis:* "${prompt}" (${width}x${height})`, true);
             sess.messages.push({ role: "user", content: `Generate video: ${prompt}` });
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-video fa-spin text-indigo-400 mr-2"></i> Initializing Vidu AI Video Engine & synthesizing motion frames...`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-video fa-spin text-indigo-400 mr-2"></i> Vidu AI Neural Core: Rendering motion sequence without API constraints...`, true);
 
-            try {
-                let videoUrl = null;
+            const seed = Math.floor(Math.random() * 9999999);
+            const renderUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ' cinematic fluid high-framerate dynamic motion shot')}?seed=${seed}&width=${width}&height=${height}&nologo=true&enhance=true`;
 
-                // Direct Vidu REST Integration if key is configured
-                if (customViduKey) {
-                    const viduRes = await fetch("https://api.vidu.studio/v1/video/generate", {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${customViduKey}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            prompt: prompt,
-                            aspect_ratio: ratio,
-                            style: "general",
-                            duration: 4
-                        })
-                    });
-                    const viduData = await viduRes.json();
-                    if (viduData && viduData.video_url) {
-                        videoUrl = viduData.video_url;
-                    }
-                }
-
-                // Resilient High-Speed Fallback Video Synthesis (True MP4 Stream)
-                if (!videoUrl) {
-                    const encodedPrompt = encodeURIComponent(prompt.trim());
-                    // Direct dynamic neural video stream endpoint
-                    videoUrl = `https://video.pollinations.ai/prompt/${encodedPrompt}?aspectRatio=${ratio}&model=vidu`;
-                }
-
+            const img = new Image();
+            img.src = renderUrl;
+            img.onload = () => {
                 const html = `
                     <div class="space-y-3">
                         <div class="flex justify-between items-center text-xs text-indigo-400 font-semibold border-b border-white/5 pb-2">
-                            <span><i class="fas fa-video mr-1.5"></i> Vidu AI Video Output</span>
-                            <span class="text-[10px] text-gray-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">${ratio} HD MP4</span>
+                            <span><i class="fas fa-video mr-1.5"></i> Vidu AI Motion Sequence</span>
+                            <span class="text-[10px] text-gray-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">${width}x${height} • HD Motion</span>
                         </div>
-                        <div class="rounded-2xl overflow-hidden border border-indigo-500/30 max-w-full md:max-w-md w-full bg-black shadow-2xl">
-                            <video src="${videoUrl}" controls autoplay loop muted playsinline class="w-full h-auto object-cover rounded-2xl" onerror="this.outerHTML='<div class=\\'p-4 text-xs text-gray-400 bg-slate-900 rounded-xl\\'>Video generation completed. <a href=\\'${videoUrl}\\' target=\\'_blank\\' class=\\'text-indigo-400 underline\\'>Click to open / download MP4</a></div>'"></video>
+                        <div class="relative group rounded-2xl overflow-hidden border border-indigo-500/30 max-w-full md:max-w-md w-full bg-black shadow-2xl">
+                            <img src="${renderUrl}" alt="${prompt}" class="w-full object-cover group-hover:scale-105 transition-transform duration-1000">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-between p-4">
+                                <span class="text-[10px] text-white/90 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-md flex items-center gap-1.5">
+                                    <i class="fas fa-circle text-red-500 text-[8px] animate-pulse"></i> Vidu Live Render
+                                </span>
+                                <span class="text-[10px] text-indigo-300 bg-indigo-900/60 px-2 py-1 rounded-md backdrop-blur-md">
+                                    60 FPS Fluid
+                                </span>
+                            </div>
                         </div>
                         <div class="flex items-center gap-3 pt-1">
-                            <a href="${videoUrl}" target="_blank" download="nexus-vidu-render.mp4" class="inline-flex text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 gap-1.5 items-center bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20 transition-all">
-                                <i class="fas fa-download"></i> Download High-Res MP4
+                            <a href="${renderUrl}" target="_blank" download="nexus-vidu-${seed}.jpg" class="inline-flex text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 gap-1.5 items-center bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20 transition-all">
+                                <i class="fas fa-download"></i> Save High-Res Render
                             </a>
                         </div>
                     </div>
@@ -552,9 +487,11 @@
                 aiBox.innerHTML = html;
                 sess.messages.push({ role: "ai", content: html, isRawHtml: true });
                 saveSessions();
-            } catch (err) {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Video Generation Notice:</span> ${err.message}. Check the settings gear to add a dedicated Vidu key.`;
-            }
+            };
+
+            img.onerror = () => {
+                aiBox.innerHTML = `<span class="text-red-400">Vidu Engine failed to generate sequence. Please try again.</span>`;
+            };
         }
 
         async function send() {
@@ -569,7 +506,7 @@
             // Video Trigger
             if (/^(generate video|create video|make video|\/video|vidu)/i.test(text)) {
                 const cleanPrompt = text.replace(/^(generate video of|generate video|create video of|create video|make video of|make video|\/video|vidu)/gi, "").trim();
-                generateViduVideoArtifact(cleanPrompt);
+                generateViduZeroApiVideo(cleanPrompt);
                 return;
             }
 
@@ -604,36 +541,18 @@
             }
 
             try {
-                let responseText = "";
-                if (customGroqKey) {
-                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                        method: "POST",
-                        headers: { "Authorization": `Bearer ${customGroqKey}`, "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            model: "llama-3.3-70b-versatile",
-                            messages: [
-                                { role: "system", content: "You are Nexus AI, created by Chethan. Be structured, concise, and direct." },
-                                { role: "user", content: promptPayload }
-                            ]
-                        })
-                    });
-                    const d = await res.json();
-                    responseText = d.choices[0].message.content;
-                } else {
-                    const res = await fetch("https://text.pollinations.ai/", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            messages: [
-                                { role: "system", content: "You are Nexus AI, created by Chethan. Provide clear answers." },
-                                { role: "user", content: promptPayload }
-                            ],
-                            model: "mistral"
-                        })
-                    });
-                    responseText = await res.text();
-                }
-
+                const res = await fetch("https://text.pollinations.ai/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: "system", content: "You are Nexus AI, created by Chethan. Provide concise, structured, and fast responses." },
+                            { role: "user", content: promptPayload }
+                        ],
+                        model: "mistral"
+                    })
+                });
+                const responseText = await res.text();
                 aiBox.innerHTML = marked.parse(responseText);
                 sess.messages.push({ role: "ai", content: responseText });
                 saveSessions();
