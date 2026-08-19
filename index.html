@@ -275,7 +275,7 @@
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500 text-white" 
-                           placeholder="Ask anything, analyze file/image, or type 'generate image of...'">
+                           placeholder="Ask anything, upload image/code/PDF, or type 'generate image of...'">
                     
                     <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-cyan-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
@@ -288,7 +288,7 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        const API = "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";
+        const GROQ_API = "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";
 
         const ROLE_CONFIG = {
             "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", roleTitle: "Owner", defaultName: "Chethan" },
@@ -296,13 +296,9 @@
             "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", roleTitle: "Manager", defaultName: "Vijay" }
         };
 
-        const TEXT_MODELS = [
+        const GROQ_TEXT_MODELS = [
             "llama-3.3-70b-versatile",
             "llama-3.1-8b-instant"
-        ];
-
-        const VISION_MODELS = [
-            "llama-3.2-11b-vision-instruct"
         ];
 
         let currentUser = null;
@@ -311,17 +307,16 @@
         let stagedFile = null;
 
         function getSystemPrompt() {
-            return `You are Nexus AI, an advanced multimodal neural intelligence system.
+            return `You are Nexus AI, an advanced multimodal neural workspace.
 Current Active User Session:
 - User Name: ${currentUser?.name || "User"}
 - User Email: ${currentUser?.email || "Unknown"}
 - Designated Role / Rank: ${currentUser?.rank || "Verified User"}
 
-Capabilities:
-1. Multimodal Vision: Analyze, decode, OCR, and explain uploaded images, diagrams, screenshots, or artwork.
-2. File Comprehension: Read, summarize, audit, and debug content extracted from uploaded PDFs, source code files, Markdown, and text data.
-3. System Roles: If asked who founded or built Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.
-4. Provide structured, accurate responses with scannable formatting and clear technical depth.`;
+Guidelines:
+1. When inspecting uploaded images, thoroughly extract any OCR text, analyze structures, explain diagrams, or describe scenes in depth.
+2. When inspecting documents or code, audit, explain, and debug them cleanly.
+3. If asked who founded or built Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.`;
         }
 
         function toggleAboutModal(show) {
@@ -499,11 +494,11 @@ Capabilities:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI neural architecture initialized. Founder clearance granted to **${currentUser.name}**.\n\n* **Multimodal Vision:** Drop images to inspect, OCR, or debug.\n* **File Reader:** Upload documents, PDFs, and code repositories.\n* **Image Gen:** Type \`generate image of [prompt]\` or open the **Art Studio**.`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI neural architecture initialized. Founder clearance active for **${currentUser.name}**.\n\n* **Vision Processing:** Upload any image or photo to analyze, read, and inspect.\n* **File Reader:** Upload documents, PDFs, or code files.\n* **Art Studio:** Generate artwork via \`generate image of [prompt]\` or open the Studio.`;
             } else if (currentUser.rank.includes("MANAGER")) {
-                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online with full file extraction and image rendering readiness.`;
+                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online with multimodal file extraction and vision analysis ready.`;
             } else {
-                msg = `### ⚡ Nexus Core Online\nMultimodal connection established. Upload files, images, or chat freely.`;
+                msg = `### ⚡ Nexus Core Online\nNeural matrix connected. Upload files, images, or chat freely.`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
@@ -538,7 +533,7 @@ Capabilities:
                     };
                     thumbEl.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover">`;
                     nameEl.innerText = file.name;
-                    descEl.innerText = `Image ready for visual perception`;
+                    descEl.innerText = `Image ready for visual inspection`;
                     preview.classList.remove("hidden");
                 };
                 reader.readAsDataURL(file);
@@ -684,7 +679,7 @@ Capabilities:
                     userDisplayContent = `
                         <div class="mb-2">
                             <img src="${currentStaged.data}" class="rounded-xl max-h-48 border border-white/20 object-cover mb-2">
-                            <p>${text || "Inspect and explain this image."}</p>
+                            <p>${text || "Inspect, extract text, and explain this image."}</p>
                         </div>
                     `;
                 } else {
@@ -705,60 +700,46 @@ Capabilities:
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing neural query...`, true);
 
-            // Multimodal Vision Handler
+            // Multimodal Vision Handler using Open Multimodal API (No Restricted Groq Keys needed)
             if (currentStaged && currentStaged.type === 'image') {
-                let visionReply = null;
-                let visionError = null;
-
-                for (const model of VISION_MODELS) {
-                    try {
-                        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                            method: "POST",
-                            headers: { 
-                                "Authorization": `Bearer ${API.trim()}`, 
-                                "Content-Type": "application/json" 
-                            },
-                            body: JSON.stringify({
-                                model: model,
-                                messages: [
-                                    { role: "system", content: getSystemPrompt() },
-                                    {
-                                        role: "user",
-                                        content: [
-                                            { type: "text", text: text || "Please thoroughly inspect, read any text, and explain this image in detail." },
-                                            {
-                                                type: "image_url",
-                                                image_url: { url: currentStaged.data }
-                                            }
-                                        ]
-                                    }
+                try {
+                    const promptQuery = text || "Please inspect this image in detail, read and transcribe any text inside it, and describe key elements.";
+                    const visionPayload = {
+                        messages: [
+                            { role: "system", content: getSystemPrompt() },
+                            {
+                                role: "user",
+                                content: [
+                                    { type: "text", text: promptQuery },
+                                    { type: "image_url", image_url: { url: currentStaged.data } }
                                 ]
-                            })
-                        });
+                            }
+                        ],
+                        model: "openai"
+                    };
 
-                        const data = await res.json();
-                        if (res.ok && data.choices && data.choices[0]?.message?.content) {
-                            visionReply = data.choices[0].message.content;
-                            break;
-                        } else {
-                            visionError = data.error?.message || `HTTP ${res.status}`;
-                        }
-                    } catch (err) {
-                        visionError = err.message;
+                    const res = await fetch("https://text.pollinations.ai/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(visionPayload)
+                    });
+
+                    const visionReply = await res.text();
+                    
+                    if (res.ok && visionReply) {
+                        aiBox.innerHTML = marked.parse(visionReply);
+                        activeSession.messages.push({ role: "ai", content: visionReply });
+                        saveSessions();
+                    } else {
+                        throw new Error(`Vision gateway error: HTTP ${res.status}`);
                     }
-                }
-
-                if (visionReply) {
-                    aiBox.innerHTML = marked.parse(visionReply);
-                    activeSession.messages.push({ role: "ai", content: visionReply });
-                    saveSessions();
-                } else {
-                    aiBox.innerHTML = `<span class="text-red-400">Vision Analysis Error: ${visionError}</span>`;
+                } catch (err) {
+                    aiBox.innerHTML = `<span class="text-red-400 font-medium">Vision Analysis Error:</span> ${err.message}`;
                 }
                 return;
             }
 
-            // Text & Document Handler
+            // Standard Text / Document Query Flow via Groq
             const apiHistory = activeSession.messages
                 .filter(m => !m.isRawHtml && !m.content.startsWith("<div") && !m.content.startsWith("<img"))
                 .map(m => ({
@@ -776,12 +757,12 @@ Capabilities:
             let reply = null;
             let lastError = null;
 
-            for (const model of TEXT_MODELS) {
+            for (const model of GROQ_TEXT_MODELS) {
                 try {
                     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                         method: "POST",
                         headers: { 
-                            "Authorization": `Bearer ${API.trim()}`, 
+                            "Authorization": `Bearer ${GROQ_API.trim()}`, 
                             "Content-Type": "application/json" 
                         },
                         body: JSON.stringify({
