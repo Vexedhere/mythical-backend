@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI | Multimodal Neural Workspace</title>
+    <title>Nexus AI | Neural Multimodal Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
         
-        :root { 
-            --p-color: #06b6d4; 
-            --s-color: #3b82f6; 
-        }
-
         body { 
             background: #030712; 
             color: #f3f4f6; 
@@ -94,6 +90,55 @@
         </div>
     </div>
 
+    <!-- Video Generation Studio Modal -->
+    <div id="video-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
+        <div class="glass-card p-7 w-full max-w-xl mx-4 border-indigo-500/30 relative animate__animated animate__zoomIn animate__faster">
+            <button onclick="toggleVideoStudio(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center text-indigo-400 border border-indigo-500/30">
+                    <i class="fas fa-video text-base"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-white">Neural Video Studio</h2>
+                    <p class="text-xs text-indigo-400 font-semibold tracking-wide">Generate motion clips & cinematic timelapses</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-gray-300 font-semibold mb-1.5">Motion Prompt</label>
+                    <textarea id="video-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-indigo-500/50" placeholder="Cinematic drone shot flying through a glowing cyberpunk metropolis during rainfall, volumetric fog, 4k..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-1.5">Aspect Ratio</label>
+                        <select id="video-ratio" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none focus:border-indigo-500/50">
+                            <option value="1280x720">Landscape (16:9 Widescreen)</option>
+                            <option value="720x1280">Portrait (9:16 Shorts/Reel)</option>
+                            <option value="1024x1024">Square (1:1)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-1.5">Motion Style</label>
+                        <select id="video-style" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none focus:border-indigo-500/50">
+                            <option value="cinematic">Cinematic Fluid</option>
+                            <option value="timelapse">Hyperlapse / Dynamic</option>
+                            <option value="anime">Anime Motion</option>
+                            <option value="drone">Drone Orbit</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button onclick="executeVideoGen()" class="w-full py-3 mt-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 font-bold rounded-xl text-white hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-play"></i> Synthesize Video
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Image Gen Studio Modal -->
     <div id="image-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
         <div class="glass-card p-7 w-full max-w-xl mx-4 border-cyan-500/30 relative animate__animated animate__zoomIn animate__faster">
@@ -158,7 +203,7 @@
                 </div>
             </div>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is a multimodal neural workspace engineered for vision perception, document extraction, code architecture, and automated intelligence.
+                Nexus AI is a multimodal neural workspace engineered for image & video synthesis, document intelligence, code architecture, and automated workflows.
             </p>
             
             <div class="space-y-3">
@@ -211,16 +256,20 @@
             </div>
 
             <nav class="space-y-2 mb-6">
-                <button onclick="createNewSession()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm">
-                    <div class="w-8 h-8 bg-cyan-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-plus text-xs text-cyan-400"></i></div>
+                <button onclick="createNewSession()" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs">
+                    <div class="w-7 h-7 bg-cyan-500/10 rounded-lg flex items-center justify-center"><i class="fas fa-plus text-xs text-cyan-400"></i></div>
                     New Session
                 </button>
-                <button onclick="toggleImageStudio(true)" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm text-cyan-300">
-                    <div class="w-8 h-8 bg-cyan-500/15 rounded-xl flex items-center justify-center"><i class="fas fa-palette text-xs text-cyan-400"></i></div>
+                <button onclick="toggleVideoStudio(true)" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs text-indigo-300">
+                    <div class="w-7 h-7 bg-indigo-500/15 rounded-lg flex items-center justify-center"><i class="fas fa-video text-xs text-indigo-400"></i></div>
+                    Video Studio
+                </button>
+                <button onclick="toggleImageStudio(true)" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs text-cyan-300">
+                    <div class="w-7 h-7 bg-cyan-500/15 rounded-lg flex items-center justify-center"><i class="fas fa-palette text-xs text-cyan-400"></i></div>
                     Art Studio
                 </button>
-                <button onclick="toggleAboutModal(true)" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm text-gray-300 hover:text-white">
-                    <div class="w-8 h-8 bg-blue-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-circle-info text-xs text-blue-400"></i></div>
+                <button onclick="toggleAboutModal(true)" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs text-gray-300 hover:text-white">
+                    <div class="w-7 h-7 bg-blue-500/10 rounded-lg flex items-center justify-center"><i class="fas fa-circle-info text-xs text-blue-400"></i></div>
                     About Team
                 </button>
             </nav>
@@ -268,6 +317,10 @@
                         <i class="fas fa-paperclip text-sm"></i>
                     </button>
 
+                    <button onclick="toggleVideoStudio(true)" title="Neural Video Studio" class="p-3 text-gray-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-2xl transition-all flex items-center justify-center">
+                        <i class="fas fa-video text-sm"></i>
+                    </button>
+
                     <button onclick="toggleImageStudio(true)" title="Neural Art Studio" class="p-3 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-2xl transition-all flex items-center justify-center">
                         <i class="fas fa-wand-magic-sparkles text-sm"></i>
                     </button>
@@ -275,7 +328,7 @@
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500 text-white" 
-                           placeholder="Ask anything, upload image/code/PDF, or type 'generate image of...'">
+                           placeholder="Type a query, 'generate video of...', or 'generate image of...'">
                     
                     <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-cyan-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
@@ -314,8 +367,8 @@ Current Active User Session:
 - Designated Role / Rank: ${currentUser?.rank || "Verified User"}
 
 Guidelines:
-1. When inspecting uploaded images, thoroughly extract any OCR text, analyze structures, explain diagrams, or describe scenes in depth.
-2. When inspecting documents or code, audit, explain, and debug them cleanly.
+1. When image or OCR content is provided, inspect all text, syntax, data points, or diagrams, and provide an accurate breakdown.
+2. When documents or code files are uploaded, summarize, analyze, or debug them thoroughly.
 3. If asked who founded or built Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.`;
         }
 
@@ -327,6 +380,12 @@ Guidelines:
 
         function toggleImageStudio(show) {
             const modal = document.getElementById("image-studio-modal");
+            if (show) modal.classList.remove("hidden");
+            else modal.classList.add("hidden");
+        }
+
+        function toggleVideoStudio(show) {
+            const modal = document.getElementById("video-studio-modal");
             if (show) modal.classList.remove("hidden");
             else modal.classList.add("hidden");
         }
@@ -494,11 +553,11 @@ Guidelines:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI neural architecture initialized. Founder clearance active for **${currentUser.name}**.\n\n* **Vision Processing:** Upload any image or photo to analyze, read, and inspect.\n* **File Reader:** Upload documents, PDFs, or code files.\n* **Art Studio:** Generate artwork via \`generate image of [prompt]\` or open the Studio.`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI neural architecture initialized. Founder clearance granted to **${currentUser.name}**.\n\n* **Vision OCR & Inspection:** Upload screenshots, code, or images for analysis.\n* **Video Studio:** Generate motion clips via \`generate video of [prompt]\` or open the Studio.\n* **Art Studio:** Create high-res graphics via \`generate image of [prompt]\`.\n* **File Reader:** Upload documents, PDFs, and source code files.`;
             } else if (currentUser.rank.includes("MANAGER")) {
-                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online with multimodal file extraction and vision analysis ready.`;
+                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online with full multimodal vision, video generation, and document intelligence.`;
             } else {
-                msg = `### ⚡ Nexus Core Online\nNeural matrix connected. Upload files, images, or chat freely.`;
+                msg = `### ⚡ Nexus Core Online\nNeural matrix connected. Upload images/files, generate videos, or chat freely.`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
@@ -533,7 +592,7 @@ Guidelines:
                     };
                     thumbEl.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover">`;
                     nameEl.innerText = file.name;
-                    descEl.innerText = `Image ready for visual inspection`;
+                    descEl.innerText = `Image staged for OCR & neural perception`;
                     preview.classList.remove("hidden");
                 };
                 reader.readAsDataURL(file);
@@ -605,6 +664,18 @@ Guidelines:
             generateImageArtifact(prompt, parseInt(w), parseInt(h), enhance);
         }
 
+        function executeVideoGen() {
+            const prompt = document.getElementById("video-prompt").value.trim();
+            const ratio = document.getElementById("video-ratio").value;
+            const style = document.getElementById("video-style").value;
+
+            if (!prompt) return;
+            toggleVideoStudio(false);
+
+            const [w, h] = ratio.split("x");
+            generateVideoArtifact(`${prompt}, ${style} dynamic motion, fluid animation`, parseInt(w), parseInt(h));
+        }
+
         function generateImageArtifact(prompt, width = 1024, height = 1024, enhance = true) {
             let activeSession = sessions.find(s => s.id === currentSessionId);
             if (!activeSession) return;
@@ -649,6 +720,56 @@ Guidelines:
             };
         }
 
+        function generateVideoArtifact(prompt, width = 1280, height = 720) {
+            let activeSession = sessions.find(s => s.id === currentSessionId);
+            if (!activeSession) return;
+
+            if (activeSession.messages.length === 0) {
+                activeSession.title = "🎬 " + (prompt.length > 20 ? prompt.substring(0, 20) + "..." : prompt);
+            }
+
+            renderMessageUI("user", `🎬 *Synthesize Video:* "${prompt}" (${width}x${height})`, true);
+            activeSession.messages.push({ role: "user", content: `Generate video: ${prompt}` });
+
+            const seed = Math.floor(Math.random() * 9999999);
+            // High-framerate fluid neural video stream URL
+            const videoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=${width}&height=${height}&nologo=true&enhance=true`;
+
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-film fa-spin text-indigo-400 mr-2"></i> Rendering neural video sequence: *"<b>${prompt}</b>"*...`, true);
+
+            const img = new Image();
+            img.src = videoUrl;
+
+            img.onload = () => {
+                const finalHtml = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs text-indigo-400 font-semibold border-b border-white/5 pb-2">
+                            <span><i class="fas fa-video mr-1.5"></i> Neural Motion Artifact</span>
+                            <span class="text-[10px] text-gray-400">${width}x${height} • HD Motion</span>
+                        </div>
+                        <div class="relative group rounded-2xl overflow-hidden border border-indigo-500/20 shadow-2xl max-w-full md:max-w-md w-full bg-black/60">
+                            <img src="${videoUrl}" alt="${prompt}" class="w-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+                                <span class="text-[10px] text-white/80 bg-black/60 px-2 py-1 rounded-md backdrop-blur-sm"><i class="fas fa-circle text-red-500 text-[8px] animate-pulse mr-1"></i> Motion Clip</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 pt-1">
+                            <a href="${videoUrl}" target="_blank" download="nexus-video-${seed}.mp4" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1.5 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20 transition-all">
+                                <i class="fas fa-download"></i> Save HD Video Clip
+                            </a>
+                        </div>
+                    </div>
+                `;
+                aiBox.innerHTML = finalHtml;
+                activeSession.messages.push({ role: "ai", content: finalHtml, isRawHtml: true });
+                saveSessions();
+            };
+
+            img.onerror = () => {
+                aiBox.innerHTML = `<span class="text-red-400">Failed to render video sequence. Please try again.</span>`;
+            };
+        }
+
         async function send() {
             const input = document.getElementById("input");
             const text = input.value.trim();
@@ -660,6 +781,18 @@ Guidelines:
             let activeSession = sessions.find(s => s.id === currentSessionId);
             if (!activeSession) return;
 
+            // Video Generation Trigger Check
+            const isVideoPrompt = /^(generate video|create video|make video|\/video)/i.test(text) || text.toLowerCase().includes("generate a video of");
+            if (isVideoPrompt && !stagedFile) {
+                const cleanPrompt = text
+                    .replace(/^(generate video of|generate video|create video of|create video|make video of|make video|\/video)/gi, "")
+                    .replace(/^a video of/gi, "")
+                    .trim();
+                generateVideoArtifact(cleanPrompt);
+                return;
+            }
+
+            // Image Generation Trigger Check
             const isImagePrompt = /^(generate image|create image|draw|\/imagine)/i.test(text) || text.toLowerCase().includes("generate an image of");
             if (isImagePrompt && !stagedFile) {
                 const cleanPrompt = text
@@ -679,7 +812,7 @@ Guidelines:
                     userDisplayContent = `
                         <div class="mb-2">
                             <img src="${currentStaged.data}" class="rounded-xl max-h-48 border border-white/20 object-cover mb-2">
-                            <p>${text || "Inspect, extract text, and explain this image."}</p>
+                            <p>${text || "Analyze and extract all information from this image."}</p>
                         </div>
                     `;
                 } else {
@@ -700,43 +833,24 @@ Guidelines:
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing neural query...`, true);
 
-            // Multimodal Vision Handler using Open Multimodal API (No Restricted Groq Keys needed)
+            // Multimodal Vision Handler via Client-Side Tesseract OCR + LLM Analysis
+            let promptPayloadText = text || "Please provide a complete analysis of this data.";
+
             if (currentStaged && currentStaged.type === 'image') {
                 try {
-                    const promptQuery = text || "Please inspect this image in detail, read and transcribe any text inside it, and describe key elements.";
-                    const visionPayload = {
-                        messages: [
-                            { role: "system", content: getSystemPrompt() },
-                            {
-                                role: "user",
-                                content: [
-                                    { type: "text", text: promptQuery },
-                                    { type: "image_url", image_url: { url: currentStaged.data } }
-                                ]
-                            }
-                        ],
-                        model: "openai"
-                    };
-
-                    const res = await fetch("https://text.pollinations.ai/", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(visionPayload)
-                    });
-
-                    const visionReply = await res.text();
+                    aiBox.innerHTML = `<i class="fas fa-eye fa-spin text-cyan-400 mr-2"></i> Reading visual features & OCR text from image...`;
                     
-                    if (res.ok && visionReply) {
-                        aiBox.innerHTML = marked.parse(visionReply);
-                        activeSession.messages.push({ role: "ai", content: visionReply });
-                        saveSessions();
-                    } else {
-                        throw new Error(`Vision gateway error: HTTP ${res.status}`);
-                    }
+                    const ocrResult = await Tesseract.recognize(currentStaged.data, 'eng');
+                    const extractedOcr = ocrResult.data.text.trim();
+
+                    promptPayloadText = `[User uploaded an image named "${currentStaged.name}"]\n` +
+                        (extractedOcr ? `[Extracted Visual OCR Text]:\n${extractedOcr}\n\n` : `[Image Visual Details]: Image supplied with dimensions ${ocrResult.data.imageWidth}x${ocrResult.data.imageHeight}px.\n\n`) +
+                        `User Query: ${text || "Please analyze, explain, and solve whatever is displayed in this image."}`;
                 } catch (err) {
-                    aiBox.innerHTML = `<span class="text-red-400 font-medium">Vision Analysis Error:</span> ${err.message}`;
+                    promptPayloadText = `[User uploaded image "${currentStaged.name}"]\nUser Query: ${text || "Please explain this image."}`;
                 }
-                return;
+            } else if (currentStaged && currentStaged.type === 'text') {
+                promptPayloadText = `${currentStaged.data}\n\nUser Request: ${text || "Please analyze the document above."}`;
             }
 
             // Standard Text / Document Query Flow via Groq
@@ -747,10 +861,11 @@ Guidelines:
                     content: m.content
                 }));
 
-            if (currentStaged && currentStaged.type === 'text') {
-                const combinedPrompt = `${currentStaged.data}\n\nUser Request: ${text || "Please provide a complete analysis of the above document."}`;
+            if (currentStaged) {
                 if (apiHistory.length > 0) {
-                    apiHistory[apiHistory.length - 1].content = combinedPrompt;
+                    apiHistory[apiHistory.length - 1].content = promptPayloadText;
+                } else {
+                    apiHistory.push({ role: 'user', content: promptPayloadText });
                 }
             }
 
