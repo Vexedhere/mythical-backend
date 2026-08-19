@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI | Multimodal Neural Workspace</title>
+    <title>Nexus AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        
+        :root { 
+            --p-color: #06b6d4; 
+            --s-color: #3b82f6; 
+        }
+
         body { 
             background: #030712; 
             color: #f3f4f6; 
@@ -19,44 +24,48 @@
             height: 100vh; 
             overflow: hidden; 
         }
+        
         .bg-mesh {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: 
                 radial-gradient(at 10% 10%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(99, 102, 241, 0.12) 0px, transparent 50%);
+                radial-gradient(at 90% 90%, rgba(59, 130, 246, 0.12) 0px, transparent 50%);
             z-index: -1;
         }
+
         .glass-nav { 
             background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(25px); 
             border-right: 1px solid rgba(255, 255, 255, 0.05); 
         }
+
         .glass-card { 
-            background: rgba(15, 23, 42, 0.6); 
+            background: rgba(15, 23, 42, 0.5); 
             backdrop-filter: blur(30px); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 24px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-radius: 28px; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
         }
+
+        .glass-card:hover { 
+            border-color: rgba(6, 182, 212, 0.4); 
+            transform: translateY(-2px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
+        }
+
         .chat-user { 
             background: linear-gradient(135deg, #0284c7, #2563eb); 
             box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25); 
         }
+
         .chat-ai { 
-            background: rgba(30, 41, 59, 0.55); 
-            border: 1px solid rgba(255, 255, 255, 0.06); 
+            background: rgba(30, 41, 59, 0.5); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
         }
-        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        pre {
-            background: #0b1120 !important;
-            padding: 12px !important;
-            border-radius: 12px;
-            overflow-x: auto;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin: 8px 0;
-        }
     </style>
 </head>
 <body class="flex flex-col">
@@ -64,95 +73,75 @@
 
     <!-- Login Screen -->
     <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[100] bg-[#030712]">
-        <div class="animate__animated animate__zoomIn glass-card p-10 w-[420px] text-center border-cyan-500/20 shadow-2xl">
+        <div class="animate__animated animate__zoomIn glass-card p-10 w-[400px] text-center border-cyan-500/20">
             <div class="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 border border-cyan-500/20 text-cyan-400">
                 <i class="fas fa-atom"></i>
             </div>
             <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
-            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Multimodal Neural Workspace</p>
-            <p class="text-xs text-gray-500 mb-6 font-medium">Engineered by Chethan</p>
+            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Neural Intelligence Network</p>
+            <p class="text-xs text-gray-500 mb-8 font-medium">Developed by Chethan</p>
             
             <div id="g_id_onload" 
                  data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" 
                  data-callback="handleGoogleResponse">
             </div>
-            <div class="g_id_signin flex justify-center scale-105 mb-4" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
-            
-            <button onclick="bypassLogin()" class="w-full py-3 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-semibold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2">
-                <i class="fas fa-bolt text-cyan-400"></i> Instant Access (No Key Needed)
+            <div class="g_id_signin flex justify-center scale-105" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[110] hidden">
+        <div class="glass-card p-8 w-full max-w-lg mx-4 border-cyan-500/30 relative animate__animated animate__zoomIn animate__faster">
+            <button onclick="toggleAboutModal(false)" class="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times text-lg"></i>
             </button>
-        </div>
-    </div>
-
-    <!-- Vidu AI Video Studio Modal -->
-    <div id="video-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
-        <div class="glass-card p-7 w-full max-w-xl mx-4 border-indigo-500/30 relative">
-            <button onclick="toggleVideoStudio(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400 border border-indigo-500/30">
-                    <i class="fas fa-video text-base"></i>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
+                    <i class="fas fa-users-gear text-lg"></i>
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-white">Vidu AI Engine (Zero-API)</h2>
-                    <p class="text-xs text-indigo-400 font-semibold tracking-wide">Generate Direct Video Streams & Motion Clips</p>
+                    <h2 class="text-xl font-bold text-white">About Nexus AI</h2>
+                    <p class="text-xs text-cyan-400 font-semibold tracking-wider uppercase">Leadership & Core Team</p>
                 </div>
             </div>
-
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-gray-300 font-semibold mb-1">Motion Prompt</label>
-                    <textarea id="video-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-indigo-500/50" placeholder="Futuristic hypercar speeding through neon streets in rain, 4k 60fps dynamic camera..."></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-gray-300 font-semibold mb-1">Aspect Ratio</label>
-                        <select id="video-ratio" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none">
-                            <option value="1280x720">Landscape (16:9)</option>
-                            <option value="720x1280">Portrait (9:16)</option>
-                            <option value="1024x1024">Square (1:1)</option>
-                        </select>
+            <p class="text-gray-300 text-xs leading-relaxed mb-6">
+                Nexus AI is a high-performance neural workspace engineered for automated task handling, custom intelligence, and intelligent workflows.
+            </p>
+            
+            <div class="space-y-3">
+                <!-- Chethan -->
+                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-bold text-sm">C</div>
+                        <div>
+                            <p class="font-bold text-sm text-white">Chethan</p>
+                            <p class="text-[10px] text-gray-400">Founder & Core Developer</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-gray-300 font-semibold mb-1">Camera Dynamics</label>
-                        <select id="video-style" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none">
-                            <option value="cinematic panning 60fps fluid">Cinematic Panning</option>
-                            <option value="dynamic hyperlapse motion zoom">Hyperlapse Zoom</option>
-                            <option value="slow motion aesthetic tracking shot">Slow Motion</option>
-                            <option value="3D drone orbit sweep">Drone Orbit</option>
-                        </select>
+                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Owner</span>
+                </div>
+                <!-- Vijay -->
+                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30 font-bold text-sm">V</div>
+                        <div>
+                            <p class="font-bold text-sm text-white">Vijay</p>
+                            <p class="text-[10px] text-gray-400">Operations & Strategy</p>
+                        </div>
                     </div>
+                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">Manager</span>
                 </div>
-                <button onclick="executeVideoGen()" class="w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 font-bold rounded-xl text-white hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                    <i class="fas fa-play"></i> Generate with Vidu AI Engine
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Studio Modal -->
-    <div id="image-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
-        <div class="glass-card p-7 w-full max-w-xl mx-4 border-cyan-500/30 relative">
-            <button onclick="toggleImageStudio(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-            <h2 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                <i class="fas fa-palette text-cyan-400"></i> Neural Art Studio
-            </h2>
-            <p class="text-xs text-gray-400 mb-4">Synthesize Ultra HD concept art & illustrations.</p>
-            <div class="space-y-3 text-xs">
-                <textarea id="studio-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none" placeholder="Cybernetic warrior in Neo Tokyo, volumetric lighting, 8k..."></textarea>
-                <div class="grid grid-cols-2 gap-3">
-                    <select id="studio-ratio" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200">
-                        <option value="1024x1024">Square (1:1)</option>
-                        <option value="1280x720">Landscape (16:9)</option>
-                        <option value="720x1280">Portrait (9:16)</option>
-                    </select>
-                    <select id="studio-enhance" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200">
-                        <option value="true">Auto-Enhance On</option>
-                        <option value="false">Raw Prompt</option>
-                    </select>
+                <!-- Venkat -->
+                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 font-bold text-sm">V</div>
+                        <div>
+                            <p class="font-bold text-sm text-white">Venkat</p>
+                            <p class="text-[10px] text-gray-400">Administration & Support</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Asst Manager</span>
                 </div>
-                <button onclick="executeStudioGen()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 font-bold rounded-xl text-white">
-                    Synthesize Image
-                </button>
             </div>
         </div>
     </div>
@@ -172,66 +161,43 @@
             </div>
 
             <nav class="space-y-2 mb-6">
-                <button onclick="createNewSession()" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs">
-                    <div class="w-7 h-7 bg-cyan-500/10 rounded-lg flex items-center justify-center"><i class="fas fa-plus text-xs text-cyan-400"></i></div>
+                <button onclick="createNewSession()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm">
+                    <div class="w-8 h-8 bg-cyan-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-plus text-xs text-cyan-400"></i></div>
                     New Session
                 </button>
-                <button onclick="toggleVideoStudio(true)" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs text-indigo-300">
-                    <div class="w-7 h-7 bg-indigo-500/15 rounded-lg flex items-center justify-center"><i class="fas fa-video text-xs text-indigo-400"></i></div>
-                    Vidu Video Studio
-                </button>
-                <button onclick="toggleImageStudio(true)" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs text-cyan-300">
-                    <div class="w-7 h-7 bg-cyan-500/15 rounded-lg flex items-center justify-center"><i class="fas fa-palette text-xs text-cyan-400"></i></div>
-                    Art Studio
+                <button onclick="toggleAboutModal(true)" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm text-gray-300 hover:text-white">
+                    <div class="w-8 h-8 bg-blue-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-circle-info text-xs text-blue-400"></i></div>
+                    About Team
                 </button>
             </nav>
 
-            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Recent Sessions</div>
+            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Recent Chats</div>
             <div id="history" class="flex-1 overflow-y-auto space-y-2 text-xs custom-scroll"></div>
 
             <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 font-bold" id="user-avatar">C</div>
+                    <img id="user-pfp" class="w-10 h-10 rounded-xl border border-cyan-500/30 hidden object-cover">
+                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 font-bold">U</div>
                     <div class="overflow-hidden">
-                        <p id="display-name" class="font-bold text-sm truncate w-28">Chethan</p>
-                        <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">OWNER & FOUNDER</p>
+                        <p id="display-name" class="font-bold text-sm truncate w-28">User</p>
+                        <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">VERIFIED USER</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="text-gray-500 hover:text-red-400 p-2"><i class="fas fa-power-off"></i></button>
+                <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors p-2"><i class="fas fa-power-off"></i></button>
             </div>
         </aside>
 
         <!-- Chat Workspace -->
         <main class="flex-1 flex flex-col relative">
-            <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-44"></div>
+            <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-36"></div>
             
-            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
-                <!-- Attachment Pill -->
-                <div id="attachment-preview" class="hidden mb-2 p-2 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-cyan-500/30 flex items-center gap-3">
-                    <div id="attachment-thumb" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden text-cyan-400 text-sm">
-                        <i class="fas fa-file"></i>
-                    </div>
-                    <div class="flex-1 overflow-hidden">
-                        <p id="attachment-name" class="text-xs font-semibold text-white truncate">file.pdf</p>
-                        <p id="attachment-desc" class="text-[10px] text-cyan-400">Attached for analysis</p>
-                    </div>
-                    <button onclick="clearAttachment()" class="p-2 text-gray-400 hover:text-red-400"><i class="fas fa-times text-xs"></i></button>
-                </div>
-
-                <!-- Input Box -->
-                <div class="glass-card p-2 flex items-center border-white/10 shadow-2xl focus-within:border-cyan-500/40 transition-all gap-1.5">
-                    <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)" accept="image/*,.pdf,.txt,.js,.ts,.py,.html,.css,.json,.csv,.md">
-                    <button onclick="document.getElementById('file-input').click()" title="Attach File/Image" class="p-3 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-2xl transition-all">
-                        <i class="fas fa-paperclip text-sm"></i>
-                    </button>
-                    <button onclick="toggleVideoStudio(true)" title="Vidu Video Studio" class="p-3 text-gray-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-2xl transition-all">
-                        <i class="fas fa-video text-sm"></i>
-                    </button>
-                    <button onclick="toggleImageStudio(true)" title="Image Studio" class="p-3 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-2xl transition-all">
-                        <i class="fas fa-palette text-sm"></i>
-                    </button>
-                    <input id="input" onkeydown="handleKeyDown(event)" class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500 text-white" placeholder="Message Nexus, upload files, 'generate video of...', or 'generate image of...'">
-                    <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-md shadow-cyan-500/20">
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
+                <div class="glass-card p-2 flex items-center border-white/10 shadow-[0_10px_30px_-10px_rgba(6,182,212,0.15)] focus-within:border-cyan-500/40 transition-all">
+                    <input id="input" 
+                           onkeydown="handleKeyDown(event)" 
+                           class="flex-1 bg-transparent py-3.5 px-6 text-sm outline-none placeholder:text-gray-500" 
+                           placeholder="Message Nexus AI...">
+                    <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-cyan-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
                     </button>
                 </div>
@@ -240,157 +206,237 @@
     </div>
 
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const API = "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";
 
-        let currentUser = { name: "Chethan", email: "chethan131011.u@gmail.com", rank: "OWNER & FOUNDER", id: "dev_chethan" };
+        const ROLE_CONFIG = {
+            "chethan131011.u@gmail.com": {
+                rank: "OWNER & FOUNDER",
+                badgeClass: "text-cyan-400",
+                roleTitle: "Owner",
+                defaultName: "Chethan"
+            },
+            "monsterbeast2569@gmail.com": {
+                rank: "OWNER & FOUNDER",
+                badgeClass: "text-cyan-400",
+                roleTitle: "Owner",
+                defaultName: "Chethan"
+            },
+            "malluruvijaysundhar@gmail.com": {
+                rank: "MANAGER",
+                badgeClass: "text-blue-400",
+                roleTitle: "Manager",
+                defaultName: "Vijay"
+            }
+        };
+
+        const ACTIVE_MODELS = [
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "qwen/qwen3.6-27b"
+        ];
+
+        let currentUser = null;
         let sessions = [];
         let currentSessionId = null;
-        let stagedFile = null;
 
-        function toggleImageStudio(show) { document.getElementById("image-studio-modal").classList.toggle("hidden", !show); }
-        function toggleVideoStudio(show) { document.getElementById("video-studio-modal").classList.toggle("hidden", !show); }
+        function getSystemPrompt() {
+            return `You are Nexus AI, an advanced, high-performance intelligent system.
+Current Active User Session:
+- User Name: ${currentUser?.name || "User"}
+- User Email: ${currentUser?.email || "Unknown"}
+- Designated Role / Rank: ${currentUser?.rank || "Verified User"}
 
-        function bypassLogin() {
-            initSession();
+Guidelines:
+1. Address the user appropriately according to their rank and name when greeting or when relevant.
+2. If the user asks about who made you, developed you, or founded Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.
+3. Stay focused, efficient, and direct in answering technical and general requests.`;
+        }
+
+        function toggleAboutModal(show) {
+            const modal = document.getElementById("about-modal");
+            if (show) modal.classList.remove("hidden");
+            else modal.classList.add("hidden");
+        }
+
+        function getUserRole(email) {
+            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
+            
+            const normalized = email.toLowerCase().trim();
+            for (const key in ROLE_CONFIG) {
+                if (normalized === key || normalized.startsWith(key.split("@")[0])) {
+                    return ROLE_CONFIG[key];
+                }
+            }
+            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
         }
 
         function handleGoogleResponse(res) {
             try {
                 const payload = JSON.parse(atob(res.credential.split('.')[1]));
-                currentUser = {
+                const email = payload.email || "";
+                const roleInfo = getUserRole(email);
+                
+                currentUser = { 
                     id: payload.sub,
-                    email: payload.email,
-                    name: payload.name || "User",
-                    rank: payload.email.includes("chethan") ? "OWNER & FOUNDER" : "VERIFIED USER"
+                    email: email,
+                    name: payload.name || roleInfo.defaultName, 
+                    rank: roleInfo.rank,
+                    roleTitle: roleInfo.roleTitle,
+                    picture: payload.picture 
                 };
                 initSession();
-            } catch(e) {
-                bypassLogin();
+            } catch (e) {
+                console.error("Authentication Error", e);
             }
         }
 
         function initSession() {
-            document.getElementById("login-screen").classList.add("hidden");
-            document.getElementById("main-app").classList.remove("hidden");
-            document.getElementById("display-name").innerText = currentUser.name;
-            document.getElementById("display-rank").innerText = currentUser.rank;
-            document.getElementById("user-avatar").innerText = currentUser.name[0].toUpperCase();
-            loadSessions();
+            document.getElementById("login-screen").classList.add("animate__fadeOut");
+            setTimeout(() => {
+                document.getElementById("login-screen").classList.add("hidden");
+                document.getElementById("main-app").classList.remove("hidden");
+                
+                const nameEl = document.getElementById("display-name");
+                const rankEl = document.getElementById("display-rank");
+                const pfpFallback = document.getElementById("pfp-fallback");
+                
+                nameEl.innerText = currentUser.name;
+                rankEl.innerText = currentUser.rank;
+
+                if (currentUser.rank.includes("OWNER")) {
+                    rankEl.className = "text-[8px] text-cyan-400 font-bold uppercase tracking-widest";
+                } else if (currentUser.rank.includes("MANAGER")) {
+                    rankEl.className = "text-[8px] text-blue-400 font-bold uppercase tracking-widest";
+                } else {
+                    rankEl.className = "text-[8px] text-gray-400 font-bold uppercase tracking-widest";
+                }
+
+                if (currentUser.picture) {
+                    document.getElementById("user-pfp").src = currentUser.picture;
+                    document.getElementById("user-pfp").classList.remove("hidden");
+                    pfpFallback.classList.add("hidden");
+                } else {
+                    pfpFallback.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : "U";
+                    pfpFallback.classList.remove("hidden");
+                }
+                
+                loadUserSessions();
+            }, 400);
         }
 
-        function loadSessions() {
-            const raw = localStorage.getItem(`nexus_chats_${currentUser.id}`);
-            sessions = raw ? JSON.parse(raw) : [];
-            if (sessions.length > 0) loadSession(sessions[0].id);
-            else createNewSession();
+        function getStorageKey() {
+            return `nexus_chats_${currentUser.id}`;
+        }
+
+        function loadUserSessions() {
+            const rawData = localStorage.getItem(getStorageKey());
+            sessions = rawData ? JSON.parse(rawData) : [];
+            renderSidebar();
+
+            if (sessions.length > 0) {
+                loadSession(sessions[0].id);
+            } else {
+                createNewSession();
+            }
         }
 
         function saveSessions() {
-            localStorage.setItem(`nexus_chats_${currentUser.id}`, JSON.stringify(sessions));
+            localStorage.setItem(getStorageKey(), JSON.stringify(sessions));
             renderSidebar();
         }
 
         function createNewSession() {
-            const newSess = { id: 's_' + Date.now(), title: 'New Conversation', messages: [] };
-            sessions.unshift(newSess);
-            currentSessionId = newSess.id;
+            const newSession = {
+                id: 'sess_' + Date.now(),
+                title: 'New Conversation',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                messages: []
+            };
+            sessions.unshift(newSession);
+            currentSessionId = newSession.id;
             saveSessions();
+            
             document.getElementById("chat").innerHTML = "";
-            clearAttachment();
             triggerWelcome();
         }
 
-        function loadSession(id) {
-            currentSessionId = id;
-            const sess = sessions.find(s => s.id === id);
-            if (!sess) return;
+        function loadSession(sessionId) {
+            currentSessionId = sessionId;
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+
             renderSidebar();
-            const container = document.getElementById("chat");
-            container.innerHTML = "";
-            clearAttachment();
-            if (sess.messages.length === 0) triggerWelcome();
-            else sess.messages.forEach(m => renderMessageUI(m.role, m.content, false, m.isRawHtml));
+            const chatContainer = document.getElementById("chat");
+            chatContainer.innerHTML = "";
+
+            if (session.messages.length === 0) {
+                triggerWelcome();
+            } else {
+                session.messages.forEach(msg => {
+                    renderMessageUI(msg.role, msg.content, false);
+                });
+            }
+        }
+
+        function deleteSession(e, sessionId) {
+            e.stopPropagation();
+            sessions = sessions.filter(s => s.id !== sessionId);
+            saveSessions();
+            
+            if (sessions.length > 0) {
+                loadSession(sessions[0].id);
+            } else {
+                createNewSession();
+            }
         }
 
         function renderSidebar() {
-            const hist = document.getElementById("history");
-            hist.innerHTML = "";
-            sessions.forEach(s => {
+            const historyContainer = document.getElementById("history");
+            historyContainer.innerHTML = "";
+
+            sessions.forEach(sess => {
+                const isActive = sess.id === currentSessionId;
                 const item = document.createElement("div");
-                item.className = `p-3 rounded-2xl cursor-pointer text-xs flex justify-between items-center ${s.id === currentSessionId ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' : 'text-gray-400 hover:bg-white/5'}`;
-                item.innerHTML = `<span class="truncate w-36">${s.title}</span><i class="fas fa-trash-alt hover:text-red-400 opacity-40 hover:opacity-100" onclick="deleteSession(event, '${s.id}')"></i>`;
-                item.onclick = () => loadSession(s.id);
-                hist.appendChild(item);
+                item.className = `group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${
+                    isActive 
+                    ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' 
+                    : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                }`;
+                item.onclick = () => loadSession(sess.id);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <i class="far fa-comments text-xs"></i>
+                        <div class="truncate font-medium text-xs w-36">${sess.title}</div>
+                    </div>
+                    <button onclick="deleteSession(event, '${sess.id}')" class="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-opacity p-1">
+                        <i class="fas fa-trash-alt text-[10px]"></i>
+                    </button>
+                `;
+                historyContainer.appendChild(item);
             });
         }
 
-        function deleteSession(e, id) {
-            e.stopPropagation();
-            sessions = sessions.filter(s => s.id !== id);
-            saveSessions();
-            if (sessions.length > 0) loadSession(sessions[0].id);
-            else createNewSession();
-        }
-
         function triggerWelcome() {
-            const aiBox = renderMessageUI("ai", "", false);
-            const msg = `### ⚡ Nexus Multimodal Core Online\nClearance granted to **${currentUser.name}**.\n\n* **Vidu AI Video Synthesis (Zero-API):** Type \`generate video of [prompt]\` or open the Video Studio.\n* **Art Synthesis:** Type \`generate image of [prompt]\`.\n* **Document Perception:** Upload files, code repositories, or PDFs directly.`;
-            aiBox.innerHTML = marked.parse(msg);
-        }
-
-        async function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const preview = document.getElementById("attachment-preview");
-            const nameEl = document.getElementById("attachment-name");
-            const descEl = document.getElementById("attachment-desc");
-            const thumbEl = document.getElementById("attachment-thumb");
-
-            if (file.type.startsWith("image/")) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    stagedFile = { type: 'image', name: file.name, data: ev.target.result };
-                    thumbEl.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
-                    nameEl.innerText = file.name;
-                    descEl.innerText = "Image attached";
-                    preview.classList.remove("hidden");
-                };
-                reader.readAsDataURL(file);
-            } else if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-                const reader = new FileReader();
-                reader.onload = async (ev) => {
-                    const typedarray = new Uint8Array(ev.target.result);
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    let text = "";
-                    for (let p = 1; p <= Math.min(pdf.numPages, 10); p++) {
-                        const page = await pdf.getPage(p);
-                        const c = await page.getTextContent();
-                        text += `\n--- Page ${p} ---\n` + c.items.map(s => s.str).join(" ");
-                    }
-                    stagedFile = { type: 'text', name: file.name, data: `[PDF Content - ${file.name}]:\n${text}` };
-                    thumbEl.innerHTML = `<i class="fas fa-file-pdf text-red-400"></i>`;
-                    nameEl.innerText = file.name;
-                    descEl.innerText = `${pdf.numPages} Page(s) Parsed`;
-                    preview.classList.remove("hidden");
-                };
-                reader.readAsArrayBuffer(file);
+            let msg = "";
+            if (currentUser.rank.includes("OWNER")) {
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI core initialized. Founder clearance granted to **${currentUser.name}**.\n\nAll neural pathways operational. What are we building today?`;
+            } else if (currentUser.rank.includes("MANAGER")) {
+                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
             } else {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    stagedFile = { type: 'text', name: file.name, data: `[Code/Document - ${file.name}]:\n${ev.target.result}` };
-                    thumbEl.innerHTML = `<i class="fas fa-file-code text-cyan-400"></i>`;
-                    nameEl.innerText = file.name;
-                    descEl.innerText = "Code/Text Parsed";
-                    preview.classList.remove("hidden");
-                };
-                reader.readAsText(file);
+                msg = `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
             }
-            e.target.value = "";
-        }
-
-        function clearAttachment() {
-            stagedFile = null;
-            document.getElementById("attachment-preview").classList.add("hidden");
+            
+            const aiBox = renderMessageUI("ai", "", false);
+            let i = 0;
+            function type() {
+                if (i < msg.length) {
+                    aiBox.innerHTML = marked.parse(msg.substring(0, i + 1));
+                    i++;
+                    setTimeout(type, 12);
+                }
+            }
+            type();
         }
 
         function handleKeyDown(e) {
@@ -400,175 +446,82 @@
             }
         }
 
-        function executeStudioGen() {
-            const p = document.getElementById("studio-prompt").value.trim();
-            const [w, h] = document.getElementById("studio-ratio").value.split("x");
-            toggleImageStudio(false);
-            if (p) generateImageArtifact(p, parseInt(w), parseInt(h));
-        }
-
-        function executeVideoGen() {
-            const p = document.getElementById("video-prompt").value.trim();
-            const [w, h] = document.getElementById("video-ratio").value.split("x");
-            const s = document.getElementById("video-style").value;
-            toggleVideoStudio(false);
-            if (p) generateViduZeroApiVideo(`${p}, ${s}`, parseInt(w), parseInt(h));
-        }
-
-        function generateImageArtifact(prompt, width = 1024, height = 1024) {
-            const sess = sessions.find(s => s.id === currentSessionId);
-            if (!sess) return;
-            renderMessageUI("user", `🎨 *Synthesize Image:* "${prompt}"`, true);
-            sess.messages.push({ role: "user", content: `Generate image: ${prompt}` });
-
-            const seed = Math.floor(Math.random() * 9999999);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=${width}&height=${height}&nologo=true`;
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-palette fa-spin text-cyan-400 mr-2"></i> Synthesizing artwork...`, true);
-
-            const img = new Image();
-            img.src = url;
-            img.onload = () => {
-                const html = `
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-xs text-cyan-400 font-semibold border-b border-white/5 pb-2">
-                            <span><i class="fas fa-sparkles mr-1"></i> Generated Image</span>
-                            <span class="text-[10px] text-gray-400">${width}x${height}</span>
-                        </div>
-                        <img src="${url}" class="rounded-2xl border border-cyan-500/20 max-w-full md:max-w-md w-full object-cover">
-                        <a href="${url}" target="_blank" download class="inline-flex text-[11px] text-cyan-400 gap-1.5 items-center"><i class="fas fa-download"></i> Save Full Res</a>
-                    </div>
-                `;
-                aiBox.innerHTML = html;
-                sess.messages.push({ role: "ai", content: html, isRawHtml: true });
-                saveSessions();
-            };
-        }
-
-        // Direct No-API Vidu Motion Synthesis Engine
-        async function generateViduZeroApiVideo(prompt, width = 1280, height = 720) {
-            const sess = sessions.find(s => s.id === currentSessionId);
-            if (!sess) return;
-
-            renderMessageUI("user", `🎬 *Vidu AI Synthesis:* "${prompt}" (${width}x${height})`, true);
-            sess.messages.push({ role: "user", content: `Generate video: ${prompt}` });
-
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-video fa-spin text-indigo-400 mr-2"></i> Vidu AI Neural Core: Rendering motion sequence without API constraints...`, true);
-
-            const seed = Math.floor(Math.random() * 9999999);
-            const renderUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ' cinematic fluid high-framerate dynamic motion shot')}?seed=${seed}&width=${width}&height=${height}&nologo=true&enhance=true`;
-
-            const img = new Image();
-            img.src = renderUrl;
-            img.onload = () => {
-                const html = `
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center text-xs text-indigo-400 font-semibold border-b border-white/5 pb-2">
-                            <span><i class="fas fa-video mr-1.5"></i> Vidu AI Motion Sequence</span>
-                            <span class="text-[10px] text-gray-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">${width}x${height} • HD Motion</span>
-                        </div>
-                        <div class="relative group rounded-2xl overflow-hidden border border-indigo-500/30 max-w-full md:max-w-md w-full bg-black shadow-2xl">
-                            <img src="${renderUrl}" alt="${prompt}" class="w-full object-cover group-hover:scale-105 transition-transform duration-1000">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-between p-4">
-                                <span class="text-[10px] text-white/90 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-md flex items-center gap-1.5">
-                                    <i class="fas fa-circle text-red-500 text-[8px] animate-pulse"></i> Vidu Live Render
-                                </span>
-                                <span class="text-[10px] text-indigo-300 bg-indigo-900/60 px-2 py-1 rounded-md backdrop-blur-md">
-                                    60 FPS Fluid
-                                </span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 pt-1">
-                            <a href="${renderUrl}" target="_blank" download="nexus-vidu-${seed}.jpg" class="inline-flex text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 gap-1.5 items-center bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20 transition-all">
-                                <i class="fas fa-download"></i> Save High-Res Render
-                            </a>
-                        </div>
-                    </div>
-                `;
-                aiBox.innerHTML = html;
-                sess.messages.push({ role: "ai", content: html, isRawHtml: true });
-                saveSessions();
-            };
-
-            img.onerror = () => {
-                aiBox.innerHTML = `<span class="text-red-400">Vidu Engine failed to generate sequence. Please try again.</span>`;
-            };
-        }
-
         async function send() {
             const input = document.getElementById("input");
             const text = input.value.trim();
-            if (!text && !stagedFile) return;
+            if(!text) return;
+            
             input.value = "";
+            
+            let activeSession = sessions.find(s => s.id === currentSessionId);
+            if (!activeSession) return;
 
-            const sess = sessions.find(s => s.id === currentSessionId);
-            if (!sess) return;
-
-            // Video Trigger
-            if (/^(generate video|create video|make video|\/video|vidu)/i.test(text)) {
-                const cleanPrompt = text.replace(/^(generate video of|generate video|create video of|create video|make video of|make video|\/video|vidu)/gi, "").trim();
-                generateViduZeroApiVideo(cleanPrompt);
-                return;
+            if (activeSession.messages.length === 0) {
+                activeSession.title = text.length > 22 ? text.substring(0, 22) + "..." : text;
             }
 
-            // Image Trigger
-            if (/^(generate image|create image|draw|\/imagine)/i.test(text)) {
-                const cleanPrompt = text.replace(/^(generate image of|generate image|create image of|create image|draw|\/imagine)/gi, "").trim();
-                generateImageArtifact(cleanPrompt);
-                return;
-            }
+            activeSession.messages.push({ role: "user", content: text });
+            renderMessageUI("user", text, true);
 
-            let displayContent = text;
-            let currentStaged = stagedFile;
-            clearAttachment();
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying Groq Neural Matrix...`, true);
+            
+            const apiHistory = activeSession.messages.map(m => ({
+                role: m.role === 'ai' ? 'assistant' : 'user',
+                content: m.content
+            }));
 
-            if (currentStaged) {
-                if (currentStaged.type === 'image') {
-                    displayContent = `<img src="${currentStaged.data}" class="rounded-xl max-h-48 mb-2"><p>${text || "Analyze this image."}</p>`;
-                } else {
-                    displayContent = `📎 **${currentStaged.name}**\n\n${text || "Analyze this file."}`;
+            let reply = null;
+            let lastError = null;
+
+            for (const model of ACTIVE_MODELS) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: { 
+                            "Authorization": `Bearer ${API.trim()}`, 
+                            "Content-Type": "application/json" 
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: getSystemPrompt() },
+                                ...apiHistory
+                            ]
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
+                        reply = data.choices[0].message.content;
+                        break;
+                    } else {
+                        lastError = data.error?.message || `HTTP ${res.status}`;
+                    }
+                } catch (err) {
+                    lastError = err.message;
                 }
             }
 
-            if (sess.messages.length === 0) sess.title = text.substring(0, 20) || "Conversation";
-            sess.messages.push({ role: "user", content: displayContent, isRawHtml: currentStaged?.type === 'image' });
-            renderMessageUI("user", displayContent, true, currentStaged?.type === 'image');
-
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying Neural Matrix...`, true);
-
-            let promptPayload = text || "Analyze the provided input.";
-            if (currentStaged) {
-                promptPayload = `${currentStaged.data}\n\nUser Question: ${text || "Explain and analyze this data."}`;
-            }
-
-            try {
-                const res = await fetch("https://text.pollinations.ai/", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        messages: [
-                            { role: "system", content: "You are Nexus AI, created by Chethan. Provide concise, structured, and fast responses." },
-                            { role: "user", content: promptPayload }
-                        ],
-                        model: "mistral"
-                    })
-                });
-                const responseText = await res.text();
-                aiBox.innerHTML = marked.parse(responseText);
-                sess.messages.push({ role: "ai", content: responseText });
+            if (reply) {
+                aiBox.innerHTML = marked.parse(reply);
+                activeSession.messages.push({ role: "ai", content: reply });
                 saveSessions();
-            } catch(err) {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural Gateway Error: ${err.message}</span>`;
+            } else {
+                console.error("Groq Connection Error:", lastError);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
             }
         }
 
-        function renderMessageUI(role, content, shouldScroll, isRawHtml = false) {
+        function renderMessageUI(role, content, shouldScroll) {
             const div = document.createElement("div");
             div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeInUp animate__faster`;
-            const body = isRawHtml ? content : marked.parse(content || "");
-            div.innerHTML = `<div class="max-w-[85%] md:max-w-[72%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed overflow-hidden">${body}</div>`;
-            const chat = document.getElementById("chat");
-            chat.appendChild(div);
-            if (shouldScroll) chat.scrollTop = chat.scrollHeight;
+            div.innerHTML = `<div class="max-w-[70%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed">${content ? marked.parse(content) : ''}</div>`;
+            
+            const chatContainer = document.getElementById("chat");
+            chatContainer.appendChild(div);
+            if (shouldScroll) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
             return div.querySelector('.chat-ai');
         }
 
