@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI | Neural Multimodal Workspace</title>
+    <title>Nexus AI | Multimodal Neural Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        
         body { 
             background: #030712; 
             color: #f3f4f6; 
@@ -21,7 +19,6 @@
             height: 100vh; 
             overflow: hidden; 
         }
-        
         .bg-mesh {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: 
@@ -29,13 +26,11 @@
                 radial-gradient(at 90% 90%, rgba(59, 130, 246, 0.12) 0px, transparent 50%);
             z-index: -1;
         }
-
         .glass-nav { 
             background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(25px); 
             border-right: 1px solid rgba(255, 255, 255, 0.05); 
         }
-
         .glass-card { 
             background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(30px); 
@@ -43,21 +38,17 @@
             border-radius: 24px; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
         }
-
         .chat-user { 
             background: linear-gradient(135deg, #0284c7, #2563eb); 
             box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25); 
         }
-
         .chat-ai { 
             background: rgba(30, 41, 59, 0.55); 
             border: 1px solid rgba(255, 255, 255, 0.06); 
         }
-
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-
         pre {
             background: #0b1120 !important;
             padding: 12px !important;
@@ -66,7 +57,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             margin: 8px 0;
         }
-        code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     </style>
 </head>
 <body class="flex flex-col">
@@ -80,163 +70,97 @@
             </div>
             <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
             <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Multimodal Neural Workspace</p>
-            <p class="text-xs text-gray-500 mb-8 font-medium">Engineered by Chethan</p>
+            <p class="text-xs text-gray-500 mb-6 font-medium">Engineered by Chethan</p>
             
             <div id="g_id_onload" 
                  data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" 
                  data-callback="handleGoogleResponse">
             </div>
-            <div class="g_id_signin flex justify-center scale-105" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
-        </div>
-    </div>
-
-    <!-- Video Generation Studio Modal -->
-    <div id="video-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
-        <div class="glass-card p-7 w-full max-w-xl mx-4 border-indigo-500/30 relative animate__animated animate__zoomIn animate__faster">
-            <button onclick="toggleVideoStudio(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
-                <i class="fas fa-times text-lg"></i>
-            </button>
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-10 h-10 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center text-indigo-400 border border-indigo-500/30">
-                    <i class="fas fa-video text-base"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg font-bold text-white">Neural Video Studio</h2>
-                    <p class="text-xs text-indigo-400 font-semibold tracking-wide">Generate motion clips & cinematic timelapses</p>
-                </div>
-            </div>
-
-            <div class="space-y-4 text-xs">
-                <div>
-                    <label class="block text-gray-300 font-semibold mb-1.5">Motion Prompt</label>
-                    <textarea id="video-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-indigo-500/50" placeholder="Cinematic drone shot flying through a glowing cyberpunk metropolis during rainfall, volumetric fog, 4k..."></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-gray-300 font-semibold mb-1.5">Aspect Ratio</label>
-                        <select id="video-ratio" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none focus:border-indigo-500/50">
-                            <option value="1280x720">Landscape (16:9 Widescreen)</option>
-                            <option value="720x1280">Portrait (9:16 Shorts/Reel)</option>
-                            <option value="1024x1024">Square (1:1)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-300 font-semibold mb-1.5">Motion Style</label>
-                        <select id="video-style" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none focus:border-indigo-500/50">
-                            <option value="cinematic">Cinematic Fluid</option>
-                            <option value="timelapse">Hyperlapse / Dynamic</option>
-                            <option value="anime">Anime Motion</option>
-                            <option value="drone">Drone Orbit</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button onclick="executeVideoGen()" class="w-full py-3 mt-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 font-bold rounded-xl text-white hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                    <i class="fas fa-play"></i> Synthesize Video
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Gen Studio Modal -->
-    <div id="image-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
-        <div class="glass-card p-7 w-full max-w-xl mx-4 border-cyan-500/30 relative animate__animated animate__zoomIn animate__faster">
-            <button onclick="toggleImageStudio(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
-                <i class="fas fa-times text-lg"></i>
-            </button>
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-10 h-10 bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/30">
-                    <i class="fas fa-wand-magic-sparkles text-base"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg font-bold text-white">Neural Art Studio</h2>
-                    <p class="text-xs text-cyan-400 font-semibold tracking-wide">Generate high-fidelity graphics</p>
-                </div>
-            </div>
-
-            <div class="space-y-4 text-xs">
-                <div>
-                    <label class="block text-gray-300 font-semibold mb-1.5">Prompt Details</label>
-                    <textarea id="studio-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-cyan-500/50" placeholder="A futuristic cybernetic tiger prowling in Neo Tokyo, neon reflections, 8k resolution, cinematic lighting..."></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-gray-300 font-semibold mb-1.5">Aspect Ratio</label>
-                        <select id="studio-ratio" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none focus:border-cyan-500/50">
-                            <option value="1024x1024">Square (1:1)</option>
-                            <option value="1280x720">Landscape (16:9)</option>
-                            <option value="720x1280">Portrait (9:16)</option>
-                            <option value="1024x768">Standard (4:3)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-300 font-semibold mb-1.5">Enhance Mode</label>
-                        <select id="studio-enhance" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200 outline-none focus:border-cyan-500/50">
-                            <option value="true">Auto-Enhance On</option>
-                            <option value="false">Raw Prompt Exact</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button onclick="executeStudioGen()" class="w-full py-3 mt-2 bg-gradient-to-r from-cyan-500 to-blue-600 font-bold rounded-xl text-white hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                    <i class="fas fa-sparkles"></i> Synthesize Artwork
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- About Modal -->
-    <div id="about-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[110] hidden">
-        <div class="glass-card p-8 w-full max-w-lg mx-4 border-cyan-500/30 relative animate__animated animate__zoomIn animate__faster">
-            <button onclick="toggleAboutModal(false)" class="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors">
-                <i class="fas fa-times text-lg"></i>
-            </button>
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
-                    <i class="fas fa-users-gear text-lg"></i>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-white">About Nexus AI</h2>
-                    <p class="text-xs text-cyan-400 font-semibold tracking-wider uppercase">Leadership & Core Team</p>
-                </div>
-            </div>
-            <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is a multimodal neural workspace engineered for image & video synthesis, document intelligence, code architecture, and automated workflows.
-            </p>
+            <div class="g_id_signin flex justify-center scale-105 mb-4" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
             
-            <div class="space-y-3">
-                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-bold text-sm">C</div>
-                        <div>
-                            <p class="font-bold text-sm text-white">Chethan</p>
-                            <p class="text-[10px] text-gray-400">Founder & Core Developer</p>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Owner</span>
+            <!-- Quick Bypass for Testing -->
+            <button onclick="bypassLogin()" class="w-full py-3 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-semibold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-bolt text-cyan-400"></i> Enter as Founder (Chethan)
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings & API Config Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[120] hidden">
+        <div class="glass-card p-7 w-full max-w-md mx-4 border-cyan-500/30 relative">
+            <button onclick="toggleSettings(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fas fa-gear text-cyan-400"></i> Neural Engine Settings
+            </h2>
+            <p class="text-xs text-gray-400 mb-4">Set your own API key for dedicated unlimited high-speed inference.</p>
+            
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-gray-300 font-semibold mb-1">Groq API Key (Optional)</label>
+                    <input id="custom-groq-key" type="password" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-cyan-500/50" placeholder="gsk_...">
                 </div>
-                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30 font-bold text-sm">V</div>
-                        <div>
-                            <p class="font-bold text-sm text-white">Vijay</p>
-                            <p class="text-[10px] text-gray-400">Operations & Strategy</p>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">Manager</span>
+                <button onclick="saveSettings()" class="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 font-bold rounded-xl text-white hover:opacity-90">
+                    Save Key Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Studio Modal -->
+    <div id="video-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
+        <div class="glass-card p-7 w-full max-w-xl mx-4 border-indigo-500/30 relative">
+            <button onclick="toggleVideoStudio(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+            <h2 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                <i class="fas fa-video text-indigo-400"></i> Motion & Video Studio
+            </h2>
+            <p class="text-xs text-gray-400 mb-4">Synthesize motion clips and dynamic animations.</p>
+            <div class="space-y-3 text-xs">
+                <textarea id="video-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none" placeholder="Drone flythrough in a futuristic cyberpunk city at night..."></textarea>
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="video-ratio" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200">
+                        <option value="1280x720">Landscape (16:9)</option>
+                        <option value="720x1280">Portrait (9:16)</option>
+                        <option value="1024x1024">Square (1:1)</option>
+                    </select>
+                    <select id="video-style" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200">
+                        <option value="cinematic 60fps drone shot">Cinematic</option>
+                        <option value="hyperlapse dynamic motion">Timelapse</option>
+                        <option value="anime aesthetic fluid motion">Anime</option>
+                    </select>
                 </div>
-                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 font-bold text-sm">V</div>
-                        <div>
-                            <p class="font-bold text-sm text-white">Venkat</p>
-                            <p class="text-[10px] text-gray-400">Administration & Support</p>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Asst Manager</span>
+                <button onclick="executeVideoGen()" class="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 font-bold rounded-xl text-white">
+                    Synthesize Video
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Art Studio Modal -->
+    <div id="image-studio-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[115] hidden">
+        <div class="glass-card p-7 w-full max-w-xl mx-4 border-cyan-500/30 relative">
+            <button onclick="toggleImageStudio(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+            <h2 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                <i class="fas fa-palette text-cyan-400"></i> Neural Art Studio
+            </h2>
+            <p class="text-xs text-gray-400 mb-4">Synthesize Ultra HD concept art & illustrations.</p>
+            <div class="space-y-3 text-xs">
+                <textarea id="studio-prompt" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none" placeholder="Cybernetic warrior in Neo Tokyo, volumetric lighting, 8k..."></textarea>
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="studio-ratio" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200">
+                        <option value="1024x1024">Square (1:1)</option>
+                        <option value="1280x720">Landscape (16:9)</option>
+                        <option value="720x1280">Portrait (9:16)</option>
+                    </select>
+                    <select id="studio-enhance" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-gray-200">
+                        <option value="true">Auto-Enhance On</option>
+                        <option value="false">Raw Prompt</option>
+                    </select>
                 </div>
+                <button onclick="executeStudioGen()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 font-bold rounded-xl text-white">
+                    Synthesize Image
+                </button>
             </div>
         </div>
     </div>
@@ -245,14 +169,17 @@
     <div id="main-app" class="hidden flex h-full">
         <!-- Sidebar -->
         <aside class="w-80 glass-nav flex flex-col p-6 z-10">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-9 h-9 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
-                    <i class="fas fa-atom text-lg"></i>
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
+                        <i class="fas fa-atom text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold tracking-tight uppercase leading-none">Nexus<span class="text-cyan-400">.</span></div>
+                        <span class="text-[9px] text-gray-500 tracking-wider font-semibold">BY CHETHAN</span>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-xl font-bold tracking-tight uppercase leading-none">Nexus<span class="text-cyan-400">.</span></div>
-                    <span class="text-[9px] text-gray-500 tracking-wider font-semibold">BY CHETHAN</span>
-                </div>
+                <button onclick="toggleSettings(true)" class="text-gray-400 hover:text-cyan-400 p-2"><i class="fas fa-gear"></i></button>
             </div>
 
             <nav class="space-y-2 mb-6">
@@ -268,25 +195,20 @@
                     <div class="w-7 h-7 bg-cyan-500/15 rounded-lg flex items-center justify-center"><i class="fas fa-palette text-xs text-cyan-400"></i></div>
                     Art Studio
                 </button>
-                <button onclick="toggleAboutModal(true)" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-xs text-gray-300 hover:text-white">
-                    <div class="w-7 h-7 bg-blue-500/10 rounded-lg flex items-center justify-center"><i class="fas fa-circle-info text-xs text-blue-400"></i></div>
-                    About Team
-                </button>
             </nav>
 
-            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Recent Chats</div>
+            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Recent Sessions</div>
             <div id="history" class="flex-1 overflow-y-auto space-y-2 text-xs custom-scroll"></div>
 
             <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
                 <div class="flex items-center gap-3">
-                    <img id="user-pfp" class="w-10 h-10 rounded-xl border border-cyan-500/30 hidden object-cover">
-                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 font-bold">U</div>
+                    <div class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 font-bold" id="user-avatar">C</div>
                     <div class="overflow-hidden">
-                        <p id="display-name" class="font-bold text-sm truncate w-28">User</p>
-                        <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">VERIFIED USER</p>
+                        <p id="display-name" class="font-bold text-sm truncate w-28">Chethan</p>
+                        <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">OWNER & FOUNDER</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors p-2"><i class="fas fa-power-off"></i></button>
+                <button onclick="logout()" class="text-gray-500 hover:text-red-400 p-2"><i class="fas fa-power-off"></i></button>
             </div>
         </aside>
 
@@ -294,43 +216,33 @@
         <main class="flex-1 flex flex-col relative">
             <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-44"></div>
             
-            <!-- Bottom Input & Attachment Bar -->
             <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
-                <!-- Staged Attachment Container -->
+                <!-- Attachment Pill -->
                 <div id="attachment-preview" class="hidden mb-2 p-2 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-cyan-500/30 flex items-center gap-3">
-                    <div id="attachment-thumb" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 text-cyan-400 text-sm">
+                    <div id="attachment-thumb" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden text-cyan-400 text-sm">
                         <i class="fas fa-file"></i>
                     </div>
                     <div class="flex-1 overflow-hidden">
                         <p id="attachment-name" class="text-xs font-semibold text-white truncate">file.pdf</p>
-                        <p id="attachment-desc" class="text-[10px] text-cyan-400">Attached to prompt</p>
+                        <p id="attachment-desc" class="text-[10px] text-cyan-400">Attached for analysis</p>
                     </div>
-                    <button onclick="clearAttachment()" class="p-2 text-gray-400 hover:text-red-400 transition-colors">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
+                    <button onclick="clearAttachment()" class="p-2 text-gray-400 hover:text-red-400"><i class="fas fa-times text-xs"></i></button>
                 </div>
 
                 <!-- Input Box -->
-                <div class="glass-card p-2 flex items-center border-white/10 shadow-[0_10px_30px_-10px_rgba(6,182,212,0.15)] focus-within:border-cyan-500/40 transition-all gap-1.5">
-                    <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)" accept="image/*,.pdf,.txt,.js,.ts,.py,.html,.css,.json,.csv,.md,.cpp,.c,.java">
-                    <button onclick="document.getElementById('file-input').click()" title="Attach image, PDF, or code" class="p-3 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-2xl transition-all flex items-center justify-center">
+                <div class="glass-card p-2 flex items-center border-white/10 shadow-2xl focus-within:border-cyan-500/40 transition-all gap-1.5">
+                    <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)" accept="image/*,.pdf,.txt,.js,.ts,.py,.html,.css,.json,.csv,.md">
+                    <button onclick="document.getElementById('file-input').click()" title="Attach File/Image" class="p-3 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-2xl transition-all">
                         <i class="fas fa-paperclip text-sm"></i>
                     </button>
-
-                    <button onclick="toggleVideoStudio(true)" title="Neural Video Studio" class="p-3 text-gray-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-2xl transition-all flex items-center justify-center">
+                    <button onclick="toggleVideoStudio(true)" title="Video Studio" class="p-3 text-gray-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-2xl transition-all">
                         <i class="fas fa-video text-sm"></i>
                     </button>
-
-                    <button onclick="toggleImageStudio(true)" title="Neural Art Studio" class="p-3 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-2xl transition-all flex items-center justify-center">
-                        <i class="fas fa-wand-magic-sparkles text-sm"></i>
+                    <button onclick="toggleImageStudio(true)" title="Image Studio" class="p-3 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-2xl transition-all">
+                        <i class="fas fa-palette text-sm"></i>
                     </button>
-
-                    <input id="input" 
-                           onkeydown="handleKeyDown(event)" 
-                           class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500 text-white" 
-                           placeholder="Type a query, 'generate video of...', or 'generate image of...'">
-                    
-                    <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-cyan-500/20">
+                    <input id="input" onkeydown="handleKeyDown(event)" class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500 text-white" placeholder="Message Nexus, upload files, or type 'generate image of...'">
+                    <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-md shadow-cyan-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
                     </button>
                 </div>
@@ -341,241 +253,118 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        const GROQ_API = "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";
-
-        const ROLE_CONFIG = {
-            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", roleTitle: "Owner", defaultName: "Chethan" },
-            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", roleTitle: "Owner", defaultName: "Chethan" },
-            "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", roleTitle: "Manager", defaultName: "Vijay" }
-        };
-
-        const GROQ_TEXT_MODELS = [
-            "llama-3.3-70b-versatile",
-            "llama-3.1-8b-instant"
-        ];
-
-        let currentUser = null;
+        let customKey = localStorage.getItem("nexus_custom_key") || "";
+        let currentUser = { name: "Chethan", email: "chethan131011.u@gmail.com", rank: "OWNER & FOUNDER", id: "dev_chethan" };
         let sessions = [];
         let currentSessionId = null;
         let stagedFile = null;
 
-        function getSystemPrompt() {
-            return `You are Nexus AI, an advanced multimodal neural workspace.
-Current Active User Session:
-- User Name: ${currentUser?.name || "User"}
-- User Email: ${currentUser?.email || "Unknown"}
-- Designated Role / Rank: ${currentUser?.rank || "Verified User"}
-
-Guidelines:
-1. When image or OCR content is provided, inspect all text, syntax, data points, or diagrams, and provide an accurate breakdown.
-2. When documents or code files are uploaded, summarize, analyze, or debug them thoroughly.
-3. If asked who founded or built Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.`;
+        function toggleSettings(show) {
+            document.getElementById("settings-modal").classList.toggle("hidden", !show);
+            if (show) document.getElementById("custom-groq-key").value = customKey;
         }
 
-        function toggleAboutModal(show) {
-            const modal = document.getElementById("about-modal");
-            if (show) modal.classList.remove("hidden");
-            else modal.classList.add("hidden");
+        function saveSettings() {
+            customKey = document.getElementById("custom-groq-key").value.trim();
+            localStorage.setItem("nexus_custom_key", customKey);
+            toggleSettings(false);
+            alert("Settings updated successfully.");
         }
 
-        function toggleImageStudio(show) {
-            const modal = document.getElementById("image-studio-modal");
-            if (show) modal.classList.remove("hidden");
-            else modal.classList.add("hidden");
-        }
+        function toggleImageStudio(show) { document.getElementById("image-studio-modal").classList.toggle("hidden", !show); }
+        function toggleVideoStudio(show) { document.getElementById("video-studio-modal").classList.toggle("hidden", !show); }
 
-        function toggleVideoStudio(show) {
-            const modal = document.getElementById("video-studio-modal");
-            if (show) modal.classList.remove("hidden");
-            else modal.classList.add("hidden");
-        }
-
-        function getUserRole(email) {
-            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
-            const normalized = email.toLowerCase().trim();
-            for (const key in ROLE_CONFIG) {
-                if (normalized === key || normalized.startsWith(key.split("@")[0])) {
-                    return ROLE_CONFIG[key];
-                }
-            }
-            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
+        function bypassLogin() {
+            initSession();
         }
 
         function handleGoogleResponse(res) {
             try {
                 const payload = JSON.parse(atob(res.credential.split('.')[1]));
-                const email = payload.email || "";
-                const roleInfo = getUserRole(email);
-                
-                currentUser = { 
+                currentUser = {
                     id: payload.sub,
-                    email: email,
-                    name: payload.name || roleInfo.defaultName, 
-                    rank: roleInfo.rank,
-                    roleTitle: roleInfo.roleTitle,
-                    picture: payload.picture 
+                    email: payload.email,
+                    name: payload.name || "User",
+                    rank: payload.email.includes("chethan") ? "OWNER & FOUNDER" : "VERIFIED USER"
                 };
                 initSession();
-            } catch (e) {
-                console.error("Auth Error", e);
+            } catch(e) {
+                bypassLogin();
             }
         }
 
         function initSession() {
-            document.getElementById("login-screen").classList.add("animate__fadeOut");
-            setTimeout(() => {
-                document.getElementById("login-screen").classList.add("hidden");
-                document.getElementById("main-app").classList.remove("hidden");
-                
-                const nameEl = document.getElementById("display-name");
-                const rankEl = document.getElementById("display-rank");
-                const pfpFallback = document.getElementById("pfp-fallback");
-                
-                nameEl.innerText = currentUser.name;
-                rankEl.innerText = currentUser.rank;
-
-                if (currentUser.rank.includes("OWNER")) {
-                    rankEl.className = "text-[8px] text-cyan-400 font-bold uppercase tracking-widest";
-                } else if (currentUser.rank.includes("MANAGER")) {
-                    rankEl.className = "text-[8px] text-blue-400 font-bold uppercase tracking-widest";
-                } else {
-                    rankEl.className = "text-[8px] text-gray-400 font-bold uppercase tracking-widest";
-                }
-
-                if (currentUser.picture) {
-                    document.getElementById("user-pfp").src = currentUser.picture;
-                    document.getElementById("user-pfp").classList.remove("hidden");
-                    pfpFallback.classList.add("hidden");
-                } else {
-                    pfpFallback.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : "U";
-                    pfpFallback.classList.remove("hidden");
-                }
-                
-                loadUserSessions();
-            }, 400);
+            document.getElementById("login-screen").classList.add("hidden");
+            document.getElementById("main-app").classList.remove("hidden");
+            document.getElementById("display-name").innerText = currentUser.name;
+            document.getElementById("display-rank").innerText = currentUser.rank;
+            document.getElementById("user-avatar").innerText = currentUser.name[0].toUpperCase();
+            loadSessions();
         }
 
-        function getStorageKey() {
-            return `nexus_chats_${currentUser.id}`;
-        }
-
-        function loadUserSessions() {
-            const rawData = localStorage.getItem(getStorageKey());
-            sessions = rawData ? JSON.parse(rawData) : [];
-            renderSidebar();
-
-            if (sessions.length > 0) {
-                loadSession(sessions[0].id);
-            } else {
-                createNewSession();
-            }
+        function loadSessions() {
+            const raw = localStorage.getItem(`nexus_chats_${currentUser.id}`);
+            sessions = raw ? JSON.parse(raw) : [];
+            if (sessions.length > 0) loadSession(sessions[0].id);
+            else createNewSession();
         }
 
         function saveSessions() {
-            localStorage.setItem(getStorageKey(), JSON.stringify(sessions));
+            localStorage.setItem(`nexus_chats_${currentUser.id}`, JSON.stringify(sessions));
             renderSidebar();
         }
 
         function createNewSession() {
-            const newSession = {
-                id: 'sess_' + Date.now(),
-                title: 'New Conversation',
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                messages: []
-            };
-            sessions.unshift(newSession);
-            currentSessionId = newSession.id;
+            const newSess = { id: 's_' + Date.now(), title: 'New Conversation', messages: [] };
+            sessions.unshift(newSess);
+            currentSessionId = newSess.id;
             saveSessions();
-            
             document.getElementById("chat").innerHTML = "";
             clearAttachment();
             triggerWelcome();
         }
 
-        function loadSession(sessionId) {
-            currentSessionId = sessionId;
-            const session = sessions.find(s => s.id === sessionId);
-            if (!session) return;
-
+        function loadSession(id) {
+            currentSessionId = id;
+            const sess = sessions.find(s => s.id === id);
+            if (!sess) return;
             renderSidebar();
-            const chatContainer = document.getElementById("chat");
-            chatContainer.innerHTML = "";
+            const container = document.getElementById("chat");
+            container.innerHTML = "";
             clearAttachment();
-
-            if (session.messages.length === 0) {
-                triggerWelcome();
-            } else {
-                session.messages.forEach(msg => {
-                    renderMessageUI(msg.role, msg.content, false, msg.isRawHtml);
-                });
-            }
-        }
-
-        function deleteSession(e, sessionId) {
-            e.stopPropagation();
-            sessions = sessions.filter(s => s.id !== sessionId);
-            saveSessions();
-            
-            if (sessions.length > 0) {
-                loadSession(sessions[0].id);
-            } else {
-                createNewSession();
-            }
+            if (sess.messages.length === 0) triggerWelcome();
+            else sess.messages.forEach(m => renderMessageUI(m.role, m.content, false, m.isRawHtml));
         }
 
         function renderSidebar() {
-            const historyContainer = document.getElementById("history");
-            historyContainer.innerHTML = "";
-
-            sessions.forEach(sess => {
-                const isActive = sess.id === currentSessionId;
+            const hist = document.getElementById("history");
+            hist.innerHTML = "";
+            sessions.forEach(s => {
                 const item = document.createElement("div");
-                item.className = `group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${
-                    isActive 
-                    ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' 
-                    : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
-                }`;
-                item.onclick = () => loadSession(sess.id);
-
-                item.innerHTML = `
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <i class="far fa-comments text-xs"></i>
-                        <div class="truncate font-medium text-xs w-36">${sess.title}</div>
-                    </div>
-                    <button onclick="deleteSession(event, '${sess.id}')" class="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-opacity p-1">
-                        <i class="fas fa-trash-alt text-[10px]"></i>
-                    </button>
-                `;
-                historyContainer.appendChild(item);
+                item.className = `p-3 rounded-2xl cursor-pointer text-xs flex justify-between items-center ${s.id === currentSessionId ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' : 'text-gray-400 hover:bg-white/5'}`;
+                item.innerHTML = `<span class="truncate w-36">${s.title}</span><i class="fas fa-trash-alt hover:text-red-400 opacity-40 hover:opacity-100" onclick="deleteSession(event, '${s.id}')"></i>`;
+                item.onclick = () => loadSession(s.id);
+                hist.appendChild(item);
             });
         }
 
+        function deleteSession(e, id) {
+            e.stopPropagation();
+            sessions = sessions.filter(s => s.id !== id);
+            saveSessions();
+            if (sessions.length > 0) loadSession(sessions[0].id);
+            else createNewSession();
+        }
+
         function triggerWelcome() {
-            let msg = "";
-            if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI neural architecture initialized. Founder clearance granted to **${currentUser.name}**.\n\n* **Vision OCR & Inspection:** Upload screenshots, code, or images for analysis.\n* **Video Studio:** Generate motion clips via \`generate video of [prompt]\` or open the Studio.\n* **Art Studio:** Create high-res graphics via \`generate image of [prompt]\`.\n* **File Reader:** Upload documents, PDFs, and source code files.`;
-            } else if (currentUser.rank.includes("MANAGER")) {
-                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online with full multimodal vision, video generation, and document intelligence.`;
-            } else {
-                msg = `### ⚡ Nexus Core Online\nNeural matrix connected. Upload images/files, generate videos, or chat freely.`;
-            }
-            
             const aiBox = renderMessageUI("ai", "", false);
-            let i = 0;
-            function type() {
-                if (i < msg.length) {
-                    aiBox.innerHTML = marked.parse(msg.substring(0, i + 1));
-                    i++;
-                    setTimeout(type, 8);
-                }
-            }
-            type();
+            const msg = `### ⚡ Nexus Neural Core Active\nWelcome back, **${currentUser.name}**.\n\n* **Image & Video Gen:** Type \`generate image of [prompt]\` or \`generate video of [prompt]\`.\n* **File Reader:** Upload documents, code, or images for full OCR extraction.`;
+            aiBox.innerHTML = marked.parse(msg);
         }
 
         async function handleFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const preview = document.getElementById("attachment-preview");
             const nameEl = document.getElementById("attachment-name");
             const descEl = document.getElementById("attachment-desc");
@@ -583,56 +372,39 @@ Guidelines:
 
             if (file.type.startsWith("image/")) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    stagedFile = {
-                        type: 'image',
-                        name: file.name,
-                        data: event.target.result,
-                        mime: file.type
-                    };
-                    thumbEl.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover">`;
+                reader.onload = (ev) => {
+                    stagedFile = { type: 'image', name: file.name, data: ev.target.result };
+                    thumbEl.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
                     nameEl.innerText = file.name;
-                    descEl.innerText = `Image staged for OCR & neural perception`;
+                    descEl.innerText = "Image attached";
                     preview.classList.remove("hidden");
                 };
                 reader.readAsDataURL(file);
             } else if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
                 const reader = new FileReader();
-                reader.onload = async (event) => {
-                    try {
-                        const typedarray = new Uint8Array(event.target.result);
-                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                        let extractedText = "";
-                        for (let p = 1; p <= Math.min(pdf.numPages, 10); p++) {
-                            const page = await pdf.getPage(p);
-                            const textContent = await page.getTextContent();
-                            extractedText += `\n--- Page ${p} ---\n` + textContent.items.map(s => s.str).join(" ");
-                        }
-                        stagedFile = {
-                            type: 'text',
-                            name: file.name,
-                            data: `[Attached PDF Content (${file.name})]:\n${extractedText}`
-                        };
-                        thumbEl.innerHTML = `<i class="fas fa-file-pdf text-red-400"></i>`;
-                        nameEl.innerText = file.name;
-                        descEl.innerText = `Extracted ${pdf.numPages} PDF page(s)`;
-                        preview.classList.remove("hidden");
-                    } catch (err) {
-                        alert("Could not extract PDF content: " + err.message);
+                reader.onload = async (ev) => {
+                    const typedarray = new Uint8Array(ev.target.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    let text = "";
+                    for (let p = 1; p <= Math.min(pdf.numPages, 10); p++) {
+                        const page = await pdf.getPage(p);
+                        const c = await page.getTextContent();
+                        text += `\n--- Page ${p} ---\n` + c.items.map(s => s.str).join(" ");
                     }
+                    stagedFile = { type: 'text', name: file.name, data: `[PDF Content - ${file.name}]:\n${text}` };
+                    thumbEl.innerHTML = `<i class="fas fa-file-pdf text-red-400"></i>`;
+                    nameEl.innerText = file.name;
+                    descEl.innerText = `${pdf.numPages} Page(s) Parsed`;
+                    preview.classList.remove("hidden");
                 };
                 reader.readAsArrayBuffer(file);
             } else {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    stagedFile = {
-                        type: 'text',
-                        name: file.name,
-                        data: `[Attached File: ${file.name}]\n\`\`\`\n${event.target.result}\n\`\`\``
-                    };
+                reader.onload = (ev) => {
+                    stagedFile = { type: 'text', name: file.name, data: `[Code/Document - ${file.name}]:\n${ev.target.result}` };
                     thumbEl.innerHTML = `<i class="fas fa-file-code text-cyan-400"></i>`;
                     nameEl.innerText = file.name;
-                    descEl.innerText = `Text/Code file parsed`;
+                    descEl.innerText = "Code/Text Parsed";
                     preview.classList.remove("hidden");
                 };
                 reader.readAsText(file);
@@ -653,281 +425,173 @@ Guidelines:
         }
 
         function executeStudioGen() {
-            const prompt = document.getElementById("studio-prompt").value.trim();
-            const ratio = document.getElementById("studio-ratio").value;
-            const enhance = document.getElementById("studio-enhance").value === "true";
-            
-            if (!prompt) return;
+            const p = document.getElementById("studio-prompt").value.trim();
+            const [w, h] = document.getElementById("studio-ratio").value.split("x");
             toggleImageStudio(false);
-            
-            const [w, h] = ratio.split("x");
-            generateImageArtifact(prompt, parseInt(w), parseInt(h), enhance);
+            if (p) generateImageArtifact(p, parseInt(w), parseInt(h));
         }
 
         function executeVideoGen() {
-            const prompt = document.getElementById("video-prompt").value.trim();
-            const ratio = document.getElementById("video-ratio").value;
-            const style = document.getElementById("video-style").value;
-
-            if (!prompt) return;
+            const p = document.getElementById("video-prompt").value.trim();
+            const [w, h] = document.getElementById("video-ratio").value.split("x");
+            const s = document.getElementById("video-style").value;
             toggleVideoStudio(false);
-
-            const [w, h] = ratio.split("x");
-            generateVideoArtifact(`${prompt}, ${style} dynamic motion, fluid animation`, parseInt(w), parseInt(h));
+            if (p) generateVideoArtifact(`${p}, ${s}`, parseInt(w), parseInt(h));
         }
 
-        function generateImageArtifact(prompt, width = 1024, height = 1024, enhance = true) {
-            let activeSession = sessions.find(s => s.id === currentSessionId);
-            if (!activeSession) return;
-
-            if (activeSession.messages.length === 0) {
-                activeSession.title = "🎨 " + (prompt.length > 20 ? prompt.substring(0, 20) + "..." : prompt);
-            }
-
-            renderMessageUI("user", `🎨 *Synthesize Image:* "${prompt}" (${width}x${height})`, true);
-            activeSession.messages.push({ role: "user", content: `Generate image: ${prompt}` });
+        function generateImageArtifact(prompt, width = 1024, height = 1024) {
+            const sess = sessions.find(s => s.id === currentSessionId);
+            if (!sess) return;
+            renderMessageUI("user", `🎨 *Synthesize Image:* "${prompt}"`, true);
+            sess.messages.push({ role: "user", content: `Generate image: ${prompt}` });
 
             const seed = Math.floor(Math.random() * 9999999);
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=${width}&height=${height}&nologo=true&enhance=${enhance}`;
-
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-palette fa-spin text-cyan-400 mr-2"></i> Generating neural artwork: *"<b>${prompt}</b>"*...`, true);
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=${width}&height=${height}&nologo=true`;
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-palette fa-spin text-cyan-400 mr-2"></i> Synthesizing artwork...`, true);
 
             const img = new Image();
-            img.src = imageUrl;
-            
+            img.src = url;
             img.onload = () => {
-                const finalHtml = `
+                const html = `
                     <div class="space-y-3">
-                        <div class="flex items-center justify-between text-xs text-cyan-400 font-semibold border-b border-white/5 pb-2">
-                            <span><i class="fas fa-sparkles mr-1.5"></i> Neural Image Synthesized</span>
+                        <div class="flex justify-between text-xs text-cyan-400 font-semibold border-b border-white/5 pb-2">
+                            <span><i class="fas fa-sparkles mr-1"></i> Generated Artifact</span>
                             <span class="text-[10px] text-gray-400">${width}x${height}</span>
                         </div>
-                        <img src="${imageUrl}" alt="${prompt}" class="rounded-2xl border border-cyan-500/20 shadow-2xl max-w-full md:max-w-md w-full object-cover">
-                        <div class="flex items-center gap-3 pt-1">
-                            <a href="${imageUrl}" target="_blank" download="nexus-art-${seed}.jpg" class="text-[11px] text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1.5 bg-cyan-500/10 px-3 py-1.5 rounded-xl border border-cyan-500/20 transition-all">
-                                <i class="fas fa-download"></i> Download Full Resolution
-                            </a>
-                        </div>
+                        <img src="${url}" class="rounded-2xl border border-cyan-500/20 max-w-full md:max-w-md w-full object-cover">
+                        <a href="${url}" target="_blank" download class="inline-flex text-[11px] text-cyan-400 gap-1.5 items-center"><i class="fas fa-download"></i> Save Full Res</a>
                     </div>
                 `;
-                aiBox.innerHTML = finalHtml;
-                activeSession.messages.push({ role: "ai", content: finalHtml, isRawHtml: true });
+                aiBox.innerHTML = html;
+                sess.messages.push({ role: "ai", content: html, isRawHtml: true });
                 saveSessions();
-            };
-
-            img.onerror = () => {
-                aiBox.innerHTML = `<span class="text-red-400">Failed to render generated image. Please verify your prompt.</span>`;
             };
         }
 
         function generateVideoArtifact(prompt, width = 1280, height = 720) {
-            let activeSession = sessions.find(s => s.id === currentSessionId);
-            if (!activeSession) return;
-
-            if (activeSession.messages.length === 0) {
-                activeSession.title = "🎬 " + (prompt.length > 20 ? prompt.substring(0, 20) + "..." : prompt);
-            }
-
-            renderMessageUI("user", `🎬 *Synthesize Video:* "${prompt}" (${width}x${height})`, true);
-            activeSession.messages.push({ role: "user", content: `Generate video: ${prompt}` });
+            const sess = sessions.find(s => s.id === currentSessionId);
+            if (!sess) return;
+            renderMessageUI("user", `🎬 *Synthesize Video:* "${prompt}"`, true);
+            sess.messages.push({ role: "user", content: `Generate video: ${prompt}` });
 
             const seed = Math.floor(Math.random() * 9999999);
-            // High-framerate fluid neural video stream URL
-            const videoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=${width}&height=${height}&nologo=true&enhance=true`;
-
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-film fa-spin text-indigo-400 mr-2"></i> Rendering neural video sequence: *"<b>${prompt}</b>"*...`, true);
+            const motionUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ' fluid motion dynamic animation cinematic 4k')}?seed=${seed}&width=${width}&height=${height}&nologo=true`;
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-film fa-spin text-indigo-400 mr-2"></i> Rendering motion sequence...`, true);
 
             const img = new Image();
-            img.src = videoUrl;
-
+            img.src = motionUrl;
             img.onload = () => {
-                const finalHtml = `
+                const html = `
                     <div class="space-y-3">
-                        <div class="flex items-center justify-between text-xs text-indigo-400 font-semibold border-b border-white/5 pb-2">
-                            <span><i class="fas fa-video mr-1.5"></i> Neural Motion Artifact</span>
-                            <span class="text-[10px] text-gray-400">${width}x${height} • HD Motion</span>
+                        <div class="flex justify-between text-xs text-indigo-400 font-semibold border-b border-white/5 pb-2">
+                            <span><i class="fas fa-video mr-1"></i> Motion Sequence</span>
+                            <span class="text-[10px] text-gray-400">${width}x${height}</span>
                         </div>
-                        <div class="relative group rounded-2xl overflow-hidden border border-indigo-500/20 shadow-2xl max-w-full md:max-w-md w-full bg-black/60">
-                            <img src="${videoUrl}" alt="${prompt}" class="w-full object-cover group-hover:scale-105 transition-transform duration-700">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
-                                <span class="text-[10px] text-white/80 bg-black/60 px-2 py-1 rounded-md backdrop-blur-sm"><i class="fas fa-circle text-red-500 text-[8px] animate-pulse mr-1"></i> Motion Clip</span>
+                        <div class="relative rounded-2xl overflow-hidden border border-indigo-500/20 max-w-full md:max-w-md w-full">
+                            <img src="${motionUrl}" class="w-full object-cover">
+                            <div class="absolute bottom-2 left-2 bg-black/70 px-2 py-1 rounded text-[10px] text-white flex items-center gap-1">
+                                <i class="fas fa-circle text-red-500 text-[8px] animate-pulse"></i> Dynamic Render
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 pt-1">
-                            <a href="${videoUrl}" target="_blank" download="nexus-video-${seed}.mp4" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1.5 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20 transition-all">
-                                <i class="fas fa-download"></i> Save HD Video Clip
-                            </a>
-                        </div>
+                        <a href="${motionUrl}" target="_blank" download class="inline-flex text-[11px] text-indigo-400 gap-1.5 items-center"><i class="fas fa-download"></i> Download Clip</a>
                     </div>
                 `;
-                aiBox.innerHTML = finalHtml;
-                activeSession.messages.push({ role: "ai", content: finalHtml, isRawHtml: true });
+                aiBox.innerHTML = html;
+                sess.messages.push({ role: "ai", content: html, isRawHtml: true });
                 saveSessions();
-            };
-
-            img.onerror = () => {
-                aiBox.innerHTML = `<span class="text-red-400">Failed to render video sequence. Please try again.</span>`;
             };
         }
 
         async function send() {
             const input = document.getElementById("input");
             const text = input.value.trim();
-            
             if (!text && !stagedFile) return;
-            
             input.value = "";
-            
-            let activeSession = sessions.find(s => s.id === currentSessionId);
-            if (!activeSession) return;
 
-            // Video Generation Trigger Check
-            const isVideoPrompt = /^(generate video|create video|make video|\/video)/i.test(text) || text.toLowerCase().includes("generate a video of");
-            if (isVideoPrompt && !stagedFile) {
-                const cleanPrompt = text
-                    .replace(/^(generate video of|generate video|create video of|create video|make video of|make video|\/video)/gi, "")
-                    .replace(/^a video of/gi, "")
-                    .trim();
-                generateVideoArtifact(cleanPrompt);
+            const sess = sessions.find(s => s.id === currentSessionId);
+            if (!sess) return;
+
+            if (/^(generate video|create video|\/video)/i.test(text)) {
+                generateVideoArtifact(text.replace(/^(generate video of|generate video|create video|\/video)/gi, "").trim());
+                return;
+            }
+            if (/^(generate image|create image|draw|\/imagine)/i.test(text)) {
+                generateImageArtifact(text.replace(/^(generate image of|generate image|create image|draw|\/imagine)/gi, "").trim());
                 return;
             }
 
-            // Image Generation Trigger Check
-            const isImagePrompt = /^(generate image|create image|draw|\/imagine)/i.test(text) || text.toLowerCase().includes("generate an image of");
-            if (isImagePrompt && !stagedFile) {
-                const cleanPrompt = text
-                    .replace(/^(generate image of|generate image|create image of|create image|draw|\/imagine)/gi, "")
-                    .replace(/^an image of/gi, "")
-                    .trim();
-                generateImageArtifact(cleanPrompt);
-                return;
-            }
-
-            let userDisplayContent = text;
+            let displayContent = text;
             let currentStaged = stagedFile;
             clearAttachment();
 
             if (currentStaged) {
                 if (currentStaged.type === 'image') {
-                    userDisplayContent = `
-                        <div class="mb-2">
-                            <img src="${currentStaged.data}" class="rounded-xl max-h-48 border border-white/20 object-cover mb-2">
-                            <p>${text || "Analyze and extract all information from this image."}</p>
-                        </div>
-                    `;
+                    displayContent = `<img src="${currentStaged.data}" class="rounded-xl max-h-48 mb-2"><p>${text || "Analyze this image."}</p>`;
                 } else {
-                    userDisplayContent = `📎 **Attached file (${currentStaged.name}):**\n\n${text || "Analyze and summarize this file."}`;
+                    displayContent = `📎 **${currentStaged.name}**\n\n${text || "Analyze this file."}`;
                 }
             }
 
-            if (activeSession.messages.length === 0) {
-                activeSession.title = text.length > 22 ? text.substring(0, 22) + "..." : (currentStaged ? currentStaged.name : "Chat");
-            }
+            if (sess.messages.length === 0) sess.title = text.substring(0, 20) || "Conversation";
+            sess.messages.push({ role: "user", content: displayContent, isRawHtml: currentStaged?.type === 'image' });
+            renderMessageUI("user", displayContent, true, currentStaged?.type === 'image');
 
-            activeSession.messages.push({ 
-                role: "user", 
-                content: userDisplayContent, 
-                isRawHtml: currentStaged?.type === 'image' 
-            });
-            renderMessageUI("user", userDisplayContent, true, currentStaged?.type === 'image');
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying Neural Matrix...`, true);
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing neural query...`, true);
-
-            // Multimodal Vision Handler via Client-Side Tesseract OCR + LLM Analysis
-            let promptPayloadText = text || "Please provide a complete analysis of this data.";
-
-            if (currentStaged && currentStaged.type === 'image') {
-                try {
-                    aiBox.innerHTML = `<i class="fas fa-eye fa-spin text-cyan-400 mr-2"></i> Reading visual features & OCR text from image...`;
-                    
-                    const ocrResult = await Tesseract.recognize(currentStaged.data, 'eng');
-                    const extractedOcr = ocrResult.data.text.trim();
-
-                    promptPayloadText = `[User uploaded an image named "${currentStaged.name}"]\n` +
-                        (extractedOcr ? `[Extracted Visual OCR Text]:\n${extractedOcr}\n\n` : `[Image Visual Details]: Image supplied with dimensions ${ocrResult.data.imageWidth}x${ocrResult.data.imageHeight}px.\n\n`) +
-                        `User Query: ${text || "Please analyze, explain, and solve whatever is displayed in this image."}`;
-                } catch (err) {
-                    promptPayloadText = `[User uploaded image "${currentStaged.name}"]\nUser Query: ${text || "Please explain this image."}`;
-                }
-            } else if (currentStaged && currentStaged.type === 'text') {
-                promptPayloadText = `${currentStaged.data}\n\nUser Request: ${text || "Please analyze the document above."}`;
-            }
-
-            // Standard Text / Document Query Flow via Groq
-            const apiHistory = activeSession.messages
-                .filter(m => !m.isRawHtml && !m.content.startsWith("<div") && !m.content.startsWith("<img"))
-                .map(m => ({
-                    role: m.role === 'ai' ? 'assistant' : 'user',
-                    content: m.content
-                }));
-
+            let promptPayload = text || "Analyze the provided input.";
             if (currentStaged) {
-                if (apiHistory.length > 0) {
-                    apiHistory[apiHistory.length - 1].content = promptPayloadText;
-                } else {
-                    apiHistory.push({ role: 'user', content: promptPayloadText });
-                }
+                promptPayload = `${currentStaged.data}\n\nUser Question: ${text || "Explain and analyze this data."}`;
             }
 
-            let reply = null;
-            let lastError = null;
-
-            for (const model of GROQ_TEXT_MODELS) {
-                try {
+            // Universal Engine Request
+            try {
+                let responseText = "";
+                if (customKey) {
                     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                         method: "POST",
-                        headers: { 
-                            "Authorization": `Bearer ${GROQ_API.trim()}`, 
-                            "Content-Type": "application/json" 
-                        },
+                        headers: { "Authorization": `Bearer ${customKey}`, "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            model: model,
+                            model: "llama-3.3-70b-versatile",
                             messages: [
-                                { role: "system", content: getSystemPrompt() },
-                                ...apiHistory
+                                { role: "system", content: "You are Nexus AI, developed by Chethan. Be concise, fast, and structured." },
+                                { role: "user", content: promptPayload }
                             ]
                         })
                     });
-
-                    const data = await res.json();
-                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
-                        reply = data.choices[0].message.content;
-                        break;
-                    } else {
-                        lastError = data.error?.message || `HTTP ${res.status}`;
-                    }
-                } catch (err) {
-                    lastError = err.message;
+                    const d = await res.json();
+                    responseText = d.choices[0].message.content;
+                } else {
+                    // Free Resilient Neural Gateway
+                    const res = await fetch("https://text.pollinations.ai/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            messages: [
+                                { role: "system", content: "You are Nexus AI, an advanced AI workspace created by Chethan. Provide clear answers." },
+                                { role: "user", content: promptPayload }
+                            ],
+                            model: "mistral"
+                        })
+                    });
+                    responseText = await res.text();
                 }
-            }
 
-            if (reply) {
-                aiBox.innerHTML = marked.parse(reply);
-                activeSession.messages.push({ role: "ai", content: reply });
+                aiBox.innerHTML = marked.parse(responseText);
+                sess.messages.push({ role: "ai", content: responseText });
                 saveSessions();
-            } else {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
+            } catch(err) {
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural Gateway Error: ${err.message}. Click the gear icon to set your own Groq key.</span>`;
             }
         }
 
         function renderMessageUI(role, content, shouldScroll, isRawHtml = false) {
             const div = document.createElement("div");
             div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeInUp animate__faster`;
-            
-            let parsedBody = "";
-            if (isRawHtml) {
-                parsedBody = content;
-            } else if (content) {
-                parsedBody = marked.parse(content);
-            }
-
-            div.innerHTML = `<div class="max-w-[85%] md:max-w-[72%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed overflow-hidden">${parsedBody}</div>`;
-            
-            const chatContainer = document.getElementById("chat");
-            chatContainer.appendChild(div);
-            if (shouldScroll) {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
+            const body = isRawHtml ? content : marked.parse(content || "");
+            div.innerHTML = `<div class="max-w-[85%] md:max-w-[72%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed overflow-hidden">${body}</div>`;
+            const chat = document.getElementById("chat");
+            chat.appendChild(div);
+            if (shouldScroll) chat.scrollTop = chat.scrollHeight;
             return div.querySelector('.chat-ai');
         }
 
