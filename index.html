@@ -298,14 +298,21 @@
             "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", roleTitle: "Manager", defaultName: "Vijay" }
         };
 
-        // Text & Vision models
-        const TEXT_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"];
-        const VISION_MODELS = ["meta-llama/llama-3.2-11b-vision-preview", "meta-llama/llama-3.2-90b-vision-preview"];
+        // Updated, active Groq text and multimodal vision model IDs
+        const TEXT_MODELS = [
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant"
+        ];
+
+        const VISION_MODELS = [
+            "llama-3.2-11b-vision-instruct",
+            "llama-3.2-90b-vision-instruct"
+        ];
 
         let currentUser = null;
         let sessions = [];
         let currentSessionId = null;
-        let stagedFile = null; // Holds { type: 'image'|'text', data: string, name: string, previewUrl: string }
+        let stagedFile = null;
 
         function getSystemPrompt() {
             return `You are Nexus AI, an advanced multimodal neural intelligence system.
@@ -515,7 +522,6 @@ Capabilities:
             type();
         }
 
-        // File Staging Handlers
         async function handleFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -531,7 +537,7 @@ Capabilities:
                     stagedFile = {
                         type: 'image',
                         name: file.name,
-                        data: event.target.result, // base64
+                        data: event.target.result,
                         mime: file.type
                     };
                     thumbEl.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover">`;
@@ -567,7 +573,6 @@ Capabilities:
                 };
                 reader.readAsArrayBuffer(file);
             } else {
-                // Generic Text/Code file
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     stagedFile = {
@@ -664,7 +669,6 @@ Capabilities:
             let activeSession = sessions.find(s => s.id === currentSessionId);
             if (!activeSession) return;
 
-            // Direct Image Generation Trigger Check
             const isImagePrompt = /^(generate image|create image|draw|\/imagine)/i.test(text) || text.toLowerCase().includes("generate an image of");
             if (isImagePrompt && !stagedFile) {
                 const cleanPrompt = text
@@ -675,7 +679,6 @@ Capabilities:
                 return;
             }
 
-            // Normal or Multimodal Prompt Handling
             let userDisplayContent = text;
             let currentStaged = stagedFile;
             clearAttachment();
@@ -706,7 +709,7 @@ Capabilities:
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Processing neural query...`, true);
 
-            // Multimodal Image Analysis via Vision Models
+            // Multimodal Vision Query using active Groq Vision models
             if (currentStaged && currentStaged.type === 'image') {
                 let visionReply = null;
                 let visionError = null;
@@ -767,7 +770,6 @@ Capabilities:
                     content: m.content
                 }));
 
-            // If a text file or PDF was attached, append it directly into the prompt payload
             if (currentStaged && currentStaged.type === 'text') {
                 const combinedPrompt = `${currentStaged.data}\n\nUser Request: ${text || "Please provide a complete analysis of the above document."}`;
                 if (apiHistory.length > 0) {
