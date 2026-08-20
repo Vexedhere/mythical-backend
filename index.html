@@ -78,7 +78,7 @@
                 <i class="fas fa-atom"></i>
             </div>
             <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
-            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Neural Intelligence Network</p>
+            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Ultra-Fast LPU Architecture</p>
             <p class="text-xs text-gray-500 mb-8 font-medium">Developed by Chethan</p>
             
             <div id="g_id_onload" 
@@ -206,8 +206,7 @@
     </div>
 
     <script>
-        // Paste your OpenRouter API Key (sk-or-v1-...) here
-        const OPENROUTER_API_KEY = "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";
+        const GROQ_API_KEY = "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";
 
         const ROLE_CONFIG = {
             "chethan131011.u@gmail.com": {
@@ -230,12 +229,11 @@
             }
         };
 
-        // Low-latency, fast-response free models on OpenRouter
-        const FAST_MODELS = [
-            "meta-llama/llama-3.1-8b-instruct:free",
-            "mistralai/mistral-7b-instruct:free",
-            "google/gemma-2-9b-it:free",
-            "openrouter/auto"
+        // Active high-speed Groq models (zero queue, 500+ tok/sec)
+        const GROQ_MODELS = [
+            "openai/gpt-oss-20b",
+            "openai/gpt-oss-120b",
+            "qwen/qwen3.6-27b"
         ];
 
         let currentUser = null;
@@ -243,7 +241,7 @@
         let currentSessionId = null;
 
         function getSystemPrompt() {
-            return `You are Nexus AI, an advanced, high-performance intelligent system.
+            return `You are Nexus AI, an advanced, high-performance intelligent system running on ultrafast LPU hardware.
 Current Active User Session:
 - User Name: ${currentUser?.name || "User"}
 - User Email: ${currentUser?.email || "Unknown"}
@@ -252,7 +250,7 @@ Current Active User Session:
 Guidelines:
 1. Address the user appropriately according to their rank and name when greeting or when relevant.
 2. If the user asks about who made you, developed you, or founded Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.
-3. Stay focused, efficient, and direct in answering technical and general requests.`;
+3. Provide crisp, intelligent, and immediate responses without unnecessary conversational filler.`;
         }
 
         function toggleAboutModal(show) {
@@ -423,7 +421,7 @@ Guidelines:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI core initialized. Founder clearance granted to **${currentUser.name}**.\n\nAll neural pathways operational. What are we building today?`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI LPU core initialized at maximum throughput. Founder clearance active for **${currentUser.name}**.\n\nAll neural pathways operational. What are we building today?`;
             } else if (currentUser.rank.includes("MANAGER")) {
                 msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
             } else {
@@ -436,7 +434,7 @@ Guidelines:
                 if (i < msg.length) {
                     aiBox.innerHTML = marked.parse(msg.substring(0, i + 1));
                     i++;
-                    setTimeout(type, 12);
+                    setTimeout(type, 10);
                 }
             }
             type();
@@ -466,35 +464,25 @@ Guidelines:
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-cyan-400 animate-pulse mr-2"></i> Querying OpenRouter Core...`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-cyan-400 animate-pulse mr-2"></i>`, true);
+            const chatContainer = document.getElementById("chat");
             
-            const rawKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY : "";
-            const cleanKey = rawKey.trim();
-
-            if (!cleanKey || cleanKey === "PASTE_YOUR_OPENROUTER_KEY_HERE") {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key (starts with <code>sk-or-v1-</code>) in <code>OPENROUTER_API_KEY</code> on line 234.`;
-                return;
-            }
-
             const apiHistory = activeSession.messages.map(m => ({
                 role: m.role === 'ai' ? 'assistant' : 'user',
                 content: m.content
             }));
 
-            let reply = null;
+            let streamedContent = "";
+            let streamSucceeded = false;
             let lastError = null;
 
-            for (const model of FAST_MODELS) {
+            for (const model of GROQ_MODELS) {
                 try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s fast failover
-
-                    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                         method: "POST",
-                        signal: controller.signal,
                         headers: { 
-                            "Authorization": `Bearer ${cleanKey}`,
-                            "Content-Type": "application/json"
+                            "Authorization": `Bearer ${GROQ_API_KEY.trim()}`, 
+                            "Content-Type": "application/json" 
                         },
                         body: JSON.stringify({
                             model: model,
@@ -502,31 +490,58 @@ Guidelines:
                                 { role: "system", content: getSystemPrompt() },
                                 ...apiHistory
                             ],
-                            temperature: 0.7,
-                            max_tokens: 1024
+                            stream: true,
+                            temperature: 0.6,
+                            max_tokens: 1500
                         })
                     });
 
-                    clearTimeout(timeoutId);
+                    if (!res.ok) {
+                        const errData = await res.json();
+                        lastError = errData.error?.message || `HTTP ${res.status}`;
+                        continue;
+                    }
 
-                    const data = await res.json();
-                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
-                        reply = data.choices[0].message.content;
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    aiBox.innerHTML = "";
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split("\n");
+
+                        for (const line of lines) {
+                            const trimmed = line.trim();
+                            if (trimmed.startsWith("data: ") && trimmed !== "data: [DONE]") {
+                                try {
+                                    const json = JSON.parse(trimmed.substring(6));
+                                    const delta = json.choices[0]?.delta?.content || "";
+                                    if (delta) {
+                                        streamedContent += delta;
+                                        aiBox.innerHTML = marked.parse(streamedContent);
+                                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+                    }
+
+                    if (streamedContent.trim().length > 0) {
+                        streamSucceeded = true;
+                        activeSession.messages.push({ role: "ai", content: streamedContent });
+                        saveSessions();
                         break;
-                    } else {
-                        lastError = data.error?.message || `HTTP ${res.status}`;
                     }
                 } catch (err) {
                     lastError = err.message;
                 }
             }
 
-            if (reply) {
-                aiBox.innerHTML = marked.parse(reply);
-                activeSession.messages.push({ role: "ai", content: reply });
-                saveSessions();
-            } else {
-                console.error("OpenRouter Connection Error:", lastError);
+            if (!streamSucceeded) {
+                console.error("Groq Engine Error:", lastError);
                 aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
             }
         }
