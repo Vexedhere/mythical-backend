@@ -206,7 +206,8 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = "AQ.Ab8RN6Ju7YghMxPKyOW-g5jdOCbs9gvAw7WdN3xEJ8SybtikvQ";
+        // Paste your OpenRouter key from openrouter.ai/keys below
+        const OPENROUTER_API_KEY = "YOUR_OPENROUTER_KEY_HERE";
 
         const ROLE_CONFIG = {
             "chethan131011.u@gmail.com": {
@@ -228,6 +229,15 @@
                 defaultName: "Vijay"
             }
         };
+
+        // Live OpenRouter free models with auto-fallback
+        const FREE_MODELS = [
+            "openrouter/free",
+            "google/gemma-4-31b-it:free",
+            "openai/gpt-oss-20b:free",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "nvidia/nemotron-3-super-120b-a12b:free"
+        ];
 
         let currentUser = null;
         let sessions = [];
@@ -457,45 +467,54 @@ Guidelines:
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Connecting to Gemini Neural Core...`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying OpenRouter Matrix...`, true);
             
-            try {
-                const cleanKey = GEMINI_API_KEY.trim();
-                
-                const contents = activeSession.messages.map(m => ({
-                    role: m.role === 'ai' ? 'model' : 'user',
-                    parts: [{ text: m.content }]
-                }));
+            const apiHistory = activeSession.messages.map(m => ({
+                role: m.role === 'ai' ? 'assistant' : 'user',
+                content: m.content
+            }));
 
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cleanKey}`;
+            let reply = null;
+            let lastError = null;
 
-                const res = await fetch(endpoint, {
-                    method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        systemInstruction: {
-                            parts: [{ text: getSystemPrompt() }]
+            for (const model of FREE_MODELS) {
+                try {
+                    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        method: "POST",
+                        headers: { 
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY.trim()}`,
+                            "HTTP-Referer": window.location.href,
+                            "X-Title": "Nexus AI",
+                            "Content-Type": "application/json" 
                         },
-                        contents: contents
-                    })
-                });
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: getSystemPrompt() },
+                                ...apiHistory
+                            ]
+                        })
+                    });
 
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error?.message || `HTTP ${res.status}`);
+                    const data = await res.json();
+                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
+                        reply = data.choices[0].message.content;
+                        break;
+                    } else {
+                        lastError = data.error?.message || `HTTP ${res.status}`;
+                    }
+                } catch (err) {
+                    lastError = err.message;
                 }
+            }
 
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
+            if (reply) {
                 aiBox.innerHTML = marked.parse(reply);
                 activeSession.messages.push({ role: "ai", content: reply });
                 saveSessions();
-
-            } catch (e) { 
-                console.error("Gemini Connection Error:", e);
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${e.message}`; 
+            } else {
+                console.error("OpenRouter Connection Error:", lastError);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
             }
         }
 
