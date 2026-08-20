@@ -206,8 +206,8 @@
     </div>
 
     <script>
-        // Paste your OpenRouter key from openrouter.ai/keys below
-        const OPENROUTER_API_KEY = "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";
+        // Paste your OpenRouter API Key (sk-or-v1-...) here
+        const OPENROUTER_API_KEY = "PASTE_YOUR_OPENROUTER_KEY_HERE";
 
         const ROLE_CONFIG = {
             "chethan131011.u@gmail.com": {
@@ -230,7 +230,6 @@
             }
         };
 
-        // Live OpenRouter free models with auto-fallback
         const FREE_MODELS = [
             "openrouter/free",
             "google/gemma-4-31b-it:free",
@@ -453,7 +452,7 @@ Guidelines:
         async function send() {
             const input = document.getElementById("input");
             const text = input.value.trim();
-            if(!text) return;
+            if (!text) return;
             
             input.value = "";
             
@@ -469,6 +468,14 @@ Guidelines:
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying OpenRouter Matrix...`, true);
             
+            const rawKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY : "";
+            const cleanKey = rawKey.trim();
+
+            if (!cleanKey || cleanKey === "PASTE_YOUR_OPENROUTER_KEY_HERE") {
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key (starts with <code>sk-or-v1-</code>) in <code>OPENROUTER_API_KEY</code> on line 234.`;
+                return;
+            }
+
             const apiHistory = activeSession.messages.map(m => ({
                 role: m.role === 'ai' ? 'assistant' : 'user',
                 content: m.content
@@ -482,10 +489,8 @@ Guidelines:
                     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
                         headers: { 
-                            "Authorization": `Bearer ${OPENROUTER_API_KEY.trim()}`,
-                            "HTTP-Referer": window.location.href,
-                            "X-Title": "Nexus AI",
-                            "Content-Type": "application/json" 
+                            "Authorization": `Bearer ${cleanKey}`,
+                            "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
                             model: model,
