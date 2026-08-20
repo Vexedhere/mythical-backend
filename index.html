@@ -230,12 +230,12 @@
             }
         };
 
-        const FREE_MODELS = [
-            "openrouter/free",
-            "google/gemma-4-31b-it:free",
-            "openai/gpt-oss-20b:free",
-            "meta-llama/llama-3.3-70b-instruct:free",
-            "nvidia/nemotron-3-super-120b-a12b:free"
+        // Low-latency, fast-response free models on OpenRouter
+        const FAST_MODELS = [
+            "meta-llama/llama-3.1-8b-instruct:free",
+            "mistralai/mistral-7b-instruct:free",
+            "google/gemma-2-9b-it:free",
+            "openrouter/auto"
         ];
 
         let currentUser = null;
@@ -466,7 +466,7 @@ Guidelines:
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-circle-notch fa-spin text-cyan-400 opacity-60 mr-2"></i> Querying OpenRouter Matrix...`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-cyan-400 animate-pulse mr-2"></i> Querying OpenRouter Core...`, true);
             
             const rawKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY : "";
             const cleanKey = rawKey.trim();
@@ -484,10 +484,14 @@ Guidelines:
             let reply = null;
             let lastError = null;
 
-            for (const model of FREE_MODELS) {
+            for (const model of FAST_MODELS) {
                 try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s fast failover
+
                     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
+                        signal: controller.signal,
                         headers: { 
                             "Authorization": `Bearer ${cleanKey}`,
                             "Content-Type": "application/json"
@@ -497,9 +501,13 @@ Guidelines:
                             messages: [
                                 { role: "system", content: getSystemPrompt() },
                                 ...apiHistory
-                            ]
+                            ],
+                            temperature: 0.7,
+                            max_tokens: 1024
                         })
                     });
+
+                    clearTimeout(timeoutId);
 
                     const data = await res.json();
                     if (res.ok && data.choices && data.choices[0]?.message?.content) {
