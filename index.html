@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
         
         :root { 
             --p-color: #06b6d4; 
@@ -63,7 +63,11 @@
             border: 1px solid rgba(255, 255, 255, 0.05); 
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
     </style>
@@ -78,7 +82,7 @@
                 <i class="fas fa-atom"></i>
             </div>
             <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
-            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Ultra-Fast LPU Architecture</p>
+            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Multimodal & Vidu Video Core</p>
             <p class="text-xs text-gray-500 mb-8 font-medium">Developed by Chethan</p>
             
             <div id="g_id_onload" 
@@ -105,11 +109,10 @@
                 </div>
             </div>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is a high-performance neural workspace engineered for automated task handling, custom intelligence, and intelligent workflows.
+                Nexus AI is a high-performance neural workspace engineered for automated task handling, Vidu AI video rendering, code generation, and intelligent workflows.
             </p>
             
             <div class="space-y-3">
-                <!-- Chethan -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-bold text-sm">C</div>
@@ -120,7 +123,6 @@
                     </div>
                     <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Owner</span>
                 </div>
-                <!-- Vijay -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30 font-bold text-sm">V</div>
@@ -131,7 +133,6 @@
                     </div>
                     <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">Manager</span>
                 </div>
-                <!-- Venkat -->
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 font-bold text-sm">V</div>
@@ -171,6 +172,16 @@
                 </button>
             </nav>
 
+            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Tools & Generators</div>
+            <div class="grid grid-cols-2 gap-2 mb-6 text-xs">
+                <button onclick="insertPromptPrefix('/image ')" class="p-2.5 rounded-xl bg-white/5 hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 text-gray-300 hover:text-cyan-400 flex items-center gap-2 transition-all">
+                    <i class="fas fa-image text-cyan-400"></i> Image Gen
+                </button>
+                <button onclick="insertPromptPrefix('/video ')" class="p-2.5 rounded-xl bg-white/5 hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 text-gray-300 hover:text-purple-400 flex items-center gap-2 transition-all">
+                    <i class="fas fa-film text-purple-400"></i> Vidu Video
+                </button>
+            </div>
+
             <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Recent Chats</div>
             <div id="history" class="flex-1 overflow-y-auto space-y-2 text-xs custom-scroll"></div>
 
@@ -196,7 +207,7 @@
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-6 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Nexus AI...">
+                           placeholder="Message Nexus AI or type /video <prompt>, /image <prompt>...">
                     <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-cyan-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
                     </button>
@@ -207,29 +218,16 @@
 
     <script>
         const GROQ_API_KEY = "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";
+        
+        // Paste your Vidu.ai API Key from vidu.studio dashboard below
+        const VIDU_API_KEY = "YOUR_VIDU_API_KEY_HERE";
 
         const ROLE_CONFIG = {
-            "chethan131011.u@gmail.com": {
-                rank: "OWNER & FOUNDER",
-                badgeClass: "text-cyan-400",
-                roleTitle: "Owner",
-                defaultName: "Chethan"
-            },
-            "monsterbeast2569@gmail.com": {
-                rank: "OWNER & FOUNDER",
-                badgeClass: "text-cyan-400",
-                roleTitle: "Owner",
-                defaultName: "Chethan"
-            },
-            "malluruvijaysundhar@gmail.com": {
-                rank: "MANAGER",
-                badgeClass: "text-blue-400",
-                roleTitle: "Manager",
-                defaultName: "Vijay"
-            }
+            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", defaultName: "Chethan" },
+            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", defaultName: "Chethan" },
+            "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", defaultName: "Vijay" }
         };
 
-        // Active high-speed Groq models (zero queue, 500+ tok/sec)
         const GROQ_MODELS = [
             "openai/gpt-oss-20b",
             "openai/gpt-oss-120b",
@@ -239,6 +237,51 @@
         let currentUser = null;
         let sessions = [];
         let currentSessionId = null;
+
+        // Custom Markdown Code Renderer with Copy Box
+        const customRenderer = new marked.Renderer();
+        customRenderer.code = function(code, language) {
+            const lang = language || 'code';
+            const escapedCode = encodeURIComponent(code);
+            
+            return `
+            <div class="my-4 rounded-2xl overflow-hidden border border-white/10 bg-[#080d1a] shadow-xl">
+                <div class="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5 text-xs text-gray-400">
+                    <span class="code-font font-bold uppercase text-[11px] text-cyan-400 tracking-wider flex items-center gap-2">
+                        <i class="fas fa-code text-[10px]"></i> ${lang}
+                    </span>
+                    <button onclick="copyCode(this, '${escapedCode}')" class="flex items-center gap-1.5 hover:text-white transition-all bg-white/5 hover:bg-white/10 px-3 py-1 rounded-lg text-xs border border-white/5">
+                        <i class="far fa-copy text-xs"></i> <span>Copy</span>
+                    </button>
+                </div>
+                <pre class="p-4 overflow-x-auto text-xs text-gray-200 code-font custom-scroll leading-relaxed"><code>${escapeHtml(code)}</code></pre>
+            </div>`;
+        };
+        marked.setOptions({ renderer: customRenderer });
+
+        function escapeHtml(string) {
+            return String(string)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        window.copyCode = function(button, encodedCode) {
+            const decoded = decodeURIComponent(encodedCode);
+            navigator.clipboard.writeText(decoded).then(() => {
+                const originalHtml = button.innerHTML;
+                button.innerHTML = `<i class="fas fa-check text-green-400"></i> <span class="text-green-400 font-semibold">Copied!</span>`;
+                setTimeout(() => { button.innerHTML = originalHtml; }, 2000);
+            });
+        };
+
+        function insertPromptPrefix(prefix) {
+            const input = document.getElementById("input");
+            input.value = prefix;
+            input.focus();
+        }
 
         function getSystemPrompt() {
             return `You are Nexus AI, an advanced, high-performance intelligent system running on ultrafast LPU hardware.
@@ -250,7 +293,8 @@ Current Active User Session:
 Guidelines:
 1. Address the user appropriately according to their rank and name when greeting or when relevant.
 2. If the user asks about who made you, developed you, or founded Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.
-3. Provide crisp, intelligent, and immediate responses without unnecessary conversational filler.`;
+3. For coding queries, ALWAYS output clean markdown code blocks with the exact language specified so the copy box renders properly.
+4. Keep answers sharp, direct, and intelligent.`;
         }
 
         function toggleAboutModal(show) {
@@ -260,15 +304,14 @@ Guidelines:
         }
 
         function getUserRole(email) {
-            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
-            
+            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
             const normalized = email.toLowerCase().trim();
             for (const key in ROLE_CONFIG) {
                 if (normalized === key || normalized.startsWith(key.split("@")[0])) {
                     return ROLE_CONFIG[key];
                 }
             }
-            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", roleTitle: "Member", defaultName: "User" };
+            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
         }
 
         function handleGoogleResponse(res) {
@@ -282,7 +325,6 @@ Guidelines:
                     email: email,
                     name: payload.name || roleInfo.defaultName, 
                     rank: roleInfo.rank,
-                    roleTitle: roleInfo.roleTitle,
                     picture: payload.picture 
                 };
                 initSession();
@@ -421,9 +463,9 @@ Guidelines:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI LPU core initialized at maximum throughput. Founder clearance active for **${currentUser.name}**.\n\nAll neural pathways operational. What are we building today?`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus Multimodal Core initialized. Founder clearance granted to **${currentUser.name}**.\n\nReady for ultra-fast chat, code execution, image generation (\`/image\`), and **Vidu.ai Video Rendering** (\`/video\`).`;
             } else if (currentUser.rank.includes("MANAGER")) {
-                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
+                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations, coding directives, and Vidu.ai video tasks.`;
             } else {
                 msg = `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
             }
@@ -434,7 +476,7 @@ Guidelines:
                 if (i < msg.length) {
                     aiBox.innerHTML = marked.parse(msg.substring(0, i + 1));
                     i++;
-                    setTimeout(type, 10);
+                    setTimeout(type, 8);
                 }
             }
             type();
@@ -444,6 +486,147 @@ Guidelines:
             if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 send();
+            }
+        }
+
+        // Dedicated Zero-Key Image Generator
+        async function handleImageGen(prompt, aiBox, activeSession) {
+            const seed = Math.floor(Math.random() * 9999999);
+            const encodedPrompt = encodeURIComponent(prompt.trim());
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+
+            aiBox.innerHTML = `
+                <div class="space-y-4 animate__animated animate__fadeIn">
+                    <div class="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-wider">
+                        <i class="fas fa-wand-magic-sparkles"></i> Synthesized Neural Image
+                    </div>
+                    <div class="relative rounded-2xl overflow-hidden border border-white/10 group shadow-2xl bg-black/40">
+                        <img src="${imageUrl}" alt="${escapeHtml(prompt)}" class="w-full max-h-[500px] object-cover rounded-2xl transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy">
+                        <div class="absolute bottom-3 right-3 flex gap-2">
+                            <a href="${imageUrl}" target="_blank" download="nexus_${seed}.jpg" class="px-3 py-1.5 bg-black/70 backdrop-blur-md hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-white/10 transition-all">
+                                <i class="fas fa-download"></i> Save HD
+                            </a>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 italic">Prompt: "${escapeHtml(prompt)}"</p>
+                </div>`;
+            
+            activeSession.messages.push({ role: "ai", content: `![${prompt}](${imageUrl})` });
+            saveSessions();
+        }
+
+        // Dedicated Vidu.ai Video Generation with Live Async Polling
+        async function handleViduVideoGen(prompt, aiBox, activeSession) {
+            const cleanKey = typeof VIDU_API_KEY !== 'undefined' ? VIDU_API_KEY.trim() : "";
+            
+            if (!cleanKey || cleanKey === "YOUR_VIDU_API_KEY_HERE") {
+                aiBox.innerHTML = `
+                    <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-200 text-xs leading-relaxed space-y-2">
+                        <div class="font-bold flex items-center gap-2 text-purple-400 text-sm">
+                            <i class="fas fa-video"></i> Vidu.ai Key Required
+                        </div>
+                        <p>To render actual AI MP4 videos using Vidu, please add your API Key in line 235 (<code>VIDU_API_KEY</code>).</p>
+                        <p class="text-gray-400">Get your key from <a href="https://www.vidu.studio/" target="_blank" class="text-cyan-400 underline">vidu.studio</a>.</p>
+                    </div>`;
+                return;
+            }
+
+            aiBox.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-wider">
+                        <i class="fas fa-circle-notch fa-spin"></i> Initializing Vidu AI Video Task...
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-gradient-to-r from-purple-500 to-cyan-400 h-1.5 rounded-full animate-pulse" style="width: 40%"></div>
+                    </div>
+                    <p class="text-xs text-gray-400 italic">Prompt: "${escapeHtml(prompt)}"</p>
+                </div>`;
+
+            try {
+                // Step 1: Submit Text-to-Video task to Vidu
+                const createRes = await fetch("https://api.vidu.studio/v1/generations", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${cleanKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        aspect_ratio: "16:9",
+                        duration: 4,
+                        style: "general"
+                    })
+                });
+
+                const createData = await createRes.json();
+                if (!createRes.ok || !createData.task_id) {
+                    throw new Error(createData.message || createData.error || `HTTP ${createRes.status}`);
+                }
+
+                const taskId = createData.task_id;
+                let videoUrl = null;
+                let attempts = 0;
+                const maxAttempts = 30; // 90 seconds max
+
+                // Step 2: Poll Vidu task until complete
+                while (attempts < maxAttempts) {
+                    await new Promise(r => setTimeout(r, 3000));
+                    attempts++;
+
+                    const pollRes = await fetch(`https://api.vidu.studio/v1/generations/${taskId}`, {
+                        headers: { "Authorization": `Bearer ${cleanKey}` }
+                    });
+                    
+                    const pollData = await pollRes.json();
+                    
+                    aiBox.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between text-purple-400 font-bold text-xs uppercase tracking-wider">
+                                <span><i class="fas fa-film fa-spin mr-1.5"></i> Rendering Video Frame ${attempts * 3}s...</span>
+                                <span class="text-gray-400 font-mono">${pollData.state || 'processing'}</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                                <div class="bg-gradient-to-r from-purple-500 to-cyan-400 h-1.5 rounded-full transition-all duration-300" style="width: ${Math.min(95, attempts * 7)}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 italic">Prompt: "${escapeHtml(prompt)}"</p>
+                        </div>`;
+
+                    if (pollData.state === "completed" || pollData.state === "success") {
+                        videoUrl = pollData.video_url || (pollData.creations && pollData.creations[0]?.url);
+                        break;
+                    } else if (pollData.state === "failed") {
+                        throw new Error(pollData.error_message || "Video synthesis failed on Vidu cluster.");
+                    }
+                }
+
+                if (!videoUrl) throw new Error("Rendering timed out. Please retry.");
+
+                // Step 3: Embed Native Video Player
+                aiBox.innerHTML = `
+                    <div class="space-y-4 animate__animated animate__fadeIn">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase tracking-wider">
+                                <i class="fas fa-circle-check text-green-400"></i> Vidu AI Video Rendered
+                            </span>
+                            <span class="text-[10px] text-gray-400 font-mono">16:9 • 1080P HD</span>
+                        </div>
+                        <div class="relative rounded-2xl overflow-hidden border border-white/10 bg-black/80 shadow-2xl group">
+                            <video src="${videoUrl}" controls autoplay loop playsinline class="w-full aspect-video rounded-2xl object-cover"></video>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <p class="text-xs text-gray-400 italic truncate max-w-[70%]">"${escapeHtml(prompt)}"</p>
+                            <a href="${videoUrl}" target="_blank" download="vidu_nexus_${Date.now()}.mp4" class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/20">
+                                <i class="fas fa-download"></i> Save MP4
+                            </a>
+                        </div>
+                    </div>`;
+
+                activeSession.messages.push({ role: "ai", content: `Generated Vidu Video: [Watch Video](${videoUrl}) for: *${prompt}*` });
+                saveSessions();
+
+            } catch (err) {
+                console.error("Vidu Generation Error:", err);
+                aiBox.innerHTML = `<div class="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs"><span class="font-bold">Vidu Video Error:</span> ${err.message}</div>`;
             }
         }
 
@@ -466,7 +649,22 @@ Guidelines:
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-cyan-400 animate-pulse mr-2"></i>`, true);
             const chatContainer = document.getElementById("chat");
-            
+
+            // Media Triggers & Routing
+            const lowerText = text.toLowerCase();
+            if (lowerText.startsWith("/image ") || lowerText.startsWith("generate image") || lowerText.startsWith("draw ")) {
+                const prompt = text.replace(/^\/image\s*|^generate image of\s*|^draw\s*/i, "");
+                await handleImageGen(prompt, aiBox, activeSession);
+                return;
+            }
+
+            if (lowerText.startsWith("/video ") || lowerText.startsWith("generate video") || lowerText.startsWith("create video")) {
+                const prompt = text.replace(/^\/video\s*|^generate video of\s*|^create video of\s*/i, "");
+                await handleViduVideoGen(prompt, aiBox, activeSession);
+                return;
+            }
+
+            // Groq LPU Text & Coding Stream
             const apiHistory = activeSession.messages.map(m => ({
                 role: m.role === 'ai' ? 'assistant' : 'user',
                 content: m.content
@@ -491,8 +689,8 @@ Guidelines:
                                 ...apiHistory
                             ],
                             stream: true,
-                            temperature: 0.6,
-                            max_tokens: 1500
+                            temperature: 0.5,
+                            max_tokens: 2048
                         })
                     });
 
@@ -549,7 +747,7 @@ Guidelines:
         function renderMessageUI(role, content, shouldScroll) {
             const div = document.createElement("div");
             div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeInUp animate__faster`;
-            div.innerHTML = `<div class="max-w-[70%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed">${content ? marked.parse(content) : ''}</div>`;
+            div.innerHTML = `<div class="max-w-[80%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed">${content ? marked.parse(content) : ''}</div>`;
             
             const chatContainer = document.getElementById("chat");
             chatContainer.appendChild(div);
