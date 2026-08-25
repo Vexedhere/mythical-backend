@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI</title>
+    <title>Kilp AI V2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -13,12 +13,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
         
         :root { 
-            --p-color: #06b6d4; 
-            --s-color: #3b82f6; 
+            --p-color: #10b981; 
+            --s-color: #06b6d4; 
         }
 
         body { 
-            background: #030712; 
+            background: #020b08; 
             color: #f3f4f6; 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             height: 100vh; 
@@ -28,39 +28,39 @@
         .bg-mesh {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: 
-                radial-gradient(at 10% 10%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(59, 130, 246, 0.12) 0px, transparent 50%);
+                radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
             z-index: -1;
         }
 
         .glass-nav { 
-            background: rgba(15, 23, 42, 0.6); 
+            background: rgba(4, 20, 16, 0.65); 
             backdrop-filter: blur(25px); 
             border-right: 1px solid rgba(255, 255, 255, 0.05); 
         }
 
         .glass-card { 
-            background: rgba(15, 23, 42, 0.5); 
+            background: rgba(6, 26, 21, 0.55); 
             backdrop-filter: blur(30px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border: 1px solid rgba(16, 185, 129, 0.15); 
             border-radius: 28px; 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
         }
 
         .glass-card:hover { 
-            border-color: rgba(6, 182, 212, 0.4); 
+            border-color: rgba(16, 185, 129, 0.4); 
             transform: translateY(-2px); 
             box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
         }
 
         .chat-user { 
-            background: linear-gradient(135deg, #0284c7, #2563eb); 
-            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25); 
+            background: linear-gradient(135deg, #059669, #0284c7); 
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.25); 
         }
 
         .chat-ai { 
-            background: rgba(30, 41, 59, 0.5); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
+            background: rgba(10, 35, 28, 0.6); 
+            border: 1px solid rgba(16, 185, 129, 0.12); 
         }
 
         .code-font {
@@ -76,13 +76,13 @@
     <div class="bg-mesh"></div>
 
     <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[100] bg-[#030712]">
-        <div class="animate__animated animate__zoomIn glass-card p-10 w-[400px] text-center border-cyan-500/20">
-            <div class="w-20 h-20 bg-cyan-500/10 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 border border-cyan-500/20 text-cyan-400">
-                <i class="fas fa-atom"></i>
+    <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-[100] bg-[#020b08]">
+        <div class="animate__animated animate__zoomIn glass-card p-10 w-[400px] text-center border-emerald-500/20">
+            <div class="w-20 h-20 bg-emerald-500/10 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 border border-emerald-500/20 text-emerald-400">
+                <i class="fas fa-microchip"></i>
             </div>
-            <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
-            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Fast Multimodal Intelligence</p>
+            <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Kilp AI <span class="text-emerald-400">V2</span></h1>
+            <p class="text-emerald-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">High-Throughput Intelligence Core</p>
             <p class="text-xs text-gray-500 mb-8 font-medium">Developed by Chethan</p>
             
             <div id="g_id_onload" 
@@ -95,53 +95,53 @@
 
     <!-- About Modal -->
     <div id="about-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[110] hidden">
-        <div class="glass-card p-8 w-full max-w-lg mx-4 border-cyan-500/30 relative animate__animated animate__zoomIn animate__faster">
+        <div class="glass-card p-8 w-full max-w-lg mx-4 border-emerald-500/30 relative animate__animated animate__zoomIn animate__faster">
             <button onclick="toggleAboutModal(false)" class="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors">
                 <i class="fas fa-times text-lg"></i>
             </button>
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
+                <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
                     <i class="fas fa-users-gear text-lg"></i>
                 </div>
                 <div>
-                    <h2 class="text-xl font-bold text-white">About Nexus AI</h2>
-                    <p class="text-xs text-cyan-400 font-semibold tracking-wider uppercase">Leadership & Core Team</p>
+                    <h2 class="text-xl font-bold text-white">About Kilp AI V2</h2>
+                    <p class="text-xs text-emerald-400 font-semibold tracking-wider uppercase">Leadership & Core Team</p>
                 </div>
             </div>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is a high-performance neural workspace engineered for automated problem solving, code generation, and intelligent workflows.
+                Kilp AI V2 is an intelligent high-throughput neural workspace engineered for fast task handling, code generation, and developer productivity.
             </p>
             
             <div class="space-y-3">
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-bold text-sm">C</div>
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30 font-bold text-sm">C</div>
                         <div>
                             <p class="font-bold text-sm text-white">Chethan</p>
                             <p class="text-[10px] text-gray-400">Founder & Core Developer</p>
                         </div>
                     </div>
-                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Owner</span>
+                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Owner</span>
                 </div>
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30 font-bold text-sm">V</div>
+                        <div class="w-9 h-9 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 border border-teal-500/30 font-bold text-sm">T</div>
                         <div>
-                            <p class="font-bold text-sm text-white">Vijay</p>
+                            <p class="font-bold text-sm text-white">Thaman</p>
+                            <p class="text-[10px] text-gray-400">System Administration & Security</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20">Admin</span>
+                </div>
+                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-bold text-sm">P</div>
+                        <div>
+                            <p class="font-bold text-sm text-white">Pavan</p>
                             <p class="text-[10px] text-gray-400">Operations & Strategy</p>
                         </div>
                     </div>
-                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">Manager</span>
-                </div>
-                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 font-bold text-sm">V</div>
-                        <div>
-                            <p class="font-bold text-sm text-white">Venkat</p>
-                            <p class="text-[10px] text-gray-400">Administration & Support</p>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Asst Manager</span>
+                    <span class="px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Manager</span>
                 </div>
             </div>
         </div>
@@ -152,22 +152,22 @@
         <!-- Sidebar -->
         <aside class="w-80 glass-nav flex flex-col p-6 z-10">
             <div class="flex items-center gap-3 mb-8">
-                <div class="w-9 h-9 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400 border border-cyan-500/20">
-                    <i class="fas fa-atom text-lg"></i>
+                <div class="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                    <i class="fas fa-microchip text-lg"></i>
                 </div>
                 <div>
-                    <div class="text-xl font-bold tracking-tight uppercase leading-none">Nexus<span class="text-cyan-400">.</span></div>
+                    <div class="text-xl font-bold tracking-tight uppercase leading-none">Kilp<span class="text-emerald-400">.</span>ai <span class="text-xs text-emerald-400 font-mono">V2</span></div>
                     <span class="text-[9px] text-gray-500 tracking-wider font-semibold">BY CHETHAN</span>
                 </div>
             </div>
 
             <nav class="space-y-2 mb-6">
-                <button onclick="createNewSession()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm">
-                    <div class="w-8 h-8 bg-cyan-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-plus text-xs text-cyan-400"></i></div>
+                <button onclick="createNewSession()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-emerald-500/20 transition-all font-semibold flex items-center gap-3 text-sm">
+                    <div class="w-8 h-8 bg-emerald-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-plus text-xs text-emerald-400"></i></div>
                     New Session
                 </button>
                 <button onclick="toggleAboutModal(true)" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition-all font-semibold flex items-center gap-3 text-sm text-gray-300 hover:text-white">
-                    <div class="w-8 h-8 bg-blue-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-circle-info text-xs text-blue-400"></i></div>
+                    <div class="w-8 h-8 bg-cyan-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-circle-info text-xs text-cyan-400"></i></div>
                     About Team
                 </button>
             </nav>
@@ -177,11 +177,11 @@
 
             <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
                 <div class="flex items-center gap-3">
-                    <img id="user-pfp" class="w-10 h-10 rounded-xl border border-cyan-500/30 hidden object-cover">
-                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-cyan-600/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20 font-bold">U</div>
+                    <img id="user-pfp" class="w-10 h-10 rounded-xl border border-emerald-500/30 hidden object-cover">
+                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 font-bold">U</div>
                     <div class="overflow-hidden">
                         <p id="display-name" class="font-bold text-sm truncate w-28">User</p>
-                        <p id="display-rank" class="text-[8px] text-cyan-400 font-bold uppercase tracking-widest">VERIFIED USER</p>
+                        <p id="display-rank" class="text-[8px] text-emerald-400 font-bold uppercase tracking-widest">VERIFIED USER</p>
                     </div>
                 </div>
                 <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors p-2"><i class="fas fa-power-off"></i></button>
@@ -193,12 +193,12 @@
             <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-36"></div>
             
             <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
-                <div class="glass-card p-2 flex items-center border-white/10 shadow-[0_10px_30px_-10px_rgba(6,182,212,0.15)] focus-within:border-cyan-500/40 transition-all">
+                <div class="glass-card p-2 flex items-center border-white/10 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.15)] focus-within:border-emerald-500/40 transition-all">
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-6 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Nexus AI...">
-                    <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-cyan-500/20">
+                           placeholder="Message Kilp AI V2...">
+                    <button onclick="send()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-emerald-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
                     </button>
                 </div>
@@ -211,12 +211,10 @@
         const OPENROUTER_API_KEY = "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";
 
         const ROLE_CONFIG = {
-            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", defaultName: "Chethan" },
-            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", defaultName: "Chethan" },
-            "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", defaultName: "Vijay" }
+            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-emerald-400", defaultName: "Chethan" },
+            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-emerald-400", defaultName: "Chethan" }
         };
 
-        // Live, high-speed models with instant first-token time
         const OPENROUTER_MODELS = [
             "openrouter/free",
             "deepseek/deepseek-chat",
@@ -228,36 +226,36 @@
         let sessions = [];
         let currentSessionId = null;
 
-        // Custom Renderer with robust object/string type handling
-        const customRenderer = new marked.Renderer();
-        customRenderer.code = function(arg1, arg2) {
-            let codeText = "";
-            let lang = "code";
+        // Custom Renderer with DOM-direct copying
+        const customRenderer = {
+            code(arg1, arg2) {
+                let codeText = "";
+                let lang = "code";
 
-            if (typeof arg1 === 'object' && arg1 !== null) {
-                codeText = arg1.text || arg1.raw || "";
-                lang = arg1.lang || "code";
-            } else {
-                codeText = typeof arg1 === 'string' ? arg1 : String(arg1 || '');
-                lang = typeof arg2 === 'string' && arg2 ? arg2 : "code";
+                if (typeof arg1 === 'object' && arg1 !== null) {
+                    codeText = arg1.text || arg1.raw || "";
+                    lang = arg1.lang || "code";
+                } else {
+                    codeText = typeof arg1 === 'string' ? arg1 : String(arg1 || '');
+                    lang = typeof arg2 === 'string' && arg2 ? arg2 : "code";
+                }
+
+                return `
+                <div class="code-box-wrapper my-4 rounded-2xl overflow-hidden border border-emerald-500/20 bg-[#040e0b] shadow-xl">
+                    <div class="flex items-center justify-between px-4 py-2.5 bg-white/5 border-b border-white/5 text-xs text-gray-400">
+                        <span class="code-font font-bold uppercase text-[11px] text-emerald-400 tracking-wider flex items-center gap-2">
+                            <i class="fas fa-code text-[10px]"></i> ${escapeHtml(lang)}
+                        </span>
+                        <button onclick="copyCode(this)" class="copy-btn flex items-center gap-1.5 hover:text-white transition-all bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-lg text-xs border border-emerald-500/20">
+                            <i class="far fa-copy text-xs"></i> <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre class="p-4 overflow-x-auto text-xs text-gray-200 code-font custom-scroll leading-relaxed"><code>${escapeHtml(codeText)}</code></pre>
+                </div>`;
             }
-
-            const escapedCode = encodeURIComponent(codeText);
-            
-            return `
-            <div class="my-4 rounded-2xl overflow-hidden border border-white/10 bg-[#080d1a] shadow-xl">
-                <div class="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5 text-xs text-gray-400">
-                    <span class="code-font font-bold uppercase text-[11px] text-cyan-400 tracking-wider flex items-center gap-2">
-                        <i class="fas fa-code text-[10px]"></i> ${escapeHtml(lang)}
-                    </span>
-                    <button onclick="copyCode(this, '${escapedCode}')" class="flex items-center gap-1.5 hover:text-white transition-all bg-white/5 hover:bg-white/10 px-3 py-1 rounded-lg text-xs border border-white/5">
-                        <i class="far fa-copy text-xs"></i> <span>Copy</span>
-                    </button>
-                </div>
-                <pre class="p-4 overflow-x-auto text-xs text-gray-200 code-font custom-scroll leading-relaxed"><code>${escapeHtml(codeText)}</code></pre>
-            </div>`;
         };
-        marked.setOptions({ renderer: customRenderer });
+
+        marked.use({ renderer: customRenderer });
 
         function escapeHtml(string) {
             return String(string)
@@ -268,17 +266,45 @@
                 .replace(/'/g, "&#039;");
         }
 
-        window.copyCode = function(button, encodedCode) {
-            const decoded = decodeURIComponent(encodedCode);
-            navigator.clipboard.writeText(decoded).then(() => {
+        // Direct DOM-based copy function with clipboard fallback
+        window.copyCode = function(button) {
+            const wrapper = button.closest('.code-box-wrapper');
+            if (!wrapper) return;
+            const codeEl = wrapper.querySelector('code');
+            const codeText = codeEl ? codeEl.innerText : '';
+
+            const showCopied = () => {
                 const originalHtml = button.innerHTML;
-                button.innerHTML = `<i class="fas fa-check text-green-400"></i> <span class="text-green-400 font-semibold">Copied!</span>`;
+                button.innerHTML = `<i class="fas fa-check text-emerald-400"></i> <span class="text-emerald-400 font-semibold">Copied!</span>`;
                 setTimeout(() => { button.innerHTML = originalHtml; }, 2000);
-            });
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(codeText).then(showCopied).catch(() => fallbackCopy(codeText, showCopied));
+            } else {
+                fallbackCopy(codeText, showCopied);
+            }
         };
 
+        function fallbackCopy(text, callback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                if (callback) callback();
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
         function getSystemPrompt() {
-            return `You are Nexus AI, an advanced high-performance intelligent system.
+            return `You are Kilp AI V2, an advanced, high-performance intelligent system engineered for speed and developer productivity.
 Current Active User Session:
 - User Name: ${currentUser?.name || "User"}
 - User Email: ${currentUser?.email || "Unknown"}
@@ -286,7 +312,7 @@ Current Active User Session:
 
 Guidelines:
 1. Address the user appropriately according to their rank and name when greeting or when relevant.
-2. If the user asks about who made you, developed you, or founded Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.
+2. If the user asks about who made you, developed you, or founded Kilp AI V2, clarify that Chethan is the Owner and Lead Developer, Thaman is the Admin, and Pavan is the Manager.
 3. For coding queries, output clean markdown code blocks with the exact language specified so copy boxes render properly.
 4. Keep answers sharp, direct, and intelligent.`;
         }
@@ -341,9 +367,11 @@ Guidelines:
                 rankEl.innerText = currentUser.rank;
 
                 if (currentUser.rank.includes("OWNER")) {
-                    rankEl.className = "text-[8px] text-cyan-400 font-bold uppercase tracking-widest";
+                    rankEl.className = "text-[8px] text-emerald-400 font-bold uppercase tracking-widest";
+                } else if (currentUser.rank.includes("ADMIN")) {
+                    rankEl.className = "text-[8px] text-teal-400 font-bold uppercase tracking-widest";
                 } else if (currentUser.rank.includes("MANAGER")) {
-                    rankEl.className = "text-[8px] text-blue-400 font-bold uppercase tracking-widest";
+                    rankEl.className = "text-[8px] text-cyan-400 font-bold uppercase tracking-widest";
                 } else {
                     rankEl.className = "text-[8px] text-gray-400 font-bold uppercase tracking-widest";
                 }
@@ -362,7 +390,7 @@ Guidelines:
         }
 
         function getStorageKey() {
-            return `nexus_chats_${currentUser.id}`;
+            return `kilp_v2_chats_${currentUser.id}`;
         }
 
         function loadUserSessions() {
@@ -436,7 +464,7 @@ Guidelines:
                 const item = document.createElement("div");
                 item.className = `group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${
                     isActive 
-                    ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
                     : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
                 }`;
                 item.onclick = () => loadSession(sess.id);
@@ -457,11 +485,13 @@ Guidelines:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI core online via OpenRouter high-speed pipeline. Founder clearance active for **${currentUser.name}**.\n\nReady for ultra-fast chat and coding directives.`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nKilp AI V2 core initialized. Founder clearance granted to **${currentUser.name}**.\n\nReady for ultra-fast chat and coding tasks.`;
+            } else if (currentUser.rank.includes("ADMIN")) {
+                msg = `### ⚡ Welcome Back, Admin Thaman\nSystem administration clearance active for **${currentUser.name}**.\n\nReady to handle operations and system directives.`;
             } else if (currentUser.rank.includes("MANAGER")) {
-                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
+                msg = `### ⚡ Welcome Back, Manager Pavan\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
             } else {
-                msg = `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
+                msg = `### ⚡ Kilp AI V2 Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
@@ -500,12 +530,12 @@ Guidelines:
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-cyan-400 animate-pulse mr-2"></i>`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-emerald-400 animate-pulse mr-2"></i>`, true);
             const chatContainer = document.getElementById("chat");
 
             const cleanKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY.trim() : "";
             if (!cleanKey || cleanKey === "PASTE_YOUR_OPENROUTER_KEY_HERE") {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key into <code>OPENROUTER_API_KEY</code> on line 226.`;
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key into <code>OPENROUTER_API_KEY</code> on line 235.`;
                 return;
             }
 
@@ -525,7 +555,7 @@ Guidelines:
                         headers: { 
                             "Authorization": `Bearer ${cleanKey}`,
                             "HTTP-Referer": window.location.origin || "http://localhost",
-                            "X-Title": "Nexus AI",
+                            "X-Title": "Kilp AI V2",
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
@@ -585,7 +615,7 @@ Guidelines:
             }
 
             if (!streamSucceeded) {
-                console.error("OpenRouter Stream Error:", lastError);
+                console.error("Kilp AI V2 Engine Error:", lastError);
                 aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
             }
         }
