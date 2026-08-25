@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI - 0x Alpha</title>
+    <title>Nexus AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -82,7 +82,7 @@
                 <i class="fas fa-atom"></i>
             </div>
             <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
-            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">0x Alpha Architecture</p>
+            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">High-Throughput Intelligence Core</p>
             <p class="text-xs text-gray-500 mb-8 font-medium">Developed by Chethan</p>
             
             <div id="g_id_onload" 
@@ -109,7 +109,7 @@
                 </div>
             </div>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Nexus AI is a high-speed neural matrix built with 0x Alpha engine intelligence, zero-latency inference, and automated workflows.
+                Nexus AI is a high-performance neural workspace engineered for automated problem solving, code generation, and intelligent workflows.
             </p>
             
             <div class="space-y-3">
@@ -157,7 +157,7 @@
                 </div>
                 <div>
                     <div class="text-xl font-bold tracking-tight uppercase leading-none">Nexus<span class="text-cyan-400">.</span></div>
-                    <span class="text-[9px] text-cyan-400 tracking-wider font-semibold">0X ALPHA MATRIX</span>
+                    <span class="text-[9px] text-gray-500 tracking-wider font-semibold">BY CHETHAN</span>
                 </div>
             </div>
 
@@ -197,7 +197,7 @@
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-6 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Nexus 0x Alpha...">
+                           placeholder="Message Nexus AI...">
                     <button onclick="send()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-cyan-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
                     </button>
@@ -207,20 +207,20 @@
     </div>
 
     <script>
-        // Paste your OpenRouter key (starts with sk-or-v1-) here
+        // Paste your OpenRouter API Key (starts with sk-or-v1-...) here
         const OPENROUTER_API_KEY = "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";
 
         const ROLE_CONFIG = {
-            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", defaultName: "Chethan" },
-            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", defaultName: "Chethan" },
-            "malluruvijaysundhar@gmail.com": { rank: "MANAGER", defaultName: "Vijay" }
+            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", defaultName: "Chethan" },
+            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", defaultName: "Chethan" },
+            "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", defaultName: "Vijay" }
         };
 
-        // 0x Alpha primary with fast free fallbacks
-        const MODELS = [
-            "stealth/ox-alpha",
+        // Ultra-fast streaming models on OpenRouter (primary + fast fallbacks)
+        const OPENROUTER_MODELS = [
+            "meta-llama/llama-3.3-70b-instruct:free",
             "meta-llama/llama-3.1-8b-instruct:free",
-            "mistralai/mistral-7b-instruct:free"
+            "google/gemini-2.0-flash-exp:free"
         ];
 
         let currentUser = null;
@@ -267,7 +267,7 @@
         };
 
         function getSystemPrompt() {
-            return `You are Nexus AI, an intelligent system operating on the 0x Alpha neural architecture.
+            return `You are Nexus AI, an advanced high-performance intelligent system.
 Current Active User Session:
 - User Name: ${currentUser?.name || "User"}
 - User Email: ${currentUser?.email || "Unknown"}
@@ -276,7 +276,7 @@ Current Active User Session:
 Guidelines:
 1. Address the user appropriately according to their rank and name when greeting or when relevant.
 2. If the user asks about who made you, developed you, or founded Nexus AI, clarify that Chethan is the Owner and Lead Developer, Vijay is the Manager, and Venkat is the Assistant Manager.
-3. For coding queries, output clean markdown code blocks with the language tagged so copy boxes render properly.
+3. For coding queries, output clean markdown code blocks with the exact language specified so copy boxes render properly.
 4. Keep answers sharp, direct, and intelligent.`;
         }
 
@@ -287,14 +287,14 @@ Guidelines:
         }
 
         function getUserRole(email) {
-            if (!email) return { rank: "VERIFIED USER", defaultName: "User" };
+            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
             const normalized = email.toLowerCase().trim();
             for (const key in ROLE_CONFIG) {
                 if (normalized === key || normalized.startsWith(key.split("@")[0])) {
                     return ROLE_CONFIG[key];
                 }
             }
-            return { rank: "VERIFIED USER", defaultName: "User" };
+            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
         }
 
         function handleGoogleResponse(res) {
@@ -446,11 +446,11 @@ Guidelines:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ 0x Alpha Core Online, Owner Chethan\nNexus AI initialized with 0x Alpha priority routing. Founder clearance active for **${currentUser.name}**.\n\nReady for ultra-fast coding directives and problem solving.`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nNexus AI core online via OpenRouter high-speed pipeline. Founder clearance active for **${currentUser.name}**.\n\nReady for ultra-fast chat and coding directives.`;
             } else if (currentUser.rank.includes("MANAGER")) {
-                msg = `### ⚡ 0x Alpha Core Online, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady for task execution and operations.`;
+                msg = `### ⚡ Welcome Back, Manager Vijay\nOperational matrix online. Management clearance active for **${currentUser.name}**.\n\nReady to handle operations and task directives.`;
             } else {
-                msg = `### ⚡ Nexus 0x Alpha Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
+                msg = `### ⚡ Nexus Core Online\nNeural matrix connection established for **${currentUser.name}**.\n\nHow can I assist you today?`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
@@ -489,11 +489,12 @@ Guidelines:
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
-            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-cyan-400 animate-pulse mr-2"></i> Querying 0x Alpha Matrix...`, true);
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-cyan-400 animate-pulse mr-2"></i>`, true);
+            const chatContainer = document.getElementById("chat");
 
             const cleanKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY.trim() : "";
             if (!cleanKey || cleanKey === "PASTE_YOUR_OPENROUTER_KEY_HERE") {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key in <code>OPENROUTER_API_KEY</code> on line 234.`;
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key into <code>OPENROUTER_API_KEY</code> on line 225.`;
                 return;
             }
 
@@ -502,15 +503,18 @@ Guidelines:
                 content: m.content
             }));
 
-            let reply = null;
+            let streamedContent = "";
+            let streamSucceeded = false;
             let lastError = null;
 
-            for (const model of MODELS) {
+            for (const model of OPENROUTER_MODELS) {
                 try {
                     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
                         headers: { 
                             "Authorization": `Bearer ${cleanKey}`,
+                            "HTTP-Referer": window.location.href || "http://localhost",
+                            "X-Title": "Nexus AI",
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
@@ -519,29 +523,58 @@ Guidelines:
                                 { role: "system", content: getSystemPrompt() },
                                 ...apiHistory
                             ],
-                            max_tokens: 2048,
-                            temperature: 0.6
+                            stream: true,
+                            temperature: 0.5,
+                            max_tokens: 2048
                         })
                     });
 
-                    const data = await res.json();
-                    if (res.ok && data.choices && data.choices[0]?.message?.content) {
-                        reply = data.choices[0].message.content;
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        lastError = errData.error?.message || `HTTP ${res.status}`;
+                        continue;
+                    }
+
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    aiBox.innerHTML = "";
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split("\n");
+
+                        for (const line of lines) {
+                            const trimmed = line.trim();
+                            if (trimmed.startsWith("data: ") && trimmed !== "data: [DONE]") {
+                                try {
+                                    const json = JSON.parse(trimmed.substring(6));
+                                    const delta = json.choices[0]?.delta?.content || "";
+                                    if (delta) {
+                                        streamedContent += delta;
+                                        aiBox.innerHTML = marked.parse(streamedContent);
+                                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+                    }
+
+                    if (streamedContent.trim().length > 0) {
+                        streamSucceeded = true;
+                        activeSession.messages.push({ role: "ai", content: streamedContent });
+                        saveSessions();
                         break;
-                    } else {
-                        lastError = data.error?.message || `HTTP ${res.status}`;
                     }
                 } catch (err) {
                     lastError = err.message;
                 }
             }
 
-            if (reply) {
-                aiBox.innerHTML = marked.parse(reply);
-                activeSession.messages.push({ role: "ai", content: reply });
-                saveSessions();
-            } else {
-                console.error("0x Alpha Matrix Error:", lastError);
+            if (!streamSucceeded) {
+                console.error("OpenRouter Stream Error:", lastError);
                 aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
             }
         }
