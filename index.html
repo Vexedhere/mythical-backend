@@ -82,7 +82,7 @@
                 <i class="fas fa-atom"></i>
             </div>
             <h1 class="text-3xl font-bold tracking-tight mb-1 text-white">Nexus AI</h1>
-            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">High-Throughput Intelligence Core</p>
+            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold">Fast Multimodal Intelligence</p>
             <p class="text-xs text-gray-500 mb-8 font-medium">Developed by Chethan</p>
             
             <div id="g_id_onload" 
@@ -216,11 +216,12 @@
             "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", defaultName: "Vijay" }
         };
 
-        // Ultra-fast streaming models on OpenRouter (primary + fast fallbacks)
+        // Resilient, verified OpenRouter model matrix (starts with auto free router)
         const OPENROUTER_MODELS = [
-            "meta-llama/llama-3.3-70b-instruct:free",
-            "meta-llama/llama-3.1-8b-instruct:free",
-            "google/gemini-2.0-flash-exp:free"
+            "openrouter/free",
+            "stealth/ox-alpha",
+            "nvidia/nemotron-3.5-lightning:free",
+            "openai/gpt-oss-20b:free"
         ];
 
         let currentUser = null;
@@ -513,7 +514,7 @@ Guidelines:
                         method: "POST",
                         headers: { 
                             "Authorization": `Bearer ${cleanKey}`,
-                            "HTTP-Referer": window.location.href || "http://localhost",
+                            "HTTP-Referer": window.location.origin || "http://localhost",
                             "X-Title": "Nexus AI",
                             "Content-Type": "application/json"
                         },
