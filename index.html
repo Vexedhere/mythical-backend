@@ -208,7 +208,7 @@
 
     <script>
         // Paste your OpenRouter API Key (starts with sk-or-v1-...) here
-        const OPENROUTER_API_KEY = "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";
+        const OPENROUTER_API_KEY = "PASTE_YOUR_OPENROUTER_KEY_HERE";
 
         const ROLE_CONFIG = {
             "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-cyan-400", defaultName: "Chethan" },
@@ -216,35 +216,45 @@
             "malluruvijaysundhar@gmail.com": { rank: "MANAGER", badgeClass: "text-blue-400", defaultName: "Vijay" }
         };
 
-        // Resilient, verified OpenRouter model matrix (starts with auto free router)
+        // Live, high-speed models with instant first-token time
         const OPENROUTER_MODELS = [
             "openrouter/free",
-            "stealth/ox-alpha",
-            "nvidia/nemotron-3.5-lightning:free",
-            "openai/gpt-oss-20b:free"
+            "deepseek/deepseek-chat",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "meta-llama/llama-3.1-8b-instruct:free"
         ];
 
         let currentUser = null;
         let sessions = [];
         let currentSessionId = null;
 
-        // Custom Markdown Code Renderer with One-Click Copy Box
+        // Custom Renderer with robust object/string type handling
         const customRenderer = new marked.Renderer();
-        customRenderer.code = function(code, language) {
-            const lang = language || 'code';
-            const escapedCode = encodeURIComponent(code);
+        customRenderer.code = function(arg1, arg2) {
+            let codeText = "";
+            let lang = "code";
+
+            if (typeof arg1 === 'object' && arg1 !== null) {
+                codeText = arg1.text || arg1.raw || "";
+                lang = arg1.lang || "code";
+            } else {
+                codeText = typeof arg1 === 'string' ? arg1 : String(arg1 || '');
+                lang = typeof arg2 === 'string' && arg2 ? arg2 : "code";
+            }
+
+            const escapedCode = encodeURIComponent(codeText);
             
             return `
             <div class="my-4 rounded-2xl overflow-hidden border border-white/10 bg-[#080d1a] shadow-xl">
                 <div class="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5 text-xs text-gray-400">
                     <span class="code-font font-bold uppercase text-[11px] text-cyan-400 tracking-wider flex items-center gap-2">
-                        <i class="fas fa-code text-[10px]"></i> ${lang}
+                        <i class="fas fa-code text-[10px]"></i> ${escapeHtml(lang)}
                     </span>
                     <button onclick="copyCode(this, '${escapedCode}')" class="flex items-center gap-1.5 hover:text-white transition-all bg-white/5 hover:bg-white/10 px-3 py-1 rounded-lg text-xs border border-white/5">
                         <i class="far fa-copy text-xs"></i> <span>Copy</span>
                     </button>
                 </div>
-                <pre class="p-4 overflow-x-auto text-xs text-gray-200 code-font custom-scroll leading-relaxed"><code>${escapeHtml(code)}</code></pre>
+                <pre class="p-4 overflow-x-auto text-xs text-gray-200 code-font custom-scroll leading-relaxed"><code>${escapeHtml(codeText)}</code></pre>
             </div>`;
         };
         marked.setOptions({ renderer: customRenderer });
@@ -495,7 +505,7 @@ Guidelines:
 
             const cleanKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY.trim() : "";
             if (!cleanKey || cleanKey === "PASTE_YOUR_OPENROUTER_KEY_HERE") {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key into <code>OPENROUTER_API_KEY</code> on line 225.`;
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please insert your OpenRouter key into <code>OPENROUTER_API_KEY</code> on line 226.`;
                 return;
             }
 
