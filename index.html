@@ -42,12 +42,6 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
         }
 
-        .glass-card:hover { 
-            border-color: rgba(16, 185, 129, 0.4); 
-            transform: translateY(-2px); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
-        }
-
         .chat-user { 
             background: linear-gradient(135deg, #059669, #0284c7); 
             box-shadow: 0 8px 20px rgba(5, 150, 105, 0.25); 
@@ -66,29 +60,34 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
 
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        @keyframes orb-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+            50% { transform: scale(1.12); box-shadow: 0 0 90px rgba(16, 185, 129, 0.6), 0 0 120px rgba(6, 182, 212, 0.4); }
+            100% { transform: scale(1); box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
         }
 
-        .voice-mode-active {
-            animation: pulse-ring 1.8s infinite;
-            background: linear-gradient(135deg, #10b981, #06b6d4) !important;
-            color: #020b08 !important;
-            border-color: #34d399 !important;
+        .voice-orb-active {
+            animation: orb-pulse 2s infinite ease-in-out;
         }
+
+        @keyframes sound-wave {
+            0%, 100% { height: 8px; }
+            50% { height: 42px; }
+        }
+
+        .wave-bar {
+            animation: sound-wave 1.2s infinite ease-in-out;
+        }
+        .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.2s; }
     </style>
 </head>
 <body class="flex flex-col">
     <div class="bg-mesh"></div>
 
-    <div id="voice-status-pill" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden glass-card px-5 py-2.5 flex items-center gap-3 border-emerald-500/40 animate__animated animate__fadeInDown">
-        <div class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
-        <span id="voice-status-text" class="text-xs font-semibold text-emerald-300">Voice-to-Voice Active • Listening...</span>
-        <button onclick="toggleVoiceMode()" class="ml-2 text-gray-400 hover:text-white text-xs bg-white/10 px-2 py-0.5 rounded-lg">End Call</button>
-    </div>
-
+    <!-- Auth / Feature Lock Modal -->
     <div id="auth-modal" class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-[120] hidden">
         <div class="glass-card p-8 w-full max-w-md mx-4 border-emerald-500/30 text-center relative animate__animated animate__zoomIn animate__faster">
             <button onclick="toggleAuthModal(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
@@ -104,7 +103,7 @@
             </p>
             
             <div id="g_id_onload" 
-                 data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com" 
+                 data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" 
                  data-callback="handleGoogleResponse">
             </div>
             <div class="g_id_signin flex justify-center scale-105 mb-3" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
@@ -112,9 +111,11 @@
         </div>
     </div>
 
+    <!-- Main Application Container -->
     <div id="main-app" class="flex h-full">
+        <!-- Sidebar Navigation -->
         <aside class="w-80 glass-nav flex flex-col p-6 z-10">
-            <div class="flex items-center gap-3 mb-8">
+            <div class="flex items-center gap-3 mb-8 cursor-pointer" onclick="navigateTo('/chat')">
                 <div class="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
                     <i class="fas fa-bolt text-lg"></i>
                 </div>
@@ -125,15 +126,22 @@
             </div>
 
             <nav class="space-y-2 mb-6">
-                <button onclick="createNewSession()" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-emerald-500/20 transition-all font-semibold flex items-center gap-3 text-sm">
+                <button onclick="navigateTo('/chat'); createNewSession();" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-emerald-500/20 transition-all font-semibold flex items-center gap-3 text-sm">
                     <div class="w-8 h-8 bg-emerald-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-plus text-xs text-emerald-400"></i></div>
                     New Session
+                </button>
+                <button onclick="navigateTo('/voice')" class="w-full text-left p-3.5 bg-gradient-to-r from-emerald-500/15 to-cyan-500/10 hover:from-emerald-500/25 hover:to-cyan-500/20 rounded-2xl border border-emerald-500/30 transition-all font-semibold flex items-center justify-between text-sm text-emerald-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-emerald-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-headset text-xs text-emerald-400 animate-pulse"></i></div>
+                        Live Voice Call
+                    </div>
+                    <span class="text-[9px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono uppercase">/voice</span>
                 </button>
             </nav>
 
             <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Generators</div>
             <div class="grid grid-cols-1 gap-2 mb-6 text-xs">
-                <button onclick="triggerImageButton()" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 text-gray-300 hover:text-emerald-400 flex items-center justify-between transition-all group">
+                <button onclick="navigateTo('/chat'); triggerImageButton();" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 text-gray-300 hover:text-emerald-400 flex items-center justify-between transition-all group">
                     <span class="flex items-center gap-2.5">
                         <i class="fas fa-wand-magic-sparkles text-emerald-400"></i> SiliconFlow Image Gen
                     </span>
@@ -161,20 +169,21 @@
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col relative">
+        <!-- VIEW 1: Standard Chat View (/chat) -->
+        <main id="chat-view" class="flex-1 flex flex-col relative">
             <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-36"></div>
             
             <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
                 <div class="glass-card p-2 flex items-center gap-2 border-white/10 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.15)] focus-within:border-emerald-500/40 transition-all">
-                    
-                    <button id="v2v-btn" onclick="toggleVoiceMode()" title="Hands-Free Voice Mode" class="text-gray-400 hover:text-emerald-400 w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-white/5 hover:bg-white/10 border border-white/5">
-                        <i id="v2v-icon" class="fas fa-headset text-sm"></i>
+                    <!-- Switch to Voice Screen -->
+                    <button onclick="navigateTo('/voice')" title="Open Dedicated Voice Call Area" class="text-gray-400 hover:text-emerald-400 w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-white/5 hover:bg-white/10 border border-white/5">
+                        <i class="fas fa-headset text-sm"></i>
                     </button>
 
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Spark AI V2, tap headset for Voice-to-Voice...">
+                           placeholder="Message Spark AI V2, tap headset for Voice Call, or /image <prompt>...">
 
                     <button onclick="send()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-emerald-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
@@ -182,11 +191,56 @@
                 </div>
             </div>
         </main>
+
+        <!-- VIEW 2: Dedicated Full-Screen Voice Call View (/voice) -->
+        <main id="voice-view" class="hidden flex-1 flex flex-col items-center justify-between p-12 relative">
+            <!-- Top Controls -->
+            <div class="w-full flex items-center justify-between z-10">
+                <button onclick="navigateTo('/chat')" class="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl glass-card text-gray-300 hover:text-white border-white/10 hover:border-emerald-500/30">
+                    <i class="fas fa-arrow-left"></i> Return to Chat
+                </button>
+                <div class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Real-time Call
+                </div>
+            </div>
+
+            <!-- Central Voice Orb & Waveforms -->
+            <div class="flex flex-col items-center justify-center text-center my-auto">
+                <div id="voice-orb" class="relative w-48 h-48 rounded-full bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center shadow-2xl voice-orb-active cursor-pointer transition-all mb-8">
+                    <div class="w-40 h-40 rounded-full bg-[#020b08] flex items-center justify-center">
+                        <i id="voice-orb-icon" class="fas fa-wave-square text-4xl text-emerald-400 animate-pulse"></i>
+                    </div>
+                </div>
+
+                <!-- Waveform Bars -->
+                <div id="voice-wave-bars" class="flex items-center gap-1.5 h-12 mb-6">
+                    <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+                    <div class="w-1.5 bg-cyan-400 rounded-full wave-bar"></div>
+                    <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+                    <div class="w-1.5 bg-teal-400 rounded-full wave-bar"></div>
+                    <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+                </div>
+
+                <h3 id="voice-call-status" class="text-xl font-bold text-white mb-2">Listening to your voice...</h3>
+                <p id="voice-call-subtext" class="text-xs text-gray-400 max-w-md italic">Speak naturally. Spark will respond with voice audio automatically.</p>
+            </div>
+
+            <!-- Bottom Call Bar -->
+            <div class="glass-card p-3 px-6 flex items-center gap-6 border-white/10 z-10 shadow-2xl">
+                <button id="voice-mute-btn" onclick="toggleVoiceMute()" class="w-12 h-12 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition-all">
+                    <i id="voice-mute-icon" class="fas fa-microphone text-sm"></i>
+                </button>
+                <button onclick="navigateTo('/chat')" class="w-14 h-14 rounded-2xl bg-red-500 hover:bg-red-600 flex items-center justify-center text-white text-lg shadow-lg shadow-red-500/25 transition-all active:scale-95">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+        </main>
     </div>
 
     <script>
-        const OPENROUTER_API_KEY = "YOUR_OPENROUTER_API_KEY_HERE";
-        const SILICONFLOW_API_KEY = "YOUR_SILICONFLOW_API_KEY_HERE";
+        // Active API Keys
+        const OPENROUTER_API_KEY = "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";
+        const SILICONFLOW_API_KEY = "sk-jdzaxerzjozzhqwnhlfitcnkoldfjtjqepqzyrvaumbyqvvl";
 
         const OPENROUTER_MODELS = [
             "openrouter/free",
@@ -213,160 +267,208 @@
         let sessions = [];
         let currentSessionId = null;
 
-        /* ========== HANDS-FREE VOICE-TO-VOICE ENGINE ========== */
-        let isVoiceMode = false;
-        let isRecognizing = false;
-        let isAiSpeaking = false;
-        let recognitionInstance = null;
-        let silenceTimer = null;
+        /* ========== ROUTER LOGIC (/chat and /voice) ========== */
+        function navigateTo(path) {
+            try {
+                window.history.pushState({}, "", path);
+            } catch(e) {}
+            handleRoute();
+        }
+
+        function handleRoute() {
+            const path = window.location.pathname;
+            const chatView = document.getElementById("chat-view");
+            const voiceView = document.getElementById("voice-view");
+
+            if (path.endsWith("/voice")) {
+                chatView.classList.add("hidden");
+                voiceView.classList.remove("hidden");
+                startDedicatedVoiceCall();
+            } else {
+                voiceView.classList.add("hidden");
+                chatView.classList.remove("hidden");
+                stopDedicatedVoiceCall();
+            }
+        }
+
+        window.addEventListener("popstate", handleRoute);
+
+        /* ========== FULL-SCREEN VOICE CALL ENGINE ========== */
+        let callRecognition = null;
+        let isCallActive = false;
+        let isCallAiSpeaking = false;
+        let isCallMuted = false;
+        let callSilenceTimer = null;
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognitionInstance = new SpeechRecognition();
-            recognitionInstance.continuous = true;
-            recognitionInstance.interimResults = true;
-            recognitionInstance.lang = 'en-US';
+            callRecognition = new SpeechRecognition();
+            callRecognition.continuous = true;
+            callRecognition.interimResults = true;
+            callRecognition.lang = 'en-US';
 
-            recognitionInstance.onresult = (event) => {
-                if (isAiSpeaking) return; // Prevent mic from hearing AI response
+            callRecognition.onresult = (event) => {
+                if (isCallAiSpeaking || isCallMuted) return;
 
-                let interimTranscript = '';
-                let finalTranscript = '';
-
+                let speechText = "";
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                    speechText += event.results[i][0].transcript;
                 }
 
-                const currentText = finalTranscript || interimTranscript;
-                if (currentText.trim()) {
-                    document.getElementById("input").value = currentText;
-                    updateVoiceStatus("Listening: " + (currentText.length > 25 ? currentText.substring(0, 25) + "..." : currentText));
+                if (speechText.trim()) {
+                    setVoiceCallStatus("Hearing you...", speechText);
 
-                    // Debounce silence: When user stops speaking for 1.2s, auto-send
-                    clearTimeout(silenceTimer);
-                    silenceTimer = setTimeout(() => {
-                        if (isVoiceMode && !isAiSpeaking && document.getElementById("input").value.trim()) {
-                            stopRecognitionEngine();
-                            send();
+                    clearTimeout(callSilenceTimer);
+                    callSilenceTimer = setTimeout(() => {
+                        if (isCallActive && !isCallAiSpeaking && speechText.trim()) {
+                            processVoiceInput(speechText.trim());
                         }
                     }, 1200);
                 }
             };
 
-            recognitionInstance.onerror = (event) => {
+            callRecognition.onerror = (event) => {
                 if (event.error !== 'no-speech') {
-                    console.warn("Speech Recognition Info:", event.error);
+                    console.warn("Call Recognition Info:", event.error);
                 }
             };
 
-            recognitionInstance.onend = () => {
-                isRecognizing = false;
-                // If voice mode is still enabled and AI is not speaking, restart listening
-                if (isVoiceMode && !isAiSpeaking) {
-                    startRecognitionEngine();
+            callRecognition.onend = () => {
+                if (isCallActive && !isCallAiSpeaking && !isCallMuted) {
+                    try { callRecognition.start(); } catch(e) {}
                 }
             };
         }
 
-        function toggleVoiceMode() {
-            if (!recognitionInstance || !('speechSynthesis' in window)) {
-                alert("Voice-to-Voice requires browser SpeechRecognition and SpeechSynthesis support (Chrome, Edge, Brave recommended).");
+        function startDedicatedVoiceCall() {
+            if (!callRecognition || !('speechSynthesis' in window)) {
+                alert("Voice Call requires browser SpeechRecognition and SpeechSynthesis (Chrome/Edge/Brave).");
+                navigateTo('/chat');
                 return;
             }
 
-            isVoiceMode = !isVoiceMode;
-            const btn = document.getElementById("v2v-btn");
-            const pill = document.getElementById("voice-status-pill");
+            isCallActive = true;
+            isCallMuted = false;
+            setVoiceCallStatus("Listening to your voice...", "Speak naturally. Spark will respond with audio.");
+            try { callRecognition.start(); } catch(e) {}
+        }
 
-            if (isVoiceMode) {
-                btn.classList.add("voice-mode-active");
-                pill.classList.remove("hidden");
-                updateVoiceStatus("Voice Mode Connected • Listening...");
-                startRecognitionEngine();
+        function stopDedicatedVoiceCall() {
+            isCallActive = false;
+            if (callRecognition) {
+                try { callRecognition.stop(); } catch(e) {}
+            }
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function toggleVoiceMute() {
+            isCallMuted = !isCallMuted;
+            const icon = document.getElementById("voice-mute-icon");
+            if (isCallMuted) {
+                icon.className = "fas fa-microphone-slash text-red-400";
+                setVoiceCallStatus("Microphone Muted", "Click mic button below to unmute.");
+                try { callRecognition.stop(); } catch(e) {}
             } else {
-                btn.classList.remove("voice-mode-active");
-                pill.classList.add("hidden");
-                stopRecognitionEngine();
-                if (window.speechSynthesis) window.speechSynthesis.cancel();
+                icon.className = "fas fa-microphone text-emerald-400";
+                setVoiceCallStatus("Listening to your voice...", "Speak naturally.");
+                try { callRecognition.start(); } catch(e) {}
             }
         }
 
-        function startRecognitionEngine() {
-            if (recognitionInstance && !isRecognizing && !isAiSpeaking) {
+        function setVoiceCallStatus(title, subtext) {
+            const tEl = document.getElementById("voice-call-status");
+            const sEl = document.getElementById("voice-call-subtext");
+            if (tEl) tEl.innerText = title;
+            if (sEl) sEl.innerText = subtext;
+        }
+
+        async function processVoiceInput(userVoiceText) {
+            let activeSession = sessions.find(s => s.id === currentSessionId);
+            if (!activeSession) return;
+
+            activeSession.messages.push({ role: "user", content: userVoiceText });
+            renderMessageUI("user", userVoiceText, false);
+
+            setVoiceCallStatus("Thinking...", `Processing: "${userVoiceText}"`);
+            
+            try { callRecognition.stop(); } catch(e) {}
+
+            const apiHistory = activeSession.messages.map(m => ({
+                role: m.role === 'ai' ? 'assistant' : 'user',
+                content: m.content
+            }));
+
+            let generatedAnswer = "";
+            let streamSuccess = false;
+
+            for (const model of OPENROUTER_MODELS) {
                 try {
-                    recognitionInstance.start();
-                    isRecognizing = true;
-                } catch (e) {}
+                    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        method: "POST",
+                        headers: { 
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                            "HTTP-Referer": window.location.origin || "http://localhost",
+                            "X-Title": "Spark AI V2",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: "You are Spark AI V2 in real-time continuous voice conversation mode. Provide direct, natural, conversational answers (1 to 3 sentences) suitable for speech. Avoid markdown formatting." },
+                                ...apiHistory
+                            ],
+                            stream: false,
+                            temperature: 0.6,
+                            max_tokens: 300
+                        })
+                    });
+
+                    if (!res.ok) continue;
+
+                    const data = await res.json();
+                    generatedAnswer = data.choices[0]?.message?.content || "";
+                    if (generatedAnswer) {
+                        streamSuccess = true;
+                        break;
+                    }
+                } catch(e) {}
+            }
+
+            if (streamSuccess && generatedAnswer) {
+                activeSession.messages.push({ role: "ai", content: generatedAnswer });
+                saveSessions();
+                renderMessageUI("ai", generatedAnswer, false);
+
+                isCallAiSpeaking = true;
+                setVoiceCallStatus("Spark Speaking...", generatedAnswer);
+
+                const utterance = new SpeechSynthesisUtterance(generatedAnswer);
+                utterance.rate = 1.05;
+                utterance.onend = () => {
+                    isCallAiSpeaking = false;
+                    if (isCallActive && !isCallMuted) {
+                        setVoiceCallStatus("Listening to your voice...", "Speak naturally.");
+                        try { callRecognition.start(); } catch(e) {}
+                    }
+                };
+                utterance.onerror = () => {
+                    isCallAiSpeaking = false;
+                    if (isCallActive && !isCallMuted) {
+                        try { callRecognition.start(); } catch(e) {}
+                    }
+                };
+                window.speechSynthesis.speak(utterance);
+            } else {
+                setVoiceCallStatus("Connection Error", "Please try again.");
+                setTimeout(() => {
+                    if (isCallActive && !isCallMuted) try { callRecognition.start(); } catch(e) {}
+                }, 1500);
             }
         }
 
-        function stopRecognitionEngine() {
-            if (recognitionInstance && isRecognizing) {
-                try {
-                    recognitionInstance.stop();
-                    isRecognizing = false;
-                } catch (e) {}
-            }
-        }
-
-        function updateVoiceStatus(text) {
-            const el = document.getElementById("voice-status-text");
-            if (el) el.innerText = text;
-        }
-
-        function speakAIResponse(text, onCompleteCallback) {
-            if (!('speechSynthesis' in window)) {
-                if (onCompleteCallback) onCompleteCallback();
-                return;
-            }
-
-            window.speechSynthesis.cancel();
-
-            // Filter markdown formatting and codeblocks for natural speech output
-            const naturalSpeech = text
-                .replace(/```[\s\S]*?```/g, 'Code snippet provided in chat.')
-                .replace(/`([^`]+)`/g, '$1')
-                .replace(/#+\s/g, '')
-                .replace(/\*+/g, '')
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-                .trim();
-
-            if (!naturalSpeech) {
-                if (onCompleteCallback) onCompleteCallback();
-                return;
-            }
-
-            isAiSpeaking = true;
-            stopRecognitionEngine();
-            updateVoiceStatus("Spark Speaking...");
-
-            const utterance = new SpeechSynthesisUtterance(naturalSpeech);
-            utterance.rate = 1.05;
-            utterance.pitch = 1.0;
-
-            utterance.onend = () => {
-                isAiSpeaking = false;
-                if (isVoiceMode) {
-                    updateVoiceStatus("Listening for your reply...");
-                    startRecognitionEngine();
-                }
-                if (onCompleteCallback) onCompleteCallback();
-            };
-
-            utterance.onerror = () => {
-                isAiSpeaking = false;
-                if (isVoiceMode) startRecognitionEngine();
-                if (onCompleteCallback) onCompleteCallback();
-            };
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        /* ========== CODE BLOCK RENDERER ========== */
+        /* ========== MARKED RENDERER & CODE COPY ========== */
         const customRenderer = {
             code(arg1, arg2) {
                 let codeText = "";
@@ -450,19 +552,21 @@
             try {
                 document.execCommand('copy');
                 if (callback) callback();
-            } catch (err) {
-                console.error('Fallback copy failed', err);
-            }
+            } catch (err) {}
             document.body.removeChild(textArea);
         }
 
         function getSystemPrompt() {
-            return `You are Spark AI V2, an advanced, high-performance intelligent system.
-${isVoiceMode ? 'CRITICAL: The user is currently in interactive hands-free VOICE-TO-VOICE mode. Keep answers concise, direct, conversational, and avoid excessively long code dumps unless explicitly asked.' : ''}
+            return `You are Spark AI V2, an advanced, high-performance intelligent system engineered for speed and developer productivity.
 Current Active User Session:
 - User Name: ${currentUser?.name || "Guest User"}
 - Designated Role / Rank: ${currentUser?.rank || "GUEST MODE"}
-- Is Guest Mode: ${currentUser?.isGuest ? "Yes" : "No"}`;
+- Is Guest Mode: ${currentUser?.isGuest ? "Yes" : "No"}
+
+Guidelines:
+1. Address the user directly and intelligently.
+2. For coding queries, output clean markdown code blocks with the exact language specified so copy boxes render properly.
+3. Keep answers sharp, direct, and concise.`;
         }
 
         function toggleAuthModal(show) {
@@ -627,9 +731,9 @@ Current Active User Session:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.isGuest) {
-                msg = `### ⚡ Spark AI V2 Active\nVoice-to-Voice hands-free mode ready. Tap the headset icon to talk live.\n\n*Tip:* Sign in with Google to unlock SiliconFlow Image Generation (\`/image\`).`;
+                msg = `### ⚡ Spark AI V2 (Guest Mode)\nHigh-speed intelligence core active. Chat, code generation, and Live Voice Calls ready.\n\n*Tip:* Switch to full-screen voice mode anytime at \`/voice\` or tap the headset icon.`;
             } else {
-                msg = `### ⚡ Spark AI V2 Pro Active\nWelcome back, **${currentUser.name}**! Hands-free Voice-to-Voice, SiliconFlow image synthesis, and pro quotas active.`;
+                msg = `### ⚡ Spark AI V2 Pro Active\nWelcome back, **${currentUser.name}**! Live Voice Calls, SiliconFlow image synthesis, and pro quotas enabled.`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
@@ -651,10 +755,9 @@ Current Active User Session:
             }
         }
 
-        // Dedicated Square Aspect-Ratio Image Loader
+        // Square Aspect-Ratio Image Loader
         async function handleSiliconFlowImageGen(rawPrompt, aiBox, activeSession) {
             const prompt = rawPrompt.trim();
-            const cleanSfKey = typeof SILICONFLOW_API_KEY !== 'undefined' ? SILICONFLOW_API_KEY.trim() : "";
             const boxId = 'img_box_' + Date.now();
             const aiBody = aiBox.querySelector('.ai-body');
 
@@ -686,38 +789,36 @@ Current Active User Session:
 
             let imageUrl = null;
 
-            if (cleanSfKey) {
-                const endpoints = [
-                    "https://api.siliconflow.cn/v1/images/generations",
-                    "https://api.siliconflow.com/v1/images/generations"
-                ];
+            const endpoints = [
+                "https://api.siliconflow.cn/v1/images/generations",
+                "https://api.siliconflow.com/v1/images/generations"
+            ];
 
-                for (const endpoint of endpoints) {
-                    for (const model of SILICONFLOW_IMAGE_MODELS) {
-                        try {
-                            const res = await fetch(endpoint, {
-                                method: "POST",
-                                headers: {
-                                    "Authorization": `Bearer ${cleanSfKey}`,
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    model: model,
-                                    prompt: prompt,
-                                    image_size: "1024x1024",
-                                    batch_size: 1
-                                })
-                            });
+            for (const endpoint of endpoints) {
+                for (const model of SILICONFLOW_IMAGE_MODELS) {
+                    try {
+                        const res = await fetch(endpoint, {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${SILICONFLOW_API_KEY}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                model: model,
+                                prompt: prompt,
+                                image_size: "1024x1024",
+                                batch_size: 1
+                            })
+                        });
 
-                            const data = await res.json();
-                            if (res.ok && data.images && data.images[0]?.url) {
-                                imageUrl = data.images[0].url;
-                                break;
-                            }
-                        } catch (err) {}
-                    }
-                    if (imageUrl) break;
+                        const data = await res.json();
+                        if (res.ok && data.images && data.images[0]?.url) {
+                            imageUrl = data.images[0].url;
+                            break;
+                        }
+                    } catch (err) {}
                 }
+                if (imageUrl) break;
             }
 
             if (!imageUrl) {
@@ -743,10 +844,6 @@ Current Active User Session:
 
             activeSession.messages.push({ role: "ai", content: `![${prompt}](${imageUrl})` });
             saveSessions();
-
-            if (isVoiceMode) {
-                speakAIResponse("I've generated the image you requested.");
-            }
         }
 
         async function send() {
@@ -755,7 +852,6 @@ Current Active User Session:
             if (!text) return;
             
             input.value = "";
-            clearTimeout(silenceTimer);
             
             let activeSession = sessions.find(s => s.id === currentSessionId);
             if (!activeSession) return;
@@ -801,12 +897,6 @@ Current Active User Session:
             const chatContainer = document.getElementById("chat");
             const aiBody = aiBox.querySelector('.ai-body');
 
-            const cleanKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY.trim() : "";
-            if (!cleanKey) {
-                aiBody.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please configure <code>OPENROUTER_API_KEY</code>.`;
-                return;
-            }
-
             const apiHistory = activeSession.messages.map(m => ({
                 role: m.role === 'ai' ? 'assistant' : 'user',
                 content: m.content
@@ -821,7 +911,7 @@ Current Active User Session:
                     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
                         headers: { 
-                            "Authorization": `Bearer ${cleanKey}`,
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                             "HTTP-Referer": window.location.origin || "http://localhost",
                             "X-Title": "Spark AI V2",
                             "Content-Type": "application/json"
@@ -875,18 +965,6 @@ Current Active User Session:
                         streamSucceeded = true;
                         activeSession.messages.push({ role: "ai", content: streamedContent });
                         saveSessions();
-                        
-                        // Enable manual Listen button
-                        const ttsBtn = aiBox.querySelector('.tts-btn');
-                        if (ttsBtn) {
-                            ttsBtn.classList.remove('hidden');
-                            ttsBtn.onclick = () => speakAIResponse(streamedContent);
-                        }
-
-                        // If in Voice-to-Voice Mode, automatically speak back
-                        if (isVoiceMode) {
-                            speakAIResponse(streamedContent);
-                        }
                         break;
                     }
                 } catch (err) {
@@ -897,9 +975,6 @@ Current Active User Session:
             if (!streamSucceeded) {
                 console.error("Spark AI V2 Engine Error:", lastError);
                 aiBody.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
-                if (isVoiceMode) {
-                    speakAIResponse("Connection failed. Please check API key.");
-                }
             }
         }
 
@@ -913,15 +988,7 @@ Current Active User Session:
                 div.innerHTML = `
                 <div class="max-w-[80%] px-6 py-4 rounded-3xl chat-ai text-gray-200 text-sm leading-relaxed relative group">
                     <div class="ai-body">${content ? marked.parse(content) : ''}</div>
-                    <button class="tts-btn ${content ? '' : 'hidden'} mt-2.5 text-[11px] text-gray-400 hover:text-emerald-400 bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 border border-white/5" title="Read Aloud">
-                        <i class="fas fa-volume-high"></i> Listen
-                    </button>
                 </div>`;
-                
-                const ttsBtn = div.querySelector('.tts-btn');
-                if (content && ttsBtn) {
-                    ttsBtn.onclick = () => speakAIResponse(content);
-                }
             }
             
             const chatContainer = document.getElementById("chat");
@@ -957,6 +1024,7 @@ Current Active User Session:
             }
             updateUserUI();
             loadUserSessions();
+            handleRoute();
         });
     </script>
 </body>
