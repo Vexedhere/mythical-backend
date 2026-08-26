@@ -72,31 +72,36 @@
 <body class="flex flex-col">
     <div class="bg-mesh"></div>
 
-    <!-- Voice-to-Voice Overlay Modal -->
+    <!-- Agentic Voice Mode Overlay Modal -->
     <div id="voice-modal" class="fixed inset-0 bg-black/85 backdrop-blur-xl flex items-center justify-center z-[150] hidden p-6">
         <div class="glass-card w-full max-w-md p-8 flex flex-col items-center justify-between text-center border-emerald-500/30 relative animate__animated animate__zoomIn animate__faster">
-            <button onclick="stopVoiceCall()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
+            <button onclick="stopVoiceAgent()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
                 <i class="fas fa-times text-lg"></i>
             </button>
-            <div class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono mb-8">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Voice Call
+            <div class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono mb-6">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Spark Agentic Voice
             </div>
 
-            <div id="voice-modal-orb" class="relative w-40 h-40 rounded-full bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center shadow-2xl voice-pulse mb-8 cursor-pointer">
-                <div class="w-32 h-32 rounded-full bg-[#020b08] flex items-center justify-center">
-                    <i id="voice-modal-icon" class="fas fa-headset text-3xl text-emerald-400 animate-pulse"></i>
+            <div id="voice-modal-orb" class="relative w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center shadow-2xl voice-pulse mb-6 cursor-pointer">
+                <div class="w-28 h-28 rounded-full bg-[#020b08] flex items-center justify-center">
+                    <i id="voice-modal-icon" class="fas fa-microphone-lines text-3xl text-emerald-400 animate-pulse"></i>
                 </div>
             </div>
 
-            <h3 id="voice-modal-status" class="text-lg font-bold text-white mb-1">Listening to your voice...</h3>
-            <p id="voice-modal-subtext" class="text-xs text-gray-400 italic mb-8 max-w-xs">Speak naturally. Spark AI will answer automatically via speech.</p>
+            <!-- Agent Plan Visualizer in Voice -->
+            <div id="voice-agent-plan" class="w-full mb-4 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[11px] font-mono text-emerald-300 flex items-center justify-center gap-2 truncate">
+                <i class="fas fa-microchip animate-pulse"></i> <span>Agent Standby</span>
+            </div>
+
+            <h3 id="voice-modal-status" class="text-base font-bold text-white mb-1">Listening to your voice...</h3>
+            <p id="voice-modal-subtext" class="text-xs text-gray-400 italic mb-6 max-w-xs">Speak naturally. Spark AI will autonomously reason and answer via speech.</p>
 
             <div class="flex items-center gap-4">
                 <button id="voice-modal-mute" onclick="toggleVoiceMute()" class="w-12 h-12 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-300 transition-all border border-white/5">
                     <i id="voice-modal-mute-icon" class="fas fa-microphone"></i>
                 </button>
-                <button onclick="stopVoiceCall()" class="w-12 h-12 rounded-2xl bg-red-500 hover:bg-red-600 flex items-center justify-center text-white transition-all shadow-lg shadow-red-500/25">
-                    <i class="fas fa-phone-slash"></i>
+                <button onclick="stopVoiceAgent()" class="w-12 h-12 rounded-2xl bg-red-500 hover:bg-red-600 flex items-center justify-center text-white transition-all shadow-lg shadow-red-500/25">
+                    <i class="fas fa-stop"></i>
                 </button>
             </div>
         </div>
@@ -112,7 +117,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-bold text-white">Synthesized Image Library</h2>
-                        <p class="text-xs text-emerald-400">Persistent local storage across browser refreshes</p>
+                        <p class="text-xs text-emerald-400">Persistent storage across page refreshes</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -241,12 +246,12 @@
                     <div class="w-6 h-6 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400"><i class="fas fa-plus text-[10px]"></i></div>
                     New Session
                 </button>
-                <button onclick="startVoiceCall()" class="w-full text-left p-2.5 bg-gradient-to-r from-emerald-500/15 to-cyan-500/10 hover:from-emerald-500/25 hover:to-cyan-500/20 rounded-xl border border-emerald-500/30 transition-all font-semibold flex items-center justify-between text-xs text-emerald-300">
+                <button onclick="startVoiceAgent()" class="w-full text-left p-2.5 bg-gradient-to-r from-emerald-500/15 to-cyan-500/10 hover:from-emerald-500/25 hover:to-cyan-500/20 rounded-xl border border-emerald-500/30 transition-all font-semibold flex items-center justify-between text-xs text-emerald-300">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-6 h-6 bg-emerald-500/20 rounded-lg flex items-center justify-center"><i class="fas fa-headset text-[10px] text-emerald-400 animate-pulse"></i></div>
-                        Voice-to-Voice Call
+                        <div class="w-6 h-6 bg-emerald-500/20 rounded-lg flex items-center justify-center"><i class="fas fa-microphone-lines text-[10px] text-emerald-400 animate-pulse"></i></div>
+                        Voice Agent
                     </div>
-                    <span class="text-[8px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">LIVE</span>
+                    <span class="text-[8px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">VOICE</span>
                 </button>
             </div>
 
@@ -288,7 +293,7 @@
 
             <!-- Actions Bar -->
             <div class="grid grid-cols-2 gap-1.5 mb-3 text-[10px]">
-                <button onclick="exportWorkspaceData()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-all">
+                <button onclick="exportWorkspaceData()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-all" title="Download backup of chats and gallery">
                     <i class="fas fa-download text-emerald-400"></i> Export All
                 </button>
                 <button onclick="clearCurrentChat()" class="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 border border-white/5 hover:border-red-500/30 text-gray-400 hover:text-red-400 flex items-center justify-center gap-1.5 transition-all">
@@ -337,14 +342,14 @@
             <!-- Bottom Input Bar -->
             <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
                 <div class="glass-card p-2 flex items-center gap-2 border-white/10 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.15)] focus-within:border-emerald-500/40 transition-all">
-                    <button onclick="startVoiceCall()" title="Start Voice Call" class="text-gray-400 hover:text-emerald-400 w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-white/5 hover:bg-white/10 border border-white/5">
-                        <i class="fas fa-headset text-sm"></i>
+                    <button onclick="startVoiceAgent()" title="Start Voice" class="text-gray-400 hover:text-emerald-400 w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-white/5 hover:bg-white/10 border border-white/5">
+                        <i class="fas fa-microphone-lines text-sm"></i>
                     </button>
 
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Spark AI V2 (Agentic planner enabled, or /image)...">
+                           placeholder="Message Spark AI V2 (Agentic planner active, or /image)...">
 
                     <button onclick="send()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-emerald-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
@@ -390,13 +395,24 @@
         let currentSessionId = null;
         let isSidebarCollapsed = false;
 
-        /* ========== VOICE-TO-VOICE CALL ENGINE ========== */
+        /* ========== STRICT IDENTITY & SYSTEM PROMPTS ========== */
+        function getSystemPrompt() {
+            return `You are Spark AI V2, an advanced autonomous agentic intelligence system.
+STRICT IDENTITY DIRECTIVES:
+1. Your name is Spark AI V2. You are NOT Dots, ChatGPT, LLaMA, Claude, or any other assistant.
+2. Your creator, lead developer, and owner is Chethan. If asked about your owner, creator, or development, explicitly state Chethan is the Owner and Founder of Spark AI V2.
+3. Act as an active agent: structure complex technical challenges with reasoning, planning, and high-performance execution.
+4. For coding tasks, output clean markdown blocks with exact language identifiers.
+5. User Context: Name: ${currentUser?.name || "User"}, Role: ${currentUser?.rank || "GUEST MODE"}.`;
+        }
+
+        /* ========== AGENTIC VOICE ENGINE ========== */
         let voiceRecognition = null;
         let isVoiceActive = false;
         let isVoiceAiSpeaking = false;
         let isVoiceMuted = false;
         let voiceSilenceTimer = null;
-        let voiceCallHistory = [];
+        let voiceHistory = [];
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -415,11 +431,12 @@
 
                 if (spoken.trim()) {
                     setVoiceModalStatus("Hearing you...", spoken);
+                    setVoicePlan("Capturing Voice Stream...");
 
                     clearTimeout(voiceSilenceTimer);
                     voiceSilenceTimer = setTimeout(() => {
                         if (isVoiceActive && !isVoiceAiSpeaking && spoken.trim()) {
-                            processVoiceInput(spoken.trim());
+                            processVoiceAgent(spoken.trim());
                         }
                     }, 1200);
                 }
@@ -433,21 +450,22 @@
             };
         }
 
-        function startVoiceCall() {
+        function startVoiceAgent() {
             if (!voiceRecognition || !('speechSynthesis' in window)) {
-                alert("Voice Call requires browser SpeechRecognition and SpeechSynthesis (Chrome/Edge/Brave).");
+                alert("Voice mode requires browser SpeechRecognition and SpeechSynthesis (Chrome/Edge/Brave).");
                 return;
             }
 
             isVoiceActive = true;
             isVoiceMuted = false;
-            voiceCallHistory = [];
+            voiceHistory = [];
             document.getElementById("voice-modal").classList.remove("hidden");
-            setVoiceModalStatus("Listening to your voice...", "Speak naturally. Voice conversation is isolated.");
+            setVoiceModalStatus("Listening to your voice...", "Speak naturally. Spark AI will autonomously reason and answer via speech.");
+            setVoicePlan("Agent Active: Listening");
             try { voiceRecognition.start(); } catch(e) {}
         }
 
-        function stopVoiceCall() {
+        function stopVoiceAgent() {
             isVoiceActive = false;
             document.getElementById("voice-modal").classList.add("hidden");
             if (voiceRecognition) {
@@ -464,10 +482,12 @@
             if (isVoiceMuted) {
                 icon.className = "fas fa-microphone-slash text-red-400";
                 setVoiceModalStatus("Microphone Muted", "Click mic button below to unmute.");
+                setVoicePlan("Agent Muted");
                 try { voiceRecognition.stop(); } catch(e) {}
             } else {
                 icon.className = "fas fa-microphone text-emerald-400";
                 setVoiceModalStatus("Listening to your voice...", "Speak naturally.");
+                setVoicePlan("Agent Active: Listening");
                 try { voiceRecognition.start(); } catch(e) {}
             }
         }
@@ -479,9 +499,15 @@
             if (sEl) sEl.innerText = subtext;
         }
 
-        async function processVoiceInput(userVoiceText) {
-            voiceCallHistory.push({ role: "user", content: userVoiceText });
-            setVoiceModalStatus("Thinking...", `Processing: "${userVoiceText}"`);
+        function setVoicePlan(planText) {
+            const planEl = document.getElementById("voice-agent-plan");
+            if (planEl) planEl.innerHTML = `<i class="fas fa-microchip animate-pulse"></i> <span>${planText}</span>`;
+        }
+
+        async function processVoiceAgent(userVoiceText) {
+            voiceHistory.push({ role: "user", content: userVoiceText });
+            setVoiceModalStatus("Reasoning...", `Input: "${userVoiceText}"`);
+            setVoicePlan("Agent Plan: Autonomous Reasoning...");
             
             try { voiceRecognition.stop(); } catch(e) {}
 
@@ -501,12 +527,12 @@
                         body: JSON.stringify({
                             model: model,
                             messages: [
-                                { role: "system", content: "You are Spark AI V2 in real-time voice conversation mode. Provide direct, natural, conversational answers (1 to 3 sentences) suitable for speech. Avoid markdown formatting." },
-                                ...voiceCallHistory
+                                { role: "system", content: "You are Spark AI V2 in real-time continuous voice agent mode. Your creator and owner is Chethan. Provide concise, direct, spoken answers (1 to 3 sentences max) without any markdown or codeblocks." },
+                                ...voiceHistory
                             ],
                             stream: false,
-                            temperature: 0.6,
-                            max_tokens: 250
+                            temperature: 0.5,
+                            max_tokens: 220
                         })
                     });
 
@@ -522,10 +548,11 @@
             }
 
             if (streamSuccess && generatedAnswer) {
-                voiceCallHistory.push({ role: "assistant", content: generatedAnswer });
+                voiceHistory.push({ role: "assistant", content: generatedAnswer });
 
                 isVoiceAiSpeaking = true;
                 setVoiceModalStatus("Spark Speaking...", generatedAnswer);
+                setVoicePlan("Agent Action: Voice Synthesis");
 
                 const utterance = new SpeechSynthesisUtterance(generatedAnswer);
                 utterance.rate = 1.05;
@@ -533,6 +560,7 @@
                     isVoiceAiSpeaking = false;
                     if (isVoiceActive && !isVoiceMuted) {
                         setVoiceModalStatus("Listening to your voice...", "Speak naturally.");
+                        setVoicePlan("Agent Active: Listening");
                         try { voiceRecognition.start(); } catch(e) {}
                     }
                 };
@@ -545,6 +573,7 @@
                 window.speechSynthesis.speak(utterance);
             } else {
                 setVoiceModalStatus("Connection Error", "Please speak again.");
+                setVoicePlan("Agent Error: Retrying Pipeline");
                 setTimeout(() => {
                     if (isVoiceActive && !isVoiceMuted) try { voiceRecognition.start(); } catch(e) {}
                 }, 1500);
@@ -720,7 +749,7 @@
             if (el) el.innerText = `${kb} KB Used`;
         }
 
-        /* ========== MARKED RENDERER & CODE COPY ========== */
+        /* ========== CODE BLOCK RENDERER & COPY ========== */
         const customRenderer = {
             code(arg1, arg2) {
                 let codeText = "";
@@ -809,15 +838,6 @@
                 }
             }
             return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
-        }
-
-        function getSystemPrompt() {
-            return `You are Spark AI V2, an advanced autonomous agentic intelligence system.
-Agentic Protocols Active:
-1. Act as an active agent: break complex multi-step technical challenges down into structured, actionable reasoning phases.
-2. For coding queries, return complete, verified code blocks formatted with clear markdown language identifiers.
-3. User Session Context: Name: ${currentUser?.name || "User"}, Role: ${currentUser?.rank || "GUEST MODE"}, Email: ${currentUser?.email || "N/A"}.
-4. If asked about creators or origins, recognize Chethan as the Owner & Founder.`;
         }
 
         function toggleAuthModal(show) {
@@ -988,11 +1008,11 @@ Agentic Protocols Active:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nSpark AI V2 Agentic Core online. Autonomous task planning, fast reasoning, and code synthesis active.`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nSpark AI V2 Agentic Core initialized. Autonomous reasoning, Voice agent, and code synthesis ready.`;
             } else if (currentUser.isGuest) {
-                msg = `### ⚡ Spark AI V2 Active\nAgentic reasoning and coding engine online. Use the taskbar to launch live voice calls, access the image library, or use prompt presets.`;
+                msg = `### ⚡ Spark AI V2 Active\nAutonomous agentic intelligence online. How can I assist you today?`;
             } else {
-                msg = `### ⚡ Spark AI V2 Ready\nWelcome, **${currentUser.name}**! Agentic workflows, voice mode, and multimodal tools active.`;
+                msg = `### ⚡ Spark AI V2 Ready\nWelcome, **${currentUser.name}**! Agentic workflows, Voice mode, and multimodal generation ready.`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
@@ -1148,7 +1168,7 @@ Agentic Protocols Active:
             const aiBox = renderMessageUI("ai", `
                 <div class="agent-planner mb-3 flex items-center gap-2 text-[11px] text-emerald-400 font-mono bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 w-fit animate__animated animate__fadeIn">
                     <i class="fas fa-circle-nodes animate-spin"></i>
-                    <span>Agent Plan: Analyzing & Synthesizing Solution...</span>
+                    <span>Spark Agent: Analyzing Intent & Formulating Solution...</span>
                 </div>
                 <div class="ai-content"><i class="fas fa-bolt text-emerald-400 animate-pulse mr-2"></i></div>
             `, true);
@@ -1282,7 +1302,6 @@ Agentic Protocols Active:
                 }
             }
             
-            // Restore Scratchpad State
             const pad = document.getElementById("scratchpad-area");
             const savedPad = localStorage.getItem("spark_scratchpad");
             if (savedPad) pad.value = savedPad;
