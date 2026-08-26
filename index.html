@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spark AI Assistant</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Spark AI Assistant & Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @keyframes pulse-ring {
@@ -14,28 +13,31 @@
     }
     .listening-glow {
       animation: pulse-ring 2s infinite ease-in-out;
-      box-shadow: 0 0 30px rgba(99, 102, 241, 0.7);
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.7);
     }
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #171717; }
-    ::-webkit-scrollbar-thumb { background: #333333; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
   </style>
 </head>
-<body class="bg-neutral-950 text-neutral-100 font-sans min-h-screen flex flex-col justify-between overflow-hidden relative selection:bg-indigo-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 font-sans h-screen flex flex-col justify-between overflow-hidden selection:bg-indigo-600 selection:text-white">
 
   <!-- ================= TOP BAR ================= -->
-  <header class="w-full p-4 flex justify-between items-center z-40">
+  <header class="w-full px-6 py-3.5 flex justify-between items-center border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md z-40">
     <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-lg tracking-wider">⚡</div>
+      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-md shadow-indigo-500/20">⚡</div>
       <div>
-        <span class="font-semibold tracking-tight text-lg text-neutral-200">Spark OS</span>
-        <div id="ipLocationBadge" class="text-[10px] text-neutral-500 font-mono">Syncing location...</div>
+        <div class="flex items-center gap-2">
+          <span class="font-semibold tracking-tight text-base text-slate-100">Spark OS</span>
+          <span id="voiceBadge" class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono">Wake Word Active</span>
+        </div>
+        <div id="ipLocationBadge" class="text-[11px] text-slate-400 font-mono">Syncing location & timezone...</div>
       </div>
     </div>
 
     <!-- Top-Right Spark Calendar Widget -->
     <div class="relative">
-      <button id="sparkCalToggle" class="flex items-center gap-2.5 bg-neutral-900/90 hover:bg-neutral-800 text-white px-4 py-2 rounded-xl border border-neutral-800 shadow-xl backdrop-blur-md transition-all">
+      <button id="sparkCalToggle" class="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700 text-white px-4 py-2 rounded-xl border border-slate-700 shadow-lg transition-all">
         <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
@@ -43,56 +45,62 @@
         <span id="eventCountBadge" class="bg-indigo-600 text-xs px-2 py-0.5 rounded-full font-mono">0</span>
       </button>
 
-      <!-- Spark Calendar Modal / Dropdown -->
-      <div id="calendarPanel" class="hidden absolute right-0 mt-3 w-80 bg-neutral-900 border border-neutral-800 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-lg">
-        <div class="flex justify-between items-center pb-3 border-b border-neutral-800">
-          <h3 class="text-sm font-semibold text-neutral-200">Scheduled Events</h3>
-          <span id="currentDateStr" class="text-xs text-neutral-400 font-mono"></span>
+      <!-- Calendar Modal -->
+      <div id="calendarPanel" class="hidden absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+          <h3 class="text-sm font-semibold text-slate-200">Scheduled Events</h3>
+          <span id="currentDateStr" class="text-xs text-slate-400 font-mono"></span>
         </div>
         <div id="eventList" class="mt-3 space-y-2 max-h-60 overflow-y-auto pr-1">
-          <p class="text-xs text-neutral-500 italic py-4 text-center">No upcoming events scheduled.</p>
+          <p class="text-xs text-slate-500 italic py-4 text-center">No upcoming events scheduled.</p>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- ================= MAIN ASSISTANT HUD ================= -->
-  <main class="flex-1 flex flex-col items-center justify-center px-4 relative">
-    <!-- Ambient Orb -->
-    <div id="statusRing" class="w-32 h-32 rounded-full bg-gradient-to-tr from-indigo-600/30 to-violet-600/10 flex items-center justify-center border border-indigo-500/20 transition-all duration-500">
-      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
-        <svg id="micIcon" class="w-8 h-8 text-white transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-        </svg>
+  <!-- ================= CHAT CONTAINER & MESSAGES ================= -->
+  <main class="flex-1 overflow-y-auto px-4 py-6 max-w-4xl w-full mx-auto space-y-4" id="chatContainer">
+    <!-- Assistant Intro Message -->
+    <div class="flex items-start gap-3">
+      <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">⚡</div>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-sm text-slate-200 leading-relaxed shadow-sm max-w-xl">
+        <p class="font-medium text-indigo-400 mb-1">Hey, I'm Spark.</p>
+        You can chat with me here via text, or speak aloud anytime by saying <strong class="text-white">"Hey Spark"</strong>. I can set alarms, manage your Spark Calendar, check exact regional time, or draft emails.
       </div>
     </div>
-
-    <!-- Transcript / Status Output -->
-    <div class="mt-8 text-center max-w-lg">
-      <p id="assistantStatus" class="text-xs font-mono uppercase tracking-widest text-indigo-400 mb-2">Say "Hey Spark" or tap Start</p>
-      <p id="liveTranscript" class="text-base text-neutral-300 font-normal leading-relaxed min-h-[3rem]">"Hey Spark, what time is it?"</p>
-    </div>
-
-    <!-- Active Alarms Container -->
-    <div id="activeAlarmsContainer" class="mt-6 flex flex-wrap gap-2 justify-center"></div>
   </main>
 
-  <!-- ================= CLEAN TASKBAR (NO OPENROUTER EXPORT) ================= -->
-  <footer class="w-full pb-6 flex flex-col items-center gap-3 z-40">
-    <div class="flex items-center gap-3 bg-neutral-900/80 border border-neutral-800 px-5 py-2.5 rounded-2xl shadow-xl backdrop-blur-md">
-      <button id="toggleMicBtn" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl transition-all">
-        <span id="micDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span id="micBtnLabel">Continuous Wake Active</span>
+  <!-- Active Alarms Floating Bar -->
+  <div id="activeAlarmsContainer" class="max-w-4xl w-full mx-auto px-4 flex flex-wrap gap-2 justify-start pb-2"></div>
+
+  <!-- ================= INPUT & VOICE BAR ================= -->
+  <footer class="w-full border-t border-slate-800/80 bg-slate-900/80 backdrop-blur-md p-4 z-40">
+    <div class="max-w-4xl mx-auto flex items-center gap-3">
+      <!-- Voice Mic Orb Button -->
+      <button id="toggleMicBtn" class="relative w-11 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-all shrink-0">
+        <svg id="micIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+        </svg>
       </button>
-      <button onclick="simulateVoiceCommand('Hey Spark what time is it')" class="text-xs text-neutral-400 hover:text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-all">Test Time</button>
-      <button onclick="simulateVoiceCommand('Hey Spark set an alarm in 10 seconds')" class="text-xs text-neutral-400 hover:text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-all">Test Alarm</button>
-      <button onclick="simulateVoiceCommand('Hey Spark schedule Math Revision at 6 PM')" class="text-xs text-neutral-400 hover:text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-all">Test Calendar</button>
+
+      <!-- Text Input Form -->
+      <form id="chatForm" class="flex-1 flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 focus-within:border-indigo-500 transition-all">
+        <input 
+          id="chatInput" 
+          type="text" 
+          placeholder="Ask Spark or type a command... (or say 'Hey Spark')" 
+          class="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none px-2 py-1.5"
+          autocomplete="off"
+        />
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-all shadow-md shadow-indigo-600/20">
+          Send
+        </button>
+      </form>
     </div>
   </footer>
 
-  <!-- ================= APPLICATION LOGIC ================= -->
+  <!-- ================= APPLICATION SCRIPT ================= -->
   <script>
-    // --- APP STATE & IP TRACKING ---
     const appState = {
       isListening: false,
       autoRestart: true,
@@ -102,11 +110,11 @@
         city: 'Local',
         region: '',
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
-        ip: 'Detecting...'
+        ip: ''
       }
     };
 
-    // Fetch IP and Time Zone metadata
+    // --- 1. IP & TIMEZONE DETECTION ---
     async function initUserLocation() {
       try {
         const res = await fetch('https://ipapi.co/json/');
@@ -116,16 +124,15 @@
           appState.userGeo.region = data.region || '';
           appState.userGeo.timezone = data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
           appState.userGeo.ip = data.ip;
-          
-          document.getElementById('ipLocationBadge').innerText = `${appState.userGeo.city}, ${appState.userGeo.region} (${appState.userGeo.timezone})`;
+          document.getElementById('ipLocationBadge').innerText = `${appState.userGeo.city}, ${appState.userGeo.region} • ${appState.userGeo.timezone}`;
         }
       } catch (err) {
-        document.getElementById('ipLocationBadge').innerText = `${appState.userGeo.timezone} (Browser Fallback)`;
+        document.getElementById('ipLocationBadge').innerText = `${appState.userGeo.timezone} (Browser Clock)`;
       }
     }
     initUserLocation();
 
-    // Set top bar date
+    // Date display in top menu
     document.getElementById('currentDateStr').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
 
     // Spark Calendar toggle
@@ -133,7 +140,32 @@
     const calPanel = document.getElementById('calendarPanel');
     calToggle.addEventListener('click', () => calPanel.classList.toggle('hidden'));
 
-    // --- SPARK VOICE SYNTHESIS ---
+    // --- 2. CHAT UI RENDERING ---
+    const chatContainer = document.getElementById('chatContainer');
+    function appendMessage(sender, text) {
+      const isUser = sender === 'user';
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `flex items-start gap-3 ${isUser ? 'justify-end' : 'justify-start'}`;
+
+      if (isUser) {
+        msgDiv.innerHTML = `
+          <div class="bg-indigo-600 text-white rounded-2xl p-3.5 text-sm leading-relaxed max-w-xl shadow-md">
+            ${text}
+          </div>
+        `;
+      } else {
+        msgDiv.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">⚡</div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 text-sm text-slate-200 leading-relaxed shadow-sm max-w-xl">
+            ${text}
+          </div>
+        `;
+      }
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // --- 3. SPARK VOICE OUTPUT ---
     function speakSparkVoice(text) {
       if (!('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
@@ -148,9 +180,8 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // --- AGENTIC TOOLS ---
+    // --- 4. AGENTIC TOOLS ---
     const agentTools = {
-      // 1. Precise Time by IP Timezone
       get_current_time: () => {
         const now = new Date();
         const timeFormatted = now.toLocaleTimeString('en-US', {
@@ -166,13 +197,9 @@
           month: 'short',
           day: 'numeric'
         });
-
-        const reply = `It is currently ${timeFormatted} on ${dateFormatted} in ${appState.userGeo.city}.`;
-        speakSparkVoice(reply);
-        return reply;
+        return `It is currently **${timeFormatted}** on **${dateFormatted}** (${appState.userGeo.timezone}).`;
       },
 
-      // 2. Alarm Trigger
       set_alarm: (title, delayMs, timeStr) => {
         const id = Date.now();
         const alarm = { id, title, timeStr };
@@ -181,6 +208,7 @@
 
         setTimeout(() => {
           speakSparkVoice(`Spark Alert: It is time for ${title}`);
+          appendMessage('spark', `⏰ **Alarm Alert:** Time for *${title}*!`);
           if (Notification.permission === 'granted') {
             new Notification('Spark Reminder', { body: title });
           }
@@ -188,114 +216,96 @@
           renderAlarms();
         }, delayMs);
 
-        const reply = `Alarm set for ${title} in ${timeStr}.`;
-        speakSparkVoice(reply);
-        return reply;
+        return `Alarm set for **${title}** (in ${timeStr}).`;
       },
 
-      // 3. Spark Calendar Event
       add_spark_event: (title, timeStr) => {
         const event = { id: Date.now(), title, timeStr };
         appState.calendarEvents.push(event);
         updateSparkCalendarUI();
-        
-        const reply = `Added ${title} to Spark Calendar.`;
-        speakSparkVoice(reply);
-        return reply;
+        return `Scheduled **${title}** in **Spark Calendar** for ${timeStr}.`;
       },
 
-      // 4. Email Draft
       send_email: (recipient, subject, body) => {
         window.open(`mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-        const reply = `Opened email draft for ${recipient}.`;
-        speakSparkVoice(reply);
-        return reply;
+        return `Prepared email draft to **${recipient}**.`;
       }
     };
 
-    // --- COMMAND ROUTER (WAKE WORD & ACTIONS) ---
-    function processAgenticCommand(rawTranscript) {
-      const text = rawTranscript.trim();
-      const lower = text.toLowerCase();
-      document.getElementById('liveTranscript').innerText = `"${text}"`;
-
-      // Wake word check: responds to "hey spark", "spark", or variations
-      const containsWakeWord = lower.includes('spark') || lower.includes('hey spark');
-
-      // Strip wake word for cleaner intent parsing
+    // --- 5. AGENT ROUTER ---
+    function processCommand(rawInput, isVoice = false) {
+      const lower = rawInput.toLowerCase().trim();
       const cleaned = lower.replace(/hey spark|spark/g, '').trim();
 
-      // If user just says "Hey Spark" with nothing else
-      if (containsWakeWord && cleaned.length === 0) {
-        speakSparkVoice("Hey! How can I help you?");
-        document.getElementById('assistantStatus').innerText = "SPARK READY";
-        return;
-      }
+      let reply = "";
 
-      // Time Query
+      // Time Check
       if (cleaned.includes('time') || cleaned.includes('clock') || cleaned.includes('timezone')) {
-        agentTools.get_current_time();
-        document.getElementById('assistantStatus').innerText = "TIME DELIVERED";
-        return;
+        reply = agentTools.get_current_time();
       }
-
-      // Alarm / Reminder Query
-      if (cleaned.includes('alarm') || cleaned.includes('remind')) {
+      // Alarms / Reminders
+      else if (cleaned.includes('alarm') || cleaned.includes('remind')) {
         let delayMs = 10000;
         let displayStr = "10 seconds";
-
         if (cleaned.includes('minute')) {
           const match = cleaned.match(/(\d+)\s*minute/);
           const mins = match ? parseInt(match[1]) : 1;
           delayMs = mins * 60 * 1000;
           displayStr = `${mins} minute${mins > 1 ? 's' : ''}`;
         }
-
-        const taskMatch = cleaned.replace(/set an alarm for|remind me to|set a reminder for|set an alarm in/g, '').trim();
-        agentTools.set_alarm(taskMatch || "Task Reminder", delayMs, displayStr);
-        document.getElementById('assistantStatus').innerText = "ALARM QUEUED";
-        return;
+        const task = cleaned.replace(/set an alarm for|remind me to|set a reminder for|set an alarm in/g, '').trim() || "Reminder";
+        reply = agentTools.set_alarm(task, delayMs, displayStr);
       }
-
-      // Spark Calendar Query
-      if (cleaned.includes('schedule') || cleaned.includes('calendar') || cleaned.includes('meeting')) {
-        const eventTitle = cleaned.replace(/schedule|add to calendar|meeting/g, '').trim();
-        agentTools.add_spark_event(eventTitle || "New Entry", "Today");
-        document.getElementById('assistantStatus').innerText = "CALENDAR UPDATED";
-        return;
+      // Spark Calendar
+      else if (cleaned.includes('schedule') || cleaned.includes('calendar') || cleaned.includes('meeting')) {
+        const task = cleaned.replace(/schedule|add to calendar|meeting/g, '').trim() || "Planned Session";
+        reply = agentTools.add_spark_event(task, "Today");
       }
-
-      // Email Query
-      if (cleaned.includes('mail') || cleaned.includes('email')) {
+      // Email
+      else if (cleaned.includes('mail') || cleaned.includes('email')) {
         const recipient = cleaned.includes('to') ? cleaned.split('to')[1].trim().split(' ')[0] : 'contact';
-        agentTools.send_email(`${recipient}@example.com`, "Note via Spark Voice", "Automated draft sent from Spark Assistant.");
-        document.getElementById('assistantStatus').innerText = "EMAIL PREPARED";
-        return;
+        reply = agentTools.send_email(`${recipient}@example.com`, "Note from Spark", "Sent via Spark Assistant.");
+      }
+      // Conversational Fallback
+      else {
+        reply = `I processed: "${rawInput}". Ask me for the time, to set an alarm, or to add an event to Spark Calendar!`;
       }
 
-      // General fallback if wake word was invoked
-      if (containsWakeWord) {
-        speakSparkVoice("I'm here. You can ask me the time, set an alarm, or schedule an event in Spark Calendar.");
-        document.getElementById('assistantStatus').innerText = "ONLINE";
+      appendMessage('spark', reply);
+      if (isVoice) {
+        // Strip markdown asterisks for clean speech output
+        speakSparkVoice(reply.replace(/\*\*/g, ''));
       }
     }
 
-    // --- UI RENDERERS ---
+    // --- 6. TEXT INPUT SUBMISSION ---
+    document.getElementById('chatForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      appendMessage('user', val);
+      processCommand(val, false);
+      input.value = '';
+    });
+
+    // --- 7. UI HELPERS ---
     function updateSparkCalendarUI() {
       const list = document.getElementById('eventList');
       const badge = document.getElementById('eventCountBadge');
       badge.innerText = appState.calendarEvents.length;
 
       if (appState.calendarEvents.length === 0) {
-        list.innerHTML = '<p class="text-xs text-neutral-500 italic py-4 text-center">No upcoming events scheduled.</p>';
+        list.innerHTML = '<p class="text-xs text-slate-500 italic py-4 text-center">No upcoming events scheduled.</p>';
         return;
       }
 
       list.innerHTML = appState.calendarEvents.map(e => `
-        <div class="p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl flex justify-between items-center">
+        <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex justify-between items-center">
           <div>
-            <p class="text-xs font-medium text-neutral-200 capitalize">${e.title}</p>
-            <p class="text-[10px] text-neutral-400 font-mono">${e.timeStr}</p>
+            <p class="text-xs font-medium text-slate-200 capitalize">${e.title}</p>
+            <p class="text-[10px] text-slate-400 font-mono">${e.timeStr}</p>
           </div>
           <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
         </div>
@@ -305,14 +315,14 @@
     function renderAlarms() {
       const container = document.getElementById('activeAlarmsContainer');
       container.innerHTML = appState.alarms.map(a => `
-        <div class="px-3 py-1 bg-neutral-900 border border-indigo-500/40 rounded-full text-[11px] text-indigo-300 flex items-center gap-1.5 font-mono">
+        <div class="px-3 py-1 bg-slate-900 border border-indigo-500/40 rounded-full text-[11px] text-indigo-300 flex items-center gap-1.5 font-mono">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
           ${a.title} (${a.timeStr})
         </div>
       `).join('');
     }
 
-    // --- CONTINUOUS SPEECH RECOGNITION (WAKE LISTENER) ---
+    // --- 8. WAKE-WORD & VOICE RECOGNITION ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
 
@@ -324,62 +334,53 @@
 
       recognition.onstart = () => {
         appState.isListening = true;
-        document.getElementById('statusRing').classList.add('listening-glow');
-        document.getElementById('assistantStatus').innerText = "SPARK LISTENING (SAY 'HEY SPARK')...";
+        document.getElementById('toggleMicBtn').classList.add('listening-glow');
       };
 
       recognition.onresult = (event) => {
         const lastIndex = event.results.length - 1;
         const transcript = event.results[lastIndex][0].transcript;
-        processAgenticCommand(transcript);
-      };
+        const lower = transcript.toLowerCase();
 
-      recognition.onerror = (e) => {
-        if (e.error !== 'no-speech') {
-          console.warn("Speech recognition error:", e.error);
+        // Check if wake word is mentioned or mic was explicitly triggered
+        if (lower.includes('spark') || lower.includes('hey spark')) {
+          appendMessage('user', `🎙️ ${transcript}`);
+          processCommand(transcript, true);
         }
       };
 
+      recognition.onerror = (e) => {
+        if (e.error !== 'no-speech') console.warn("Speech recognition error:", e.error);
+      };
+
       recognition.onend = () => {
-        // Auto-restart to maintain continuous "Hey Spark" wake detection
         if (appState.autoRestart) {
           try { recognition.start(); } catch (err) {}
         } else {
           appState.isListening = false;
-          document.getElementById('statusRing').classList.remove('listening-glow');
+          document.getElementById('toggleMicBtn').classList.remove('listening-glow');
         }
       };
 
-      // Auto start on page load
       try { recognition.start(); } catch(e) {}
     }
 
-    // Taskbar Toggle Button
-    const toggleMicBtn = document.getElementById('toggleMicBtn');
-    toggleMicBtn.addEventListener('click', () => {
-      if (!recognition) {
-        alert("Speech Recognition API not supported in this browser. Use the test triggers.");
-        return;
-      }
+    // Mic Toggle Button (Enable/Disable wake listener)
+    document.getElementById('toggleMicBtn').addEventListener('click', () => {
+      if (!recognition) return alert("Speech API not supported in this browser.");
 
       if (appState.autoRestart) {
         appState.autoRestart = false;
         recognition.stop();
-        document.getElementById('micBtnLabel').innerText = "Start Listening";
-        document.getElementById('micDot').className = "w-2 h-2 rounded-full bg-red-400";
-        document.getElementById('assistantStatus').innerText = "MICROPHONE PAUSED";
+        document.getElementById('voiceBadge').innerText = "Wake Word Paused";
+        document.getElementById('voiceBadge').className = "text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/20 font-mono";
       } else {
         appState.autoRestart = true;
         recognition.start();
-        document.getElementById('micBtnLabel').innerText = "Continuous Wake Active";
-        document.getElementById('micDot').className = "w-2 h-2 rounded-full bg-emerald-400";
+        document.getElementById('voiceBadge').innerText = "Wake Word Active";
+        document.getElementById('voiceBadge').className = "text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono";
       }
     });
-
-    // Test Helper
-    window.simulateVoiceCommand = function(cmd) {
-      processAgenticCommand(cmd);
-    };
 
     if ('Notification' in window && Notification.permission !== 'granted') {
       Notification.requestPermission();
