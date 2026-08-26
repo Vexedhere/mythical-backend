@@ -12,11 +12,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
         
-        :root { 
-            --p-color: #10b981; 
-            --s-color: #06b6d4; 
-        }
-
         body { 
             background: #020b08; 
             color: #f3f4f6; 
@@ -70,12 +65,30 @@
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .voice-mode-active {
+            animation: pulse-ring 1.8s infinite;
+            background: linear-gradient(135deg, #10b981, #06b6d4) !important;
+            color: #020b08 !important;
+            border-color: #34d399 !important;
+        }
     </style>
 </head>
 <body class="flex flex-col">
     <div class="bg-mesh"></div>
 
-    <!-- Auth / Feature Lock Modal -->
+    <div id="voice-status-pill" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden glass-card px-5 py-2.5 flex items-center gap-3 border-emerald-500/40 animate__animated animate__fadeInDown">
+        <div class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
+        <span id="voice-status-text" class="text-xs font-semibold text-emerald-300">Voice-to-Voice Active • Listening...</span>
+        <button onclick="toggleVoiceMode()" class="ml-2 text-gray-400 hover:text-white text-xs bg-white/10 px-2 py-0.5 rounded-lg">End Call</button>
+    </div>
+
     <div id="auth-modal" class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-[120] hidden">
         <div class="glass-card p-8 w-full max-w-md mx-4 border-emerald-500/30 text-center relative animate__animated animate__zoomIn animate__faster">
             <button onclick="toggleAuthModal(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
@@ -91,7 +104,7 @@
             </p>
             
             <div id="g_id_onload" 
-                 data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" 
+                 data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com" 
                  data-callback="handleGoogleResponse">
             </div>
             <div class="g_id_signin flex justify-center scale-105 mb-3" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
@@ -99,9 +112,7 @@
         </div>
     </div>
 
-    <!-- Main Application -->
     <div id="main-app" class="flex h-full">
-        <!-- Sidebar -->
         <aside class="w-80 glass-nav flex flex-col p-6 z-10">
             <div class="flex items-center gap-3 mb-8">
                 <div class="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
@@ -150,16 +161,21 @@
             </div>
         </aside>
 
-        <!-- Chat Workspace -->
         <main class="flex-1 flex flex-col relative">
             <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-36"></div>
             
             <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
-                <div class="glass-card p-2 flex items-center border-white/10 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.15)] focus-within:border-emerald-500/40 transition-all">
+                <div class="glass-card p-2 flex items-center gap-2 border-white/10 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.15)] focus-within:border-emerald-500/40 transition-all">
+                    
+                    <button id="v2v-btn" onclick="toggleVoiceMode()" title="Hands-Free Voice Mode" class="text-gray-400 hover:text-emerald-400 w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-white/5 hover:bg-white/10 border border-white/5">
+                        <i id="v2v-icon" class="fas fa-headset text-sm"></i>
+                    </button>
+
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
-                           class="flex-1 bg-transparent py-3.5 px-6 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Spark AI V2 or type /image <prompt>...">
+                           class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500" 
+                           placeholder="Message Spark AI V2, tap headset for Voice-to-Voice...">
+
                     <button onclick="send()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-emerald-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
                     </button>
@@ -169,8 +185,8 @@
     </div>
 
     <script>
-        const OPENROUTER_API_KEY = "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";
-        const SILICONFLOW_API_KEY = "sk-jdzaxerzjozzhqwnhlfitcnkoldfjtjqepqzyrvaumbyqvvl";
+        const OPENROUTER_API_KEY = "YOUR_OPENROUTER_API_KEY_HERE";
+        const SILICONFLOW_API_KEY = "YOUR_SILICONFLOW_API_KEY_HERE";
 
         const OPENROUTER_MODELS = [
             "openrouter/free",
@@ -197,6 +213,160 @@
         let sessions = [];
         let currentSessionId = null;
 
+        /* ========== HANDS-FREE VOICE-TO-VOICE ENGINE ========== */
+        let isVoiceMode = false;
+        let isRecognizing = false;
+        let isAiSpeaking = false;
+        let recognitionInstance = null;
+        let silenceTimer = null;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognitionInstance = new SpeechRecognition();
+            recognitionInstance.continuous = true;
+            recognitionInstance.interimResults = true;
+            recognitionInstance.lang = 'en-US';
+
+            recognitionInstance.onresult = (event) => {
+                if (isAiSpeaking) return; // Prevent mic from hearing AI response
+
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                const currentText = finalTranscript || interimTranscript;
+                if (currentText.trim()) {
+                    document.getElementById("input").value = currentText;
+                    updateVoiceStatus("Listening: " + (currentText.length > 25 ? currentText.substring(0, 25) + "..." : currentText));
+
+                    // Debounce silence: When user stops speaking for 1.2s, auto-send
+                    clearTimeout(silenceTimer);
+                    silenceTimer = setTimeout(() => {
+                        if (isVoiceMode && !isAiSpeaking && document.getElementById("input").value.trim()) {
+                            stopRecognitionEngine();
+                            send();
+                        }
+                    }, 1200);
+                }
+            };
+
+            recognitionInstance.onerror = (event) => {
+                if (event.error !== 'no-speech') {
+                    console.warn("Speech Recognition Info:", event.error);
+                }
+            };
+
+            recognitionInstance.onend = () => {
+                isRecognizing = false;
+                // If voice mode is still enabled and AI is not speaking, restart listening
+                if (isVoiceMode && !isAiSpeaking) {
+                    startRecognitionEngine();
+                }
+            };
+        }
+
+        function toggleVoiceMode() {
+            if (!recognitionInstance || !('speechSynthesis' in window)) {
+                alert("Voice-to-Voice requires browser SpeechRecognition and SpeechSynthesis support (Chrome, Edge, Brave recommended).");
+                return;
+            }
+
+            isVoiceMode = !isVoiceMode;
+            const btn = document.getElementById("v2v-btn");
+            const pill = document.getElementById("voice-status-pill");
+
+            if (isVoiceMode) {
+                btn.classList.add("voice-mode-active");
+                pill.classList.remove("hidden");
+                updateVoiceStatus("Voice Mode Connected • Listening...");
+                startRecognitionEngine();
+            } else {
+                btn.classList.remove("voice-mode-active");
+                pill.classList.add("hidden");
+                stopRecognitionEngine();
+                if (window.speechSynthesis) window.speechSynthesis.cancel();
+            }
+        }
+
+        function startRecognitionEngine() {
+            if (recognitionInstance && !isRecognizing && !isAiSpeaking) {
+                try {
+                    recognitionInstance.start();
+                    isRecognizing = true;
+                } catch (e) {}
+            }
+        }
+
+        function stopRecognitionEngine() {
+            if (recognitionInstance && isRecognizing) {
+                try {
+                    recognitionInstance.stop();
+                    isRecognizing = false;
+                } catch (e) {}
+            }
+        }
+
+        function updateVoiceStatus(text) {
+            const el = document.getElementById("voice-status-text");
+            if (el) el.innerText = text;
+        }
+
+        function speakAIResponse(text, onCompleteCallback) {
+            if (!('speechSynthesis' in window)) {
+                if (onCompleteCallback) onCompleteCallback();
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            // Filter markdown formatting and codeblocks for natural speech output
+            const naturalSpeech = text
+                .replace(/```[\s\S]*?```/g, 'Code snippet provided in chat.')
+                .replace(/`([^`]+)`/g, '$1')
+                .replace(/#+\s/g, '')
+                .replace(/\*+/g, '')
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                .trim();
+
+            if (!naturalSpeech) {
+                if (onCompleteCallback) onCompleteCallback();
+                return;
+            }
+
+            isAiSpeaking = true;
+            stopRecognitionEngine();
+            updateVoiceStatus("Spark Speaking...");
+
+            const utterance = new SpeechSynthesisUtterance(naturalSpeech);
+            utterance.rate = 1.05;
+            utterance.pitch = 1.0;
+
+            utterance.onend = () => {
+                isAiSpeaking = false;
+                if (isVoiceMode) {
+                    updateVoiceStatus("Listening for your reply...");
+                    startRecognitionEngine();
+                }
+                if (onCompleteCallback) onCompleteCallback();
+            };
+
+            utterance.onerror = () => {
+                isAiSpeaking = false;
+                if (isVoiceMode) startRecognitionEngine();
+                if (onCompleteCallback) onCompleteCallback();
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* ========== CODE BLOCK RENDERER ========== */
         const customRenderer = {
             code(arg1, arg2) {
                 let codeText = "";
@@ -287,16 +457,12 @@
         }
 
         function getSystemPrompt() {
-            return `You are Spark AI V2, an advanced, high-performance intelligent system engineered for speed and developer productivity.
+            return `You are Spark AI V2, an advanced, high-performance intelligent system.
+${isVoiceMode ? 'CRITICAL: The user is currently in interactive hands-free VOICE-TO-VOICE mode. Keep answers concise, direct, conversational, and avoid excessively long code dumps unless explicitly asked.' : ''}
 Current Active User Session:
 - User Name: ${currentUser?.name || "Guest User"}
 - Designated Role / Rank: ${currentUser?.rank || "GUEST MODE"}
-- Is Guest Mode: ${currentUser?.isGuest ? "Yes" : "No"}
-
-Guidelines:
-1. Address the user directly and intelligently.
-2. For coding queries, output clean markdown code blocks with the exact language specified so copy boxes render properly.
-3. Keep answers sharp, direct, and concise.`;
+- Is Guest Mode: ${currentUser?.isGuest ? "Yes" : "No"}`;
         }
 
         function toggleAuthModal(show) {
@@ -461,16 +627,16 @@ Guidelines:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.isGuest) {
-                msg = `### ⚡ Spark AI V2 (Guest Mode)\nHigh-speed intelligence core active. Chat and code generation ready.\n\n*Tip:* Sign in with Google to unlock SiliconFlow Image Generation (\`/image\`).`;
+                msg = `### ⚡ Spark AI V2 Active\nVoice-to-Voice hands-free mode ready. Tap the headset icon to talk live.\n\n*Tip:* Sign in with Google to unlock SiliconFlow Image Generation (\`/image\`).`;
             } else {
-                msg = `### ⚡ Spark AI V2 Pro Active\nWelcome back, **${currentUser.name}**! SiliconFlow image synthesis and pro quotas enabled.`;
+                msg = `### ⚡ Spark AI V2 Pro Active\nWelcome back, **${currentUser.name}**! Hands-free Voice-to-Voice, SiliconFlow image synthesis, and pro quotas active.`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
             let i = 0;
             function type() {
                 if (i < msg.length) {
-                    aiBox.innerHTML = marked.parse(msg.substring(0, i + 1));
+                    aiBox.querySelector('.ai-body').innerHTML = marked.parse(msg.substring(0, i + 1));
                     i++;
                     setTimeout(type, 8);
                 }
@@ -490,9 +656,9 @@ Guidelines:
             const prompt = rawPrompt.trim();
             const cleanSfKey = typeof SILICONFLOW_API_KEY !== 'undefined' ? SILICONFLOW_API_KEY.trim() : "";
             const boxId = 'img_box_' + Date.now();
+            const aiBody = aiBox.querySelector('.ai-body');
 
-            // Render square container with circular loader
-            aiBox.innerHTML = `
+            aiBody.innerHTML = `
                 <div class="space-y-3 w-full max-w-[420px]">
                     <div class="flex items-center justify-between text-xs">
                         <span class="flex items-center gap-2 text-emerald-400 font-bold uppercase tracking-wider">
@@ -502,7 +668,6 @@ Guidelines:
                     </div>
 
                     <div id="${boxId}" class="relative w-full aspect-square rounded-3xl overflow-hidden border border-emerald-500/20 bg-[#03120c] flex items-center justify-center shadow-2xl">
-                        <!-- Circle Loading State -->
                         <div class="loader-circle-container flex flex-col items-center justify-center gap-4 text-center p-6">
                             <div class="relative w-16 h-16 flex items-center justify-center">
                                 <div class="absolute inset-0 rounded-full border-4 border-emerald-500/20"></div>
@@ -521,7 +686,6 @@ Guidelines:
 
             let imageUrl = null;
 
-            // Step 1: Try SiliconFlow API
             if (cleanSfKey) {
                 const endpoints = [
                     "https://api.siliconflow.cn/v1/images/generations",
@@ -556,14 +720,12 @@ Guidelines:
                 }
             }
 
-            // Step 2: Instant Neural Fallback
             if (!imageUrl) {
                 const seed = Math.floor(Math.random() * 99999999);
                 const encodedPrompt = encodeURIComponent(prompt);
                 imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
             }
 
-            // Once URL is ready, preload image and reveal only after it completes
             const targetContainer = document.getElementById(boxId);
             if (targetContainer) {
                 const preloader = new Image();
@@ -581,6 +743,10 @@ Guidelines:
 
             activeSession.messages.push({ role: "ai", content: `![${prompt}](${imageUrl})` });
             saveSessions();
+
+            if (isVoiceMode) {
+                speakAIResponse("I've generated the image you requested.");
+            }
         }
 
         async function send() {
@@ -589,6 +755,7 @@ Guidelines:
             if (!text) return;
             
             input.value = "";
+            clearTimeout(silenceTimer);
             
             let activeSession = sessions.find(s => s.id === currentSessionId);
             if (!activeSession) return;
@@ -632,10 +799,11 @@ Guidelines:
 
             const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-emerald-400 animate-pulse mr-2"></i>`, true);
             const chatContainer = document.getElementById("chat");
+            const aiBody = aiBox.querySelector('.ai-body');
 
             const cleanKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY.trim() : "";
             if (!cleanKey) {
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please configure <code>OPENROUTER_API_KEY</code> on line 186.`;
+                aiBody.innerHTML = `<span class="text-red-400 font-medium">Missing Key:</span> Please configure <code>OPENROUTER_API_KEY</code>.`;
                 return;
             }
 
@@ -678,7 +846,7 @@ Guidelines:
 
                     const reader = res.body.getReader();
                     const decoder = new TextDecoder("utf-8");
-                    aiBox.innerHTML = "";
+                    aiBody.innerHTML = "";
 
                     while (true) {
                         const { done, value } = await reader.read();
@@ -695,7 +863,7 @@ Guidelines:
                                     const delta = json.choices[0]?.delta?.content || "";
                                     if (delta) {
                                         streamedContent += delta;
-                                        aiBox.innerHTML = marked.parse(streamedContent);
+                                        aiBody.innerHTML = marked.parse(streamedContent);
                                         chatContainer.scrollTop = chatContainer.scrollHeight;
                                     }
                                 } catch (e) {}
@@ -707,6 +875,18 @@ Guidelines:
                         streamSucceeded = true;
                         activeSession.messages.push({ role: "ai", content: streamedContent });
                         saveSessions();
+                        
+                        // Enable manual Listen button
+                        const ttsBtn = aiBox.querySelector('.tts-btn');
+                        if (ttsBtn) {
+                            ttsBtn.classList.remove('hidden');
+                            ttsBtn.onclick = () => speakAIResponse(streamedContent);
+                        }
+
+                        // If in Voice-to-Voice Mode, automatically speak back
+                        if (isVoiceMode) {
+                            speakAIResponse(streamedContent);
+                        }
                         break;
                     }
                 } catch (err) {
@@ -716,14 +896,33 @@ Guidelines:
 
             if (!streamSucceeded) {
                 console.error("Spark AI V2 Engine Error:", lastError);
-                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
+                aiBody.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
+                if (isVoiceMode) {
+                    speakAIResponse("Connection failed. Please check API key.");
+                }
             }
         }
 
         function renderMessageUI(role, content, shouldScroll) {
             const div = document.createElement("div");
             div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeInUp animate__faster`;
-            div.innerHTML = `<div class="max-w-[80%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed">${content ? marked.parse(content) : ''}</div>`;
+            
+            if (role === 'user') {
+                div.innerHTML = `<div class="max-w-[80%] px-6 py-4 rounded-3xl chat-user text-white text-sm leading-relaxed">${escapeHtml(content)}</div>`;
+            } else {
+                div.innerHTML = `
+                <div class="max-w-[80%] px-6 py-4 rounded-3xl chat-ai text-gray-200 text-sm leading-relaxed relative group">
+                    <div class="ai-body">${content ? marked.parse(content) : ''}</div>
+                    <button class="tts-btn ${content ? '' : 'hidden'} mt-2.5 text-[11px] text-gray-400 hover:text-emerald-400 bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 border border-white/5" title="Read Aloud">
+                        <i class="fas fa-volume-high"></i> Listen
+                    </button>
+                </div>`;
+                
+                const ttsBtn = div.querySelector('.tts-btn');
+                if (content && ttsBtn) {
+                    ttsBtn.onclick = () => speakAIResponse(content);
+                }
+            }
             
             const chatContainer = document.getElementById("chat");
             chatContainer.appendChild(div);
