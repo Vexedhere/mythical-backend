@@ -1,390 +1,737 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spark AI Assistant & Chat</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.15); opacity: 0.4; }
-      100% { transform: scale(0.95); opacity: 0.8; }
-    }
-    .listening-glow {
-      animation: pulse-ring 2s infinite ease-in-out;
-      box-shadow: 0 0 25px rgba(99, 102, 241, 0.7);
-    }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spark AI V2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
+        body { 
+            background: #020b08; 
+            color: #f3f4f6; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        
+        .bg-mesh {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+            z-index: -1;
+        }
+
+        .glass-nav { 
+            background: rgba(4, 20, 16, 0.7); 
+            backdrop-filter: blur(25px); 
+            border-right: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+
+        .glass-card { 
+            background: rgba(6, 26, 21, 0.55); 
+            backdrop-filter: blur(30px); 
+            border: 1px solid rgba(16, 185, 129, 0.15); 
+            border-radius: 28px; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        .chat-user { 
+            background: linear-gradient(135deg, #059669, #0284c7); 
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.25); 
+        }
+
+        .chat-ai { 
+            background: rgba(10, 35, 28, 0.6); 
+            border: 1px solid rgba(16, 185, 129, 0.12); 
+        }
+
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans h-screen flex flex-col justify-between overflow-hidden selection:bg-indigo-600 selection:text-white">
+<body class="flex flex-col">
+    <div class="bg-mesh"></div>
 
-  <!-- ================= TOP BAR ================= -->
-  <header class="w-full px-6 py-3.5 flex justify-between items-center border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md z-40">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-md shadow-indigo-500/20">⚡</div>
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="font-semibold tracking-tight text-base text-slate-100">Spark OS</span>
-          <span id="voiceBadge" class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono">Wake Word Active</span>
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-[120] hidden">
+        <div class="glass-card p-8 w-full max-w-md mx-4 border-emerald-500/30 text-center relative animate__animated animate__zoomIn animate__faster">
+            <button onclick="toggleAuthModal(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <div class="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-emerald-500/20 text-emerald-400">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-1">Account Authentication</h2>
+            <p class="text-xs text-emerald-400 font-semibold tracking-wider uppercase mb-3">Owner Access & Agent Features</p>
+            <p class="text-gray-300 text-xs leading-relaxed mb-6">
+                Sign in with your Google account. Owner emails will automatically receive full founder clearance.
+            </p>
+            
+            <div id="g_id_onload" 
+                 data-client_id="727852259882-dr8l2t7fjsjog7riu8t5cj93ht0up9nr.apps.googleusercontent.com" 
+                 data-callback="handleGoogleResponse">
+            </div>
+            <div class="g_id_signin flex justify-center scale-105 mb-3" data-type="standard" data-theme="filled_black" data-shape="pill"></div>
+            <button onclick="toggleAuthModal(false)" class="text-[11px] text-gray-500 hover:text-gray-300 transition-colors">Continue in Guest Mode</button>
         </div>
-        <div id="ipLocationBadge" class="text-[11px] text-slate-400 font-mono">Syncing location & timezone...</div>
-      </div>
     </div>
 
-    <!-- Top-Right Spark Calendar Widget -->
-    <div class="relative">
-      <button id="sparkCalToggle" class="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700 text-white px-4 py-2 rounded-xl border border-slate-700 shadow-lg transition-all">
-        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        <span class="font-medium text-sm">Spark Calendar</span>
-        <span id="eventCountBadge" class="bg-indigo-600 text-xs px-2 py-0.5 rounded-full font-mono">0</span>
-      </button>
+    <!-- Main Workspace -->
+    <div id="main-app" class="flex h-full w-full">
+        <!-- Clean Sidebar -->
+        <aside class="w-80 glass-nav flex flex-col p-5 z-10 shrink-0">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                    <i class="fas fa-bolt text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-lg font-bold tracking-tight uppercase leading-none">Spark<span class="text-emerald-400">.</span>ai <span class="text-xs text-emerald-400 font-mono">V2</span></div>
+                    <span class="text-[9px] text-gray-500 tracking-wider font-semibold">AGENTIC CHATBOT</span>
+                </div>
+            </div>
 
-      <!-- Calendar Modal -->
-      <div id="calendarPanel" class="hidden absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl">
-        <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-          <h3 class="text-sm font-semibold text-slate-200">Scheduled Events</h3>
-          <span id="currentDateStr" class="text-xs text-slate-400 font-mono"></span>
-        </div>
-        <div id="eventList" class="mt-3 space-y-2 max-h-60 overflow-y-auto pr-1">
-          <p class="text-xs text-slate-500 italic py-4 text-center">No upcoming events scheduled.</p>
-        </div>
-      </div>
+            <nav class="space-y-2 mb-4">
+                <button onclick="createNewSession()" class="w-full text-left p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-emerald-500/20 transition-all font-semibold flex items-center gap-3 text-xs text-gray-200">
+                    <div class="w-7 h-7 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400"><i class="fas fa-plus text-[11px]"></i></div>
+                    New Session
+                </button>
+                <button onclick="triggerImageButton()" class="w-full text-left p-3 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-2xl border border-emerald-500/20 transition-all font-semibold flex items-center justify-between text-xs text-emerald-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 bg-emerald-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-wand-magic-sparkles text-[11px] text-emerald-400"></i></div>
+                        Image Generator
+                    </div>
+                    <span class="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">FLUX</span>
+                </button>
+            </nav>
+
+            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-2 px-1">Recent Chats</div>
+            <div id="history" class="flex-1 overflow-y-auto space-y-1.5 text-xs custom-scroll pr-1 mb-4"></div>
+
+            <!-- User Auth Bar -->
+            <div class="pt-3 flex items-center justify-between border-t border-white/5">
+                <div class="flex items-center gap-2.5 overflow-hidden">
+                    <img id="user-pfp" class="w-9 h-9 rounded-xl border border-emerald-500/30 hidden object-cover shrink-0">
+                    <div id="pfp-fallback" class="w-9 h-9 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 font-bold shrink-0 text-xs">G</div>
+                    <div class="overflow-hidden">
+                        <p id="display-name" class="font-bold text-xs truncate w-24">Guest User</p>
+                        <p id="display-rank" class="text-[8px] text-gray-400 font-bold uppercase tracking-widest truncate">GUEST MODE</p>
+                    </div>
+                </div>
+                <button id="auth-action-btn" onclick="toggleAuthModal(true)" class="text-[11px] px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 font-semibold transition-all">
+                    Sign In
+                </button>
+            </div>
+        </aside>
+
+        <!-- Clean Chat Screen -->
+        <main class="flex-1 flex flex-col relative h-full">
+            <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-36"></div>
+            
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
+                <div class="glass-card p-2 flex items-center gap-2 border-white/10 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.15)] focus-within:border-emerald-500/40 transition-all">
+                    <input id="input" 
+                           onkeydown="handleKeyDown(event)" 
+                           class="flex-1 bg-transparent py-3.5 px-4 text-sm outline-none placeholder:text-gray-500" 
+                           placeholder="Message Spark AI V2 (Agentic core active, or type /image)...">
+
+                    <button onclick="send()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-emerald-500/20">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
     </div>
-  </header>
 
-  <!-- ================= CHAT CONTAINER & MESSAGES ================= -->
-  <main class="flex-1 overflow-y-auto px-4 py-6 max-w-4xl w-full mx-auto space-y-4" id="chatContainer">
-    <!-- Assistant Intro Message -->
-    <div class="flex items-start gap-3">
-      <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">⚡</div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-sm text-slate-200 leading-relaxed shadow-sm max-w-xl">
-        <p class="font-medium text-indigo-400 mb-1">Hey, I'm Spark.</p>
-        You can chat with me here via text, or speak aloud anytime by saying <strong class="text-white">"Hey Spark"</strong>. I can set alarms, manage your Spark Calendar, check exact regional time, or draft emails.
-      </div>
-    </div>
-  </main>
+    <script>
+        const OPENROUTER_API_KEY = "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";
+        const SILICONFLOW_API_KEY = "sk-jdzaxerzjozzhqwnhlfitcnkoldfjtjqepqzyrvaumbyqvvl";
 
-  <!-- Active Alarms Floating Bar -->
-  <div id="activeAlarmsContainer" class="max-w-4xl w-full mx-auto px-4 flex flex-wrap gap-2 justify-start pb-2"></div>
+        const ROLE_CONFIG = {
+            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-emerald-400", defaultName: "Chethan" },
+            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-emerald-400", defaultName: "Chethan" }
+        };
 
-  <!-- ================= INPUT & VOICE BAR ================= -->
-  <footer class="w-full border-t border-slate-800/80 bg-slate-900/80 backdrop-blur-md p-4 z-40">
-    <div class="max-w-4xl mx-auto flex items-center gap-3">
-      <!-- Voice Mic Orb Button -->
-      <button id="toggleMicBtn" class="relative w-11 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-all shrink-0">
-        <svg id="micIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-        </svg>
-      </button>
+        const OPENROUTER_MODELS = [
+            "openrouter/free",
+            "deepseek/deepseek-chat",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "meta-llama/llama-3.1-8b-instruct:free"
+        ];
 
-      <!-- Text Input Form -->
-      <form id="chatForm" class="flex-1 flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 focus-within:border-indigo-500 transition-all">
-        <input 
-          id="chatInput" 
-          type="text" 
-          placeholder="Ask Spark or type a command... (or say 'Hey Spark')" 
-          class="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none px-2 py-1.5"
-          autocomplete="off"
-        />
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-all shadow-md shadow-indigo-600/20">
-          Send
-        </button>
-      </form>
-    </div>
-  </footer>
+        const SILICONFLOW_IMAGE_MODELS = [
+            "black-forest-labs/FLUX.1-schnell",
+            "stabilityai/stable-diffusion-3-5-large-turbo",
+            "Kwai-Kolors/Kolors"
+        ];
 
-  <!-- ================= APPLICATION SCRIPT ================= -->
-  <script>
-    const appState = {
-      isListening: false,
-      autoRestart: true,
-      calendarEvents: [],
-      alarms: [],
-      userGeo: {
-        city: 'Local',
-        region: '',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
-        ip: ''
-      }
-    };
+        let currentUser = {
+            id: "guest",
+            isGuest: true,
+            email: "",
+            name: "Guest User",
+            rank: "GUEST MODE",
+            picture: null
+        };
 
-    // --- 1. IP & TIMEZONE DETECTION ---
-    async function initUserLocation() {
-      try {
-        const res = await fetch('https://ipapi.co/json/');
-        if (res.ok) {
-          const data = await res.json();
-          appState.userGeo.city = data.city || 'Local';
-          appState.userGeo.region = data.region || '';
-          appState.userGeo.timezone = data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-          appState.userGeo.ip = data.ip;
-          document.getElementById('ipLocationBadge').innerText = `${appState.userGeo.city}, ${appState.userGeo.region} • ${appState.userGeo.timezone}`;
+        let sessions = [];
+        let currentSessionId = null;
+
+        // Custom Renderer with DOM Copy Box
+        const customRenderer = {
+            code(arg1, arg2) {
+                let codeText = "";
+                let lang = "code";
+
+                if (typeof arg1 === 'object' && arg1 !== null) {
+                    codeText = arg1.text || arg1.raw || "";
+                    lang = arg1.lang || "code";
+                } else {
+                    codeText = typeof arg1 === 'string' ? arg1 : String(arg1 || '');
+                    lang = typeof arg2 === 'string' && arg2 ? arg2 : "code";
+                }
+
+                return `
+                <div class="code-box-wrapper my-4 rounded-2xl overflow-hidden border border-emerald-500/20 bg-[#040e0b] shadow-xl">
+                    <div class="flex items-center justify-between px-4 py-2.5 bg-white/5 border-b border-white/5 text-xs text-gray-400">
+                        <span class="code-font font-bold uppercase text-[11px] text-emerald-400 tracking-wider flex items-center gap-2">
+                            <i class="fas fa-code text-[10px]"></i> ${escapeHtml(lang)}
+                        </span>
+                        <button onclick="copyCode(this)" class="copy-btn flex items-center gap-1.5 hover:text-white transition-all bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-lg text-xs border border-emerald-500/20">
+                            <i class="far fa-copy text-xs"></i> <span>Copy</span>
+                        </button>
+                    </div>
+                    <pre class="p-4 overflow-x-auto text-xs text-gray-200 code-font custom-scroll leading-relaxed"><code>${escapeHtml(codeText)}</code></pre>
+                </div>`;
+            }
+        };
+
+        marked.use({ renderer: customRenderer });
+
+        function escapeHtml(string) {
+            return String(string)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
-      } catch (err) {
-        document.getElementById('ipLocationBadge').innerText = `${appState.userGeo.timezone} (Browser Clock)`;
-      }
-    }
-    initUserLocation();
 
-    // Date display in top menu
-    document.getElementById('currentDateStr').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
+        function triggerImageButton() {
+            const input = document.getElementById("input");
+            input.value = "/image ";
+            input.focus();
+        }
 
-    // Spark Calendar toggle
-    const calToggle = document.getElementById('sparkCalToggle');
-    const calPanel = document.getElementById('calendarPanel');
-    calToggle.addEventListener('click', () => calPanel.classList.toggle('hidden'));
+        window.copyCode = function(button) {
+            const wrapper = button.closest('.code-box-wrapper');
+            if (!wrapper) return;
+            const codeEl = wrapper.querySelector('code');
+            const codeText = codeEl ? codeEl.innerText : '';
 
-    // --- 2. CHAT UI RENDERING ---
-    const chatContainer = document.getElementById('chatContainer');
-    function appendMessage(sender, text) {
-      const isUser = sender === 'user';
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `flex items-start gap-3 ${isUser ? 'justify-end' : 'justify-start'}`;
+            const showCopied = () => {
+                const originalHtml = button.innerHTML;
+                button.innerHTML = `<i class="fas fa-check text-emerald-400"></i> <span class="text-emerald-400 font-semibold">Copied!</span>`;
+                setTimeout(() => { button.innerHTML = originalHtml; }, 2000);
+            };
 
-      if (isUser) {
-        msgDiv.innerHTML = `
-          <div class="bg-indigo-600 text-white rounded-2xl p-3.5 text-sm leading-relaxed max-w-xl shadow-md">
-            ${text}
-          </div>
-        `;
-      } else {
-        msgDiv.innerHTML = `
-          <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">⚡</div>
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 text-sm text-slate-200 leading-relaxed shadow-sm max-w-xl">
-            ${text}
-          </div>
-        `;
-      }
-      chatContainer.appendChild(msgDiv);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(codeText).then(showCopied).catch(() => fallbackCopy(codeText, showCopied));
+            } else {
+                fallbackCopy(codeText, showCopied);
+            }
+        };
 
-    // --- 3. SPARK VOICE OUTPUT ---
-    function speakSparkVoice(text) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-      const naturalVoice = voices.find(v => v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')) || voices[0];
-      
-      if (naturalVoice) utterance.voice = naturalVoice;
-      utterance.rate = 1.05;
-      utterance.pitch = 1.0;
-      window.speechSynthesis.speak(utterance);
-    }
+        function fallbackCopy(text, callback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                if (callback) callback();
+            } catch (err) {}
+            document.body.removeChild(textArea);
+        }
 
-    // --- 4. AGENTIC TOOLS ---
-    const agentTools = {
-      get_current_time: () => {
-        const now = new Date();
-        const timeFormatted = now.toLocaleTimeString('en-US', {
-          timeZone: appState.userGeo.timezone,
-          hour: 'numeric',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
+        function getUserRole(email) {
+            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
+            const normalized = email.toLowerCase().trim();
+            for (const key in ROLE_CONFIG) {
+                if (normalized === key || normalized.startsWith(key.split("@")[0])) {
+                    return ROLE_CONFIG[key];
+                }
+            }
+            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
+        }
+
+        function getSystemPrompt() {
+            return `You are Spark AI V2, an advanced autonomous agentic intelligence system.
+Agentic Protocols Active:
+1. Act as an active agent: break complex multi-step technical challenges down into structured, actionable reasoning phases.
+2. For coding queries, return complete, verified code blocks formatted with clear markdown language identifiers.
+3. User Session Context: Name: ${currentUser?.name || "User"}, Role: ${currentUser?.rank || "GUEST MODE"}, Email: ${currentUser?.email || "N/A"}.
+4. If asked about creators or origins, recognize Chethan as the Owner & Founder.`;
+        }
+
+        function toggleAuthModal(show) {
+            const modal = document.getElementById("auth-modal");
+            if (show) modal.classList.remove("hidden");
+            else modal.classList.add("hidden");
+        }
+
+        function handleGoogleResponse(res) {
+            try {
+                const payload = JSON.parse(atob(res.credential.split('.')[1]));
+                const email = payload.email || "";
+                const roleInfo = getUserRole(email);
+                
+                currentUser = { 
+                    id: payload.sub,
+                    isGuest: false,
+                    email: email,
+                    name: payload.name || roleInfo.defaultName, 
+                    rank: roleInfo.rank,
+                    picture: payload.picture 
+                };
+
+                localStorage.setItem("spark_logged_user", JSON.stringify(currentUser));
+                toggleAuthModal(false);
+                updateUserUI();
+                loadUserSessions();
+            } catch (e) {
+                console.error("Authentication Error", e);
+            }
+        }
+
+        function updateUserUI() {
+            const nameEl = document.getElementById("display-name");
+            const rankEl = document.getElementById("display-rank");
+            const pfpFallback = document.getElementById("pfp-fallback");
+            const userPfp = document.getElementById("user-pfp");
+            const authBtn = document.getElementById("auth-action-btn");
+
+            nameEl.innerText = currentUser.name;
+            rankEl.innerText = currentUser.rank;
+
+            if (currentUser.isGuest) {
+                rankEl.className = "text-[8px] text-gray-400 font-bold uppercase tracking-widest";
+                authBtn.innerHTML = `Sign In`;
+                authBtn.onclick = () => toggleAuthModal(true);
+                userPfp.classList.add("hidden");
+                pfpFallback.classList.remove("hidden");
+                pfpFallback.innerText = "G";
+            } else {
+                authBtn.innerHTML = `<i class="fas fa-power-off text-red-400"></i>`;
+                authBtn.onclick = logout;
+
+                if (currentUser.rank.includes("OWNER")) {
+                    rankEl.className = "text-[8px] text-emerald-400 font-bold uppercase tracking-widest";
+                } else {
+                    rankEl.className = "text-[8px] text-cyan-400 font-bold uppercase tracking-widest";
+                }
+
+                if (currentUser.picture) {
+                    userPfp.src = currentUser.picture;
+                    userPfp.classList.remove("hidden");
+                    pfpFallback.classList.add("hidden");
+                } else {
+                    pfpFallback.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : "U";
+                    pfpFallback.classList.remove("hidden");
+                    userPfp.classList.add("hidden");
+                }
+            }
+        }
+
+        function getStorageKey() {
+            return `spark_v2_chats_${currentUser.id}`;
+        }
+
+        function loadUserSessions() {
+            const rawData = localStorage.getItem(getStorageKey());
+            sessions = rawData ? JSON.parse(rawData) : [];
+            renderSidebar();
+
+            if (sessions.length > 0) {
+                loadSession(sessions[0].id);
+            } else {
+                createNewSession();
+            }
+        }
+
+        function saveSessions() {
+            localStorage.setItem(getStorageKey(), JSON.stringify(sessions));
+            renderSidebar();
+        }
+
+        function createNewSession() {
+            const newSession = {
+                id: 'sess_' + Date.now(),
+                title: 'New Conversation',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                messages: []
+            };
+            sessions.unshift(newSession);
+            currentSessionId = newSession.id;
+            saveSessions();
+            
+            document.getElementById("chat").innerHTML = "";
+            triggerWelcome();
+        }
+
+        function loadSession(sessionId) {
+            currentSessionId = sessionId;
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+
+            renderSidebar();
+            const chatContainer = document.getElementById("chat");
+            chatContainer.innerHTML = "";
+
+            if (session.messages.length === 0) {
+                triggerWelcome();
+            } else {
+                session.messages.forEach(msg => {
+                    renderMessageUI(msg.role, msg.content, false);
+                });
+            }
+        }
+
+        function deleteSession(e, sessionId) {
+            e.stopPropagation();
+            sessions = sessions.filter(s => s.id !== sessionId);
+            saveSessions();
+            
+            if (sessions.length > 0) {
+                loadSession(sessions[0].id);
+            } else {
+                createNewSession();
+            }
+        }
+
+        function renderSidebar() {
+            const historyContainer = document.getElementById("history");
+            historyContainer.innerHTML = "";
+
+            sessions.forEach(sess => {
+                const isActive = sess.id === currentSessionId;
+                const item = document.createElement("div");
+                item.className = `group flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all border ${
+                    isActive 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                    : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                }`;
+                item.onclick = () => loadSession(sess.id);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <i class="far fa-comments text-xs"></i>
+                        <div class="truncate font-medium text-xs w-36">${sess.title}</div>
+                    </div>
+                    <button onclick="deleteSession(event, '${sess.id}')" class="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-opacity p-1">
+                        <i class="fas fa-trash-alt text-[10px]"></i>
+                    </button>
+                `;
+                historyContainer.appendChild(item);
+            });
+        }
+
+        function triggerWelcome() {
+            let msg = "";
+            if (currentUser.rank.includes("OWNER")) {
+                msg = `### ⚡ Welcome Back, Owner Chethan\nSpark AI V2 Agentic Core online. Autonomous task planning, fast reasoning, and code synthesis active.`;
+            } else if (currentUser.isGuest) {
+                msg = `### ⚡ Spark AI V2 Active\nAgentic reasoning and coding engine online. How can I assist you today?`;
+            } else {
+                msg = `### ⚡ Spark AI V2 Ready\nWelcome, **${currentUser.name}**! Agentic workflows and multimodal tools active.`;
+            }
+            
+            const aiBox = renderMessageUI("ai", "", false);
+            let i = 0;
+            function type() {
+                if (i < msg.length) {
+                    aiBox.innerHTML = marked.parse(msg.substring(0, i + 1));
+                    i++;
+                    setTimeout(type, 8);
+                }
+            }
+            type();
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        }
+
+        // SiliconFlow Image Generation
+        async function handleSiliconFlowImageGen(rawPrompt, aiBox, activeSession) {
+            const prompt = rawPrompt.trim();
+            const boxId = 'img_box_' + Date.now();
+
+            aiBox.innerHTML = `
+                <div class="space-y-3 w-full max-w-[400px]">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="flex items-center gap-2 text-emerald-400 font-bold uppercase tracking-wider">
+                            <i class="fas fa-wand-magic-sparkles"></i> FLUX Agentic Synthesizer
+                        </span>
+                    </div>
+
+                    <div id="${boxId}" class="relative w-full aspect-square rounded-3xl overflow-hidden border border-emerald-500/20 bg-[#03120c] flex items-center justify-center shadow-2xl">
+                        <div class="flex flex-col items-center justify-center gap-4 text-center p-6">
+                            <div class="relative w-14 h-14 flex items-center justify-center">
+                                <div class="absolute inset-0 rounded-full border-4 border-emerald-500/20"></div>
+                                <div class="absolute inset-0 rounded-full border-4 border-emerald-400 border-t-transparent animate-spin"></div>
+                                <i class="fas fa-sparkles text-emerald-400 text-xs animate-pulse"></i>
+                            </div>
+                            <p class="text-xs font-bold text-white tracking-wide">Rendering Image...</p>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-gray-400 italic truncate">Prompt: "${escapeHtml(prompt)}"</p>
+                </div>`;
+
+            let imageUrl = null;
+            const endpoints = [
+                "https://api.siliconflow.cn/v1/images/generations",
+                "https://api.siliconflow.com/v1/images/generations"
+            ];
+
+            for (const endpoint of endpoints) {
+                for (const model of SILICONFLOW_IMAGE_MODELS) {
+                    try {
+                        const res = await fetch(endpoint, {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${SILICONFLOW_API_KEY}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                model: model,
+                                prompt: prompt,
+                                image_size: "1024x1024",
+                                batch_size: 1
+                            })
+                        });
+
+                        const data = await res.json();
+                        if (res.ok && data.images && data.images[0]?.url) {
+                            imageUrl = data.images[0].url;
+                            break;
+                        }
+                    } catch (err) {}
+                }
+                if (imageUrl) break;
+            }
+
+            if (!imageUrl) {
+                const seed = Math.floor(Math.random() * 99999999);
+                const encodedPrompt = encodeURIComponent(prompt);
+                imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+            }
+
+            const targetContainer = document.getElementById(boxId);
+            if (targetContainer) {
+                const preloader = new Image();
+                preloader.src = imageUrl;
+                preloader.onload = () => {
+                    targetContainer.innerHTML = `
+                        <img src="${imageUrl}" alt="${escapeHtml(prompt)}" class="w-full h-full object-cover rounded-3xl animate__animated animate__fadeIn">
+                        <div class="absolute bottom-3 right-3 flex gap-2">
+                            <a href="${imageUrl}" target="_blank" download="spark_${Date.now()}.jpg" class="px-3 py-1.5 bg-black/70 backdrop-blur-md hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-white/10 transition-all shadow-lg">
+                                <i class="fas fa-download"></i> Save HD
+                            </a>
+                        </div>`;
+                };
+            }
+
+            activeSession.messages.push({ role: "ai", content: `![${prompt}](${imageUrl})` });
+            saveSessions();
+        }
+
+        /* ========== AGENTIC DISPATCHER & SEND ========== */
+        async function send() {
+            const input = document.getElementById("input");
+            const text = input.value.trim();
+            if (!text) return;
+            
+            input.value = "";
+            
+            let activeSession = sessions.find(s => s.id === currentSessionId);
+            if (!activeSession) return;
+
+            if (activeSession.messages.length === 0) {
+                activeSession.title = text.length > 22 ? text.substring(0, 22) + "..." : text;
+            }
+
+            // Image Agent Router Check
+            const lowerText = text.toLowerCase().trim();
+            let isImageRequest = false;
+            let imagePrompt = "";
+
+            if (lowerText.startsWith("/image ")) {
+                isImageRequest = true;
+                imagePrompt = text.substring(7).trim();
+            } else if (lowerText.startsWith("generate image of ")) {
+                isImageRequest = true;
+                imagePrompt = text.substring(18).trim();
+            } else if (lowerText.startsWith("generate image ")) {
+                isImageRequest = true;
+                imagePrompt = text.substring(15).trim();
+            } else if (lowerText.startsWith("draw ")) {
+                isImageRequest = true;
+                imagePrompt = text.substring(5).trim();
+            }
+
+            if (isImageRequest) {
+                activeSession.messages.push({ role: "user", content: text });
+                renderMessageUI("user", text, true);
+                const aiBox = renderMessageUI("ai", ``, true);
+                await handleSiliconFlowImageGen(imagePrompt, aiBox, activeSession);
+                return;
+            }
+
+            activeSession.messages.push({ role: "user", content: text });
+            renderMessageUI("user", text, true);
+
+            const aiBox = renderMessageUI("ai", `<i class="fas fa-bolt text-emerald-400 animate-pulse mr-2"></i>`, true);
+            const chatContainer = document.getElementById("chat");
+
+            const apiHistory = activeSession.messages.map(m => ({
+                role: m.role === 'ai' ? 'assistant' : 'user',
+                content: m.content
+            }));
+
+            let streamedContent = "";
+            let streamSucceeded = false;
+            let lastError = null;
+
+            for (const model of OPENROUTER_MODELS) {
+                try {
+                    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        method: "POST",
+                        headers: { 
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                            "HTTP-Referer": window.location.origin || "http://localhost",
+                            "X-Title": "Spark AI V2",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: getSystemPrompt() },
+                                ...apiHistory
+                            ],
+                            stream: true,
+                            temperature: 0.5,
+                            max_tokens: 2048
+                        })
+                    });
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        lastError = errData.error?.message || `HTTP ${res.status}`;
+                        continue;
+                    }
+
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    aiBox.innerHTML = "";
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split("\n");
+
+                        for (const line of lines) {
+                            const trimmed = line.trim();
+                            if (trimmed.startsWith("data: ") && trimmed !== "data: [DONE]") {
+                                try {
+                                    const json = JSON.parse(trimmed.substring(6));
+                                    const delta = json.choices[0]?.delta?.content || "";
+                                    if (delta) {
+                                        streamedContent += delta;
+                                        aiBox.innerHTML = marked.parse(streamedContent);
+                                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+                    }
+
+                    if (streamedContent.trim().length > 0) {
+                        streamSucceeded = true;
+                        activeSession.messages.push({ role: "ai", content: streamedContent });
+                        saveSessions();
+                        break;
+                    }
+                } catch (err) {
+                    lastError = err.message;
+                }
+            }
+
+            if (!streamSucceeded) {
+                console.error("Spark AI V2 Engine Error:", lastError);
+                aiBox.innerHTML = `<span class="text-red-400 font-medium">Neural connection failed:</span> ${lastError}`;
+            }
+        }
+
+        function renderMessageUI(role, content, shouldScroll) {
+            const div = document.createElement("div");
+            div.className = `flex ${role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeInUp animate__faster`;
+            div.innerHTML = `<div class="max-w-[80%] px-6 py-4 rounded-3xl ${role === 'user' ? 'chat-user text-white' : 'chat-ai text-gray-200'} text-sm leading-relaxed">${content ? marked.parse(content) : ''}</div>`;
+            
+            const chatContainer = document.getElementById("chat");
+            chatContainer.appendChild(div);
+            if (shouldScroll) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            return div.querySelector('.chat-ai');
+        }
+
+        function logout() { 
+            localStorage.removeItem("spark_logged_user");
+            currentUser = {
+                id: "guest",
+                isGuest: true,
+                email: "",
+                name: "Guest User",
+                rank: "GUEST MODE",
+                picture: null
+            };
+            updateUserUI();
+            loadUserSessions();
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const savedUser = localStorage.getItem("spark_logged_user");
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                } catch(e) {
+                    localStorage.removeItem("spark_logged_user");
+                }
+            }
+            updateUserUI();
+            loadUserSessions();
         });
-        const dateFormatted = now.toLocaleDateString('en-US', {
-          timeZone: appState.userGeo.timezone,
-          weekday: 'long',
-          month: 'short',
-          day: 'numeric'
-        });
-        return `It is currently **${timeFormatted}** on **${dateFormatted}** (${appState.userGeo.timezone}).`;
-      },
-
-      set_alarm: (title, delayMs, timeStr) => {
-        const id = Date.now();
-        const alarm = { id, title, timeStr };
-        appState.alarms.push(alarm);
-        renderAlarms();
-
-        setTimeout(() => {
-          speakSparkVoice(`Spark Alert: It is time for ${title}`);
-          appendMessage('spark', `⏰ **Alarm Alert:** Time for *${title}*!`);
-          if (Notification.permission === 'granted') {
-            new Notification('Spark Reminder', { body: title });
-          }
-          appState.alarms = appState.alarms.filter(a => a.id !== id);
-          renderAlarms();
-        }, delayMs);
-
-        return `Alarm set for **${title}** (in ${timeStr}).`;
-      },
-
-      add_spark_event: (title, timeStr) => {
-        const event = { id: Date.now(), title, timeStr };
-        appState.calendarEvents.push(event);
-        updateSparkCalendarUI();
-        return `Scheduled **${title}** in **Spark Calendar** for ${timeStr}.`;
-      },
-
-      send_email: (recipient, subject, body) => {
-        window.open(`mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-        return `Prepared email draft to **${recipient}**.`;
-      }
-    };
-
-    // --- 5. AGENT ROUTER ---
-    function processCommand(rawInput, isVoice = false) {
-      const lower = rawInput.toLowerCase().trim();
-      const cleaned = lower.replace(/hey spark|spark/g, '').trim();
-
-      let reply = "";
-
-      // Time Check
-      if (cleaned.includes('time') || cleaned.includes('clock') || cleaned.includes('timezone')) {
-        reply = agentTools.get_current_time();
-      }
-      // Alarms / Reminders
-      else if (cleaned.includes('alarm') || cleaned.includes('remind')) {
-        let delayMs = 10000;
-        let displayStr = "10 seconds";
-        if (cleaned.includes('minute')) {
-          const match = cleaned.match(/(\d+)\s*minute/);
-          const mins = match ? parseInt(match[1]) : 1;
-          delayMs = mins * 60 * 1000;
-          displayStr = `${mins} minute${mins > 1 ? 's' : ''}`;
-        }
-        const task = cleaned.replace(/set an alarm for|remind me to|set a reminder for|set an alarm in/g, '').trim() || "Reminder";
-        reply = agentTools.set_alarm(task, delayMs, displayStr);
-      }
-      // Spark Calendar
-      else if (cleaned.includes('schedule') || cleaned.includes('calendar') || cleaned.includes('meeting')) {
-        const task = cleaned.replace(/schedule|add to calendar|meeting/g, '').trim() || "Planned Session";
-        reply = agentTools.add_spark_event(task, "Today");
-      }
-      // Email
-      else if (cleaned.includes('mail') || cleaned.includes('email')) {
-        const recipient = cleaned.includes('to') ? cleaned.split('to')[1].trim().split(' ')[0] : 'contact';
-        reply = agentTools.send_email(`${recipient}@example.com`, "Note from Spark", "Sent via Spark Assistant.");
-      }
-      // Conversational Fallback
-      else {
-        reply = `I processed: "${rawInput}". Ask me for the time, to set an alarm, or to add an event to Spark Calendar!`;
-      }
-
-      appendMessage('spark', reply);
-      if (isVoice) {
-        // Strip markdown asterisks for clean speech output
-        speakSparkVoice(reply.replace(/\*\*/g, ''));
-      }
-    }
-
-    // --- 6. TEXT INPUT SUBMISSION ---
-    document.getElementById('chatForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = document.getElementById('chatInput');
-      const val = input.value.trim();
-      if (!val) return;
-
-      appendMessage('user', val);
-      processCommand(val, false);
-      input.value = '';
-    });
-
-    // --- 7. UI HELPERS ---
-    function updateSparkCalendarUI() {
-      const list = document.getElementById('eventList');
-      const badge = document.getElementById('eventCountBadge');
-      badge.innerText = appState.calendarEvents.length;
-
-      if (appState.calendarEvents.length === 0) {
-        list.innerHTML = '<p class="text-xs text-slate-500 italic py-4 text-center">No upcoming events scheduled.</p>';
-        return;
-      }
-
-      list.innerHTML = appState.calendarEvents.map(e => `
-        <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex justify-between items-center">
-          <div>
-            <p class="text-xs font-medium text-slate-200 capitalize">${e.title}</p>
-            <p class="text-[10px] text-slate-400 font-mono">${e.timeStr}</p>
-          </div>
-          <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-        </div>
-      `).join('');
-    }
-
-    function renderAlarms() {
-      const container = document.getElementById('activeAlarmsContainer');
-      container.innerHTML = appState.alarms.map(a => `
-        <div class="px-3 py-1 bg-slate-900 border border-indigo-500/40 rounded-full text-[11px] text-indigo-300 flex items-center gap-1.5 font-mono">
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
-          ${a.title} (${a.timeStr})
-        </div>
-      `).join('');
-    }
-
-    // --- 8. WAKE-WORD & VOICE RECOGNITION ---
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
-
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        appState.isListening = true;
-        document.getElementById('toggleMicBtn').classList.add('listening-glow');
-      };
-
-      recognition.onresult = (event) => {
-        const lastIndex = event.results.length - 1;
-        const transcript = event.results[lastIndex][0].transcript;
-        const lower = transcript.toLowerCase();
-
-        // Check if wake word is mentioned or mic was explicitly triggered
-        if (lower.includes('spark') || lower.includes('hey spark')) {
-          appendMessage('user', `🎙️ ${transcript}`);
-          processCommand(transcript, true);
-        }
-      };
-
-      recognition.onerror = (e) => {
-        if (e.error !== 'no-speech') console.warn("Speech recognition error:", e.error);
-      };
-
-      recognition.onend = () => {
-        if (appState.autoRestart) {
-          try { recognition.start(); } catch (err) {}
-        } else {
-          appState.isListening = false;
-          document.getElementById('toggleMicBtn').classList.remove('listening-glow');
-        }
-      };
-
-      try { recognition.start(); } catch(e) {}
-    }
-
-    // Mic Toggle Button (Enable/Disable wake listener)
-    document.getElementById('toggleMicBtn').addEventListener('click', () => {
-      if (!recognition) return alert("Speech API not supported in this browser.");
-
-      if (appState.autoRestart) {
-        appState.autoRestart = false;
-        recognition.stop();
-        document.getElementById('voiceBadge').innerText = "Wake Word Paused";
-        document.getElementById('voiceBadge').className = "text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/20 font-mono";
-      } else {
-        appState.autoRestart = true;
-        recognition.start();
-        document.getElementById('voiceBadge').innerText = "Wake Word Active";
-        document.getElementById('voiceBadge').className = "text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono";
-      }
-    });
-
-    if ('Notification' in window && Notification.permission !== 'granted') {
-      Notification.requestPermission();
-    }
-  </script>
+    </script>
 </body>
 </html>
