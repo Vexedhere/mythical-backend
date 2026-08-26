@@ -29,13 +29,14 @@
         }
 
         .glass-nav { 
-            background: rgba(4, 20, 16, 0.65); 
+            background: rgba(4, 20, 16, 0.85); 
             backdrop-filter: blur(25px); 
             border-right: 1px solid rgba(255, 255, 255, 0.05); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .glass-card { 
-            background: rgba(6, 26, 21, 0.55); 
+            background: rgba(6, 26, 21, 0.6); 
             backdrop-filter: blur(30px); 
             border: 1px solid rgba(16, 185, 129, 0.15); 
             border-radius: 28px; 
@@ -58,7 +59,7 @@
 
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 10px; }
 
         @keyframes orb-pulse {
             0% { transform: scale(1); box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
@@ -87,19 +88,112 @@
 <body class="flex flex-col">
     <div class="bg-mesh"></div>
 
-    <!-- Auth / Feature Lock Modal -->
-    <div id="auth-modal" class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-[120] hidden">
+    <!-- Modal 1: Image Gallery & Asset Library -->
+    <div id="gallery-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-[130] hidden p-6">
+        <div class="glass-card w-full max-w-5xl h-[85vh] flex flex-col p-6 border-emerald-500/30 relative animate__animated animate__zoomIn animate__faster">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                        <i class="fas fa-images text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Synthesized Image Library</h2>
+                        <p class="text-xs text-emerald-400">All local creations saved permanently in browser storage</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="clearAllGalleryImages()" class="text-xs px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all flex items-center gap-1.5">
+                        <i class="fas fa-trash"></i> Clear Library
+                    </button>
+                    <button onclick="toggleGalleryModal(false)" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gallery Grid Container -->
+            <div id="gallery-grid" class="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pr-1 custom-scroll"></div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Code Scratchpad & Sandbox -->
+    <div id="scratchpad-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-[130] hidden p-6">
+        <div class="glass-card w-full max-w-4xl h-[80vh] flex flex-col p-6 border-emerald-500/30 relative animate__animated animate__zoomIn animate__faster">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20">
+                        <i class="fas fa-terminal text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Developer Scratchpad</h2>
+                        <p class="text-xs text-cyan-400">Live draft area for code snippets, JSON payloads, and notes</p>
+                    </div>
+                </div>
+                <button onclick="toggleScratchpadModal(false)" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <textarea id="scratchpad-area" class="flex-1 bg-[#010806] border border-white/10 rounded-2xl p-4 text-xs font-mono text-emerald-300 outline-none focus:border-emerald-500/40 custom-scroll resize-none" placeholder="// Paste code, scratchpad ideas, or prompts here... Auto-saves locally."></textarea>
+            <div class="flex items-center justify-between pt-3 text-[11px] text-gray-400">
+                <span>Stored automatically to browser cache</span>
+                <button onclick="copyScratchpad()" class="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-semibold transition-all flex items-center gap-1.5">
+                    <i class="far fa-copy"></i> Copy Contents
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Prompt Templates Library -->
+    <div id="templates-modal" class="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-[130] hidden p-6">
+        <div class="glass-card w-full max-w-3xl max-h-[80vh] flex flex-col p-6 border-emerald-500/30 relative animate__animated animate__zoomIn animate__faster">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                        <i class="fas fa-book-bookmark text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Prompt Template Library</h2>
+                        <p class="text-xs text-emerald-400">Click any preset to insert directly into your prompt bar</p>
+                    </div>
+                </div>
+                <button onclick="toggleTemplatesModal(false)" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scroll">
+                <div onclick="useTemplate('Build a complete single-file interactive 2D physics sandbox using HTML5 canvas, Tailwind CSS, and vanilla JS with adjustable sliders for gravity and restitution.')" class="p-3.5 rounded-2xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 cursor-pointer transition-all">
+                    <p class="text-xs font-bold text-emerald-300 mb-1">🎮 HTML5 Canvas Physics Simulator</p>
+                    <p class="text-[11px] text-gray-400">Generates full 60fps game/sandbox logic in a single self-contained HTML file.</p>
+                </div>
+                <div onclick="useTemplate('Write a responsive dark-mode dashboard landing page with Tailwind CSS, Chart.js graphs, sidebar navigation, and glassmorphism styling.')" class="p-3.5 rounded-2xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 cursor-pointer transition-all">
+                    <p class="text-xs font-bold text-emerald-300 mb-1">📊 Modern SaaS Dashboard Template</p>
+                    <p class="text-[11px] text-gray-400">Generates clean frontend markup with responsive tables and data visualizations.</p>
+                </div>
+                <div onclick="useTemplate('/image a hyper-detailed cyberpunk command center, glowing holographic matrices, volumetric emerald lighting, 8k render, octane engine')" class="p-3.5 rounded-2xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 cursor-pointer transition-all">
+                    <p class="text-xs font-bold text-emerald-300 mb-1">🎨 SiliconFlow FLUX 8K Concept Art</p>
+                    <p class="text-[11px] text-gray-400">Pre-tuned optical prompt for high-resolution visual rendering.</p>
+                </div>
+                <div onclick="useTemplate('Optimize the following algorithm for zero-overhead time complexity and explain memory optimizations step-by-step:')" class="p-3.5 rounded-2xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 cursor-pointer transition-all">
+                    <p class="text-xs font-bold text-emerald-300 mb-1">⚡ Algorithm & Complexity Refactoring</p>
+                    <p class="text-[11px] text-gray-400">Detailed algorithmic audit with asymptotic Big-O breakdown.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Auth / Feature Lock Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-[140] hidden">
         <div class="glass-card p-8 w-full max-w-md mx-4 border-emerald-500/30 text-center relative animate__animated animate__zoomIn animate__faster">
             <button onclick="toggleAuthModal(false)" class="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors">
                 <i class="fas fa-times text-lg"></i>
             </button>
             <div class="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-emerald-500/20 text-emerald-400">
-                <i class="fas fa-wand-magic-sparkles"></i>
+                <i class="fas fa-shield-halved"></i>
             </div>
-            <h2 class="text-xl font-bold text-white mb-1">Unlock Pro Features</h2>
-            <p class="text-xs text-emerald-400 font-semibold tracking-wider uppercase mb-3">SiliconFlow Image Gen & Multimodal Tools</p>
+            <h2 class="text-xl font-bold text-white mb-1">Account Authentication</h2>
+            <p class="text-xs text-emerald-400 font-semibold tracking-wider uppercase mb-3">Owner Clearance & Pro Features</p>
             <p class="text-gray-300 text-xs leading-relaxed mb-6">
-                Sign in with your Google account to unlock HD Image Generation with FLUX.1 and priority generation quotas.
+                Sign in with your Google Account. Owner emails (<code class="text-emerald-300">chethan131011.u@gmail.com</code> / <code class="text-emerald-300">monsterbeast2569@gmail.com</code>) will receive <strong>Owner & Founder</strong> rank automatically.
             </p>
             
             <div id="g_id_onload" 
@@ -111,58 +205,114 @@
         </div>
     </div>
 
-    <!-- Main Application Container -->
-    <div id="main-app" class="flex h-full">
-        <!-- Sidebar Navigation -->
-        <aside class="w-80 glass-nav flex flex-col p-6 z-10">
-            <div class="flex items-center gap-3 mb-8 cursor-pointer" onclick="navigateTo('/chat')">
-                <div class="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
-                    <i class="fas fa-bolt text-lg"></i>
+    <!-- Main Workspace Container -->
+    <div id="main-app" class="flex h-full w-full relative">
+        
+        <!-- Expanded Multi-Tool Sidebar Taskbar -->
+        <aside id="sidebar-taskbar" class="w-80 glass-nav flex flex-col p-4 z-20 shrink-0 h-full relative overflow-hidden">
+            
+            <!-- Sidebar Header & Toggle -->
+            <div class="flex items-center justify-between mb-4 px-1">
+                <div class="flex items-center gap-2.5 cursor-pointer" onclick="navigateTo('/chat')">
+                    <div class="w-8 h-8 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                        <i class="fas fa-bolt text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="text-base font-bold tracking-tight uppercase leading-none">Spark<span class="text-emerald-400">.</span>ai <span class="text-xs text-emerald-400 font-mono">V2</span></div>
+                        <span class="text-[8px] text-gray-500 tracking-wider font-semibold">WORKSPACE</span>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-xl font-bold tracking-tight uppercase leading-none">Spark<span class="text-emerald-400">.</span>ai <span class="text-xs text-emerald-400 font-mono">V2</span></div>
-                    <span class="text-[9px] text-gray-500 tracking-wider font-semibold">INTELLIGENCE CORE</span>
-                </div>
+                <button onclick="toggleTaskbar()" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all" title="Collapse Taskbar">
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </button>
             </div>
 
-            <nav class="space-y-2 mb-6">
-                <button onclick="navigateTo('/chat'); createNewSession();" class="w-full text-left p-3.5 hover:bg-white/5 rounded-2xl border border-transparent hover:border-emerald-500/20 transition-all font-semibold flex items-center gap-3 text-sm">
-                    <div class="w-8 h-8 bg-emerald-500/10 rounded-xl flex items-center justify-center"><i class="fas fa-plus text-xs text-emerald-400"></i></div>
-                    New Session
+            <!-- Primary Navigation Modes -->
+            <div class="space-y-1 mb-4">
+                <button onclick="navigateTo('/chat'); createNewSession();" class="w-full text-left p-2.5 hover:bg-white/5 rounded-xl border border-transparent hover:border-emerald-500/20 transition-all font-semibold flex items-center gap-2.5 text-xs text-gray-200">
+                    <div class="w-6 h-6 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400"><i class="fas fa-plus text-[10px]"></i></div>
+                    New Chat Session
                 </button>
-                <button onclick="navigateTo('/voice')" class="w-full text-left p-3.5 bg-gradient-to-r from-emerald-500/15 to-cyan-500/10 hover:from-emerald-500/25 hover:to-cyan-500/20 rounded-2xl border border-emerald-500/30 transition-all font-semibold flex items-center justify-between text-sm text-emerald-300">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-emerald-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-headset text-xs text-emerald-400 animate-pulse"></i></div>
+                <button onclick="navigateTo('/voice')" class="w-full text-left p-2.5 bg-gradient-to-r from-emerald-500/15 to-cyan-500/10 hover:from-emerald-500/25 hover:to-cyan-500/20 rounded-xl border border-emerald-500/30 transition-all font-semibold flex items-center justify-between text-xs text-emerald-300">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-6 h-6 bg-emerald-500/20 rounded-lg flex items-center justify-center"><i class="fas fa-headset text-[10px] text-emerald-400 animate-pulse"></i></div>
                         Live Voice Call
                     </div>
-                    <span class="text-[9px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono uppercase">/voice</span>
-                </button>
-            </nav>
-
-            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Generators</div>
-            <div class="grid grid-cols-1 gap-2 mb-6 text-xs">
-                <button onclick="navigateTo('/chat'); triggerImageButton();" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 text-gray-300 hover:text-emerald-400 flex items-center justify-between transition-all group">
-                    <span class="flex items-center gap-2.5">
-                        <i class="fas fa-wand-magic-sparkles text-emerald-400"></i> SiliconFlow Image Gen
-                    </span>
-                    <span id="img-lock-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black transition-all">PRO</span>
+                    <span class="text-[8px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">/voice</span>
                 </button>
             </div>
 
-            <div class="text-[10px] font-bold text-gray-500 tracking-widest uppercase mb-3 px-2">Recent Chats</div>
-            <div id="history" class="flex-1 overflow-y-auto space-y-2 text-xs custom-scroll"></div>
+            <!-- Workspace Hub & Creative Tools -->
+            <div class="text-[9px] font-bold text-gray-500 tracking-widest uppercase mb-1.5 px-1">Workspace Hub</div>
+            <div class="grid grid-cols-1 gap-1 mb-4 text-xs">
+                <!-- Persistent Image Library Button -->
+                <button onclick="toggleGalleryModal(true)" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 text-gray-300 hover:text-emerald-400 flex items-center justify-between transition-all group">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-images text-emerald-400"></i> Image Library
+                    </span>
+                    <span id="gallery-counter-badge" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[8px] font-mono">0 IMGS</span>
+                </button>
+                <!-- Prompt Template Library -->
+                <button onclick="toggleTemplatesModal(true)" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white flex items-center justify-between transition-all">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-book-bookmark text-cyan-400"></i> Prompt Presets
+                    </span>
+                    <i class="fas fa-chevron-right text-[9px] text-gray-500"></i>
+                </button>
+                <!-- Code Scratchpad -->
+                <button onclick="toggleScratchpadModal(true)" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white flex items-center justify-between transition-all">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-code text-teal-400"></i> Code Scratchpad
+                    </span>
+                    <span class="text-[8px] text-gray-400 font-mono">DRAFT</span>
+                </button>
+                <!-- Quick SiliconFlow Generator Prompt -->
+                <button onclick="navigateTo('/chat'); triggerImageButton();" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 text-gray-300 hover:text-emerald-400 flex items-center justify-between transition-all group">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-wand-magic-sparkles text-emerald-400"></i> SiliconFlow Gen
+                    </span>
+                    <span id="img-lock-badge" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[8px] font-bold border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black">PRO</span>
+                </button>
+            </div>
 
-            <div class="mt-auto pt-4 flex items-center justify-between border-t border-white/5">
-                <div class="flex items-center gap-3">
-                    <img id="user-pfp" class="w-10 h-10 rounded-xl border border-emerald-500/30 hidden object-cover">
-                    <div id="pfp-fallback" class="w-10 h-10 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 font-bold">G</div>
+            <!-- Recent Chat History Section -->
+            <div class="flex items-center justify-between text-[9px] font-bold text-gray-500 tracking-widest uppercase mb-1 px-1">
+                <span>Recent History</span>
+                <span class="text-[8px] font-mono lowercase" id="history-count">0 chats</span>
+            </div>
+            <div id="history" class="flex-1 overflow-y-auto space-y-1 text-xs custom-scroll pr-1 mb-3"></div>
+
+            <!-- Workspace Actions & Export -->
+            <div class="grid grid-cols-2 gap-1.5 mb-3 text-[10px]">
+                <button onclick="exportWorkspaceData()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-all" title="Download backup of chats and gallery">
+                    <i class="fas fa-download text-emerald-400"></i> Export All
+                </button>
+                <button onclick="clearCurrentChat()" class="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 border border-white/5 hover:border-red-500/30 text-gray-400 hover:text-red-400 flex items-center justify-center gap-1.5 transition-all">
+                    <i class="fas fa-trash-can text-red-400"></i> Clear Screen
+                </button>
+            </div>
+
+            <!-- Persistent Engine & Cache Metric -->
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/5 mb-3 text-[10px] flex items-center justify-between text-gray-400">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="font-medium text-gray-300">OpenRouter Core</span>
+                </div>
+                <span id="cache-metric" class="text-[9px] text-emerald-400 font-mono">0 KB Used</span>
+            </div>
+
+            <!-- User Auth & Role Footer -->
+            <div class="pt-2 flex items-center justify-between border-t border-white/5">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <img id="user-pfp" class="w-8 h-8 rounded-xl border border-emerald-500/30 hidden object-cover shrink-0">
+                    <div id="pfp-fallback" class="w-8 h-8 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 font-bold shrink-0 text-xs">G</div>
                     <div class="overflow-hidden">
-                        <p id="display-name" class="font-bold text-sm truncate w-28">Guest User</p>
-                        <p id="display-rank" class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">GUEST MODE</p>
+                        <p id="display-name" class="font-bold text-xs truncate w-24">Guest User</p>
+                        <p id="display-rank" class="text-[8px] text-gray-400 font-bold uppercase tracking-widest truncate">GUEST MODE</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-1">
-                    <button id="auth-action-btn" onclick="toggleAuthModal(true)" class="text-xs px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 font-semibold transition-all">
+                <div>
+                    <button id="auth-action-btn" onclick="toggleAuthModal(true)" class="text-[10px] px-2 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 font-semibold transition-all">
                         Sign In
                     </button>
                 </div>
@@ -170,12 +320,18 @@
         </aside>
 
         <!-- VIEW 1: Standard Chat View (/chat) -->
-        <main id="chat-view" class="flex-1 flex flex-col relative">
+        <main id="chat-view" class="flex-1 flex flex-col relative h-full overflow-hidden">
+            <!-- Top Floating Taskbar Expander -->
+            <div class="p-4 flex items-center justify-between absolute top-0 left-0 right-0 z-10 pointer-events-none">
+                <button id="floating-toggle-btn" onclick="toggleTaskbar()" class="pointer-events-auto p-2.5 rounded-2xl glass-card border-white/10 hover:border-emerald-500/30 text-gray-300 hover:text-white transition-all hidden" title="Toggle Taskbar">
+                    <i class="fas fa-bars text-sm"></i>
+                </button>
+            </div>
+
             <div id="chat" class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll pb-36"></div>
             
             <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6">
                 <div class="glass-card p-2 flex items-center gap-2 border-white/10 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.15)] focus-within:border-emerald-500/40 transition-all">
-                    <!-- Switch to Voice Screen -->
                     <button onclick="navigateTo('/voice')" title="Open Dedicated Voice Call Area" class="text-gray-400 hover:text-emerald-400 w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-white/5 hover:bg-white/10 border border-white/5">
                         <i class="fas fa-headset text-sm"></i>
                     </button>
@@ -183,7 +339,7 @@
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Spark AI V2, tap headset for Voice Call, or /image <prompt>...">
+                           placeholder="Message Spark AI V2, type /image <prompt>, or open taskbar tools...">
 
                     <button onclick="send()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-emerald-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
@@ -193,14 +349,13 @@
         </main>
 
         <!-- VIEW 2: Dedicated Full-Screen Voice Call View (/voice) -->
-        <main id="voice-view" class="hidden flex-1 flex flex-col items-center justify-between p-12 relative">
-            <!-- Top Controls -->
+        <main id="voice-view" class="hidden flex-1 flex flex-col items-center justify-between p-12 relative h-full overflow-hidden">
             <div class="w-full flex items-center justify-between z-10">
                 <button onclick="navigateTo('/chat')" class="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl glass-card text-gray-300 hover:text-white border-white/10 hover:border-emerald-500/30">
                     <i class="fas fa-arrow-left"></i> Return to Chat
                 </button>
                 <div class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Real-time Call
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Audio Call
                 </div>
             </div>
 
@@ -212,7 +367,6 @@
                     </div>
                 </div>
 
-                <!-- Waveform Bars -->
                 <div id="voice-wave-bars" class="flex items-center gap-1.5 h-12 mb-6">
                     <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
                     <div class="w-1.5 bg-cyan-400 rounded-full wave-bar"></div>
@@ -222,7 +376,7 @@
                 </div>
 
                 <h3 id="voice-call-status" class="text-xl font-bold text-white mb-2">Listening to your voice...</h3>
-                <p id="voice-call-subtext" class="text-xs text-gray-400 max-w-md italic">Speak naturally. Spark will respond with voice audio automatically.</p>
+                <p id="voice-call-subtext" class="text-xs text-gray-400 max-w-md italic">Speak naturally. Voice conversations are isolated and won't appear in text chats.</p>
             </div>
 
             <!-- Bottom Call Bar -->
@@ -238,9 +392,13 @@
     </div>
 
     <script>
-        // Active API Keys
         const OPENROUTER_API_KEY = "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";
         const SILICONFLOW_API_KEY = "sk-jdzaxerzjozzhqwnhlfitcnkoldfjtjqepqzyrvaumbyqvvl";
+
+        const ROLE_CONFIG = {
+            "chethan131011.u@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-emerald-400", defaultName: "Chethan" },
+            "monsterbeast2569@gmail.com": { rank: "OWNER & FOUNDER", badgeClass: "text-emerald-400", defaultName: "Chethan" }
+        };
 
         const OPENROUTER_MODELS = [
             "openrouter/free",
@@ -265,9 +423,182 @@
         };
 
         let sessions = [];
+        let galleryImages = [];
         let currentSessionId = null;
+        let voiceConversationHistory = [];
+        let isSidebarCollapsed = false;
 
-        /* ========== ROUTER LOGIC (/chat and /voice) ========== */
+        /* ========== TASKBAR & MODAL TOGGLE LOGIC ========== */
+        function toggleTaskbar() {
+            const sidebar = document.getElementById("sidebar-taskbar");
+            const floatBtn = document.getElementById("floating-toggle-btn");
+            isSidebarCollapsed = !isSidebarCollapsed;
+
+            if (isSidebarCollapsed) {
+                sidebar.classList.add("-ml-80");
+                floatBtn.classList.remove("hidden");
+            } else {
+                sidebar.classList.remove("-ml-80");
+                floatBtn.classList.add("hidden");
+            }
+        }
+
+        function toggleGalleryModal(show) {
+            const modal = document.getElementById("gallery-modal");
+            if (show) {
+                renderGalleryUI();
+                modal.classList.remove("hidden");
+            } else {
+                modal.classList.add("hidden");
+            }
+        }
+
+        function toggleScratchpadModal(show) {
+            const modal = document.getElementById("scratchpad-modal");
+            if (show) modal.classList.remove("hidden");
+            else modal.classList.add("hidden");
+        }
+
+        function toggleTemplatesModal(show) {
+            const modal = document.getElementById("templates-modal");
+            if (show) modal.classList.remove("hidden");
+            else modal.classList.add("hidden");
+        }
+
+        function useTemplate(promptText) {
+            toggleTemplatesModal(false);
+            navigateTo('/chat');
+            const input = document.getElementById("input");
+            input.value = promptText;
+            input.focus();
+        }
+
+        function copyScratchpad() {
+            const pad = document.getElementById("scratchpad-area");
+            navigator.clipboard.writeText(pad.value);
+        }
+
+        function clearCurrentChat() {
+            let activeSession = sessions.find(s => s.id === currentSessionId);
+            if (activeSession) {
+                activeSession.messages = [];
+                saveSessions();
+                document.getElementById("chat").innerHTML = "";
+                triggerWelcome();
+            }
+        }
+
+        /* ========== PERSISTENT IMAGE GALLERY STORAGE ========== */
+        function loadGalleryData() {
+            const raw = localStorage.getItem("spark_gallery_v2");
+            galleryImages = raw ? JSON.parse(raw) : [];
+            updateGalleryCounter();
+        }
+
+        function saveGalleryImage(prompt, url) {
+            const newImg = {
+                id: 'img_' + Date.now(),
+                prompt: prompt,
+                url: url,
+                timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            };
+            galleryImages.unshift(newImg);
+            localStorage.setItem("spark_gallery_v2", JSON.stringify(galleryImages));
+            updateGalleryCounter();
+        }
+
+        function deleteGalleryImage(id) {
+            galleryImages = galleryImages.filter(img => img.id !== id);
+            localStorage.setItem("spark_gallery_v2", JSON.stringify(galleryImages));
+            renderGalleryUI();
+            updateGalleryCounter();
+        }
+
+        function clearAllGalleryImages() {
+            if (confirm("Are you sure you want to clear all stored images?")) {
+                galleryImages = [];
+                localStorage.removeItem("spark_gallery_v2");
+                renderGalleryUI();
+                updateGalleryCounter();
+            }
+        }
+
+        function updateGalleryCounter() {
+            const badge = document.getElementById("gallery-counter-badge");
+            if (badge) badge.innerText = `${galleryImages.length} IMGS`;
+            updateStorageMetrics();
+        }
+
+        function renderGalleryUI() {
+            const grid = document.getElementById("gallery-grid");
+            grid.innerHTML = "";
+
+            if (galleryImages.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full h-64 flex flex-col items-center justify-center text-center text-gray-500">
+                        <i class="fas fa-image text-3xl mb-2 text-gray-600"></i>
+                        <p class="text-xs">No images synthesized yet.</p>
+                        <p class="text-[11px] text-gray-600 mt-1">Use <code>/image &lt;prompt&gt;</code> in chat to generate your first creation.</p>
+                    </div>`;
+                return;
+            }
+
+            galleryImages.forEach(img => {
+                const card = document.createElement("div");
+                card.className = "group relative aspect-square rounded-2xl overflow-hidden border border-emerald-500/20 bg-black/40 shadow-lg flex flex-col";
+                card.innerHTML = `
+                    <img src="${img.url}" alt="${escapeHtml(img.prompt)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-between">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] font-mono text-emerald-400 bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-md">${img.timestamp}</span>
+                            <button onclick="deleteGalleryImage('${img.id}')" class="w-7 h-7 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white flex items-center justify-center transition-all" title="Delete image">
+                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-gray-200 line-clamp-2 italic mb-2">"${escapeHtml(img.prompt)}"</p>
+                            <a href="${img.url}" target="_blank" download="spark_${img.id}.jpg" class="w-full py-1.5 bg-emerald-500 text-black font-semibold rounded-xl text-[10px] flex items-center justify-center gap-1.5 hover:bg-emerald-400 transition-all">
+                                <i class="fas fa-download"></i> Save HD Image
+                            </a>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ========== EXPORT WORKSPACE & STORAGE METRICS ========== */
+        function exportWorkspaceData() {
+            const exportPayload = {
+                user: currentUser,
+                chats: sessions,
+                gallery: galleryImages,
+                scratchpad: document.getElementById("scratchpad-area").value,
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `spark_workspace_backup_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function updateStorageMetrics() {
+            let totalBytes = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    totalBytes += ((localStorage[key].length + key.length) * 2);
+                }
+            }
+            const kb = (totalBytes / 1024).toFixed(1);
+            const el = document.getElementById("cache-metric");
+            if (el) el.innerText = `${kb} KB Used`;
+        }
+
+        /* ========== ROUTER LOGIC (/chat vs /voice) ========== */
         function navigateTo(path) {
             try {
                 window.history.pushState({}, "", path);
@@ -293,7 +624,7 @@
 
         window.addEventListener("popstate", handleRoute);
 
-        /* ========== FULL-SCREEN VOICE CALL ENGINE ========== */
+        /* ========== ISOLATED VOICE CALL ENGINE ========== */
         let callRecognition = null;
         let isCallActive = false;
         let isCallAiSpeaking = false;
@@ -321,7 +652,7 @@
                     clearTimeout(callSilenceTimer);
                     callSilenceTimer = setTimeout(() => {
                         if (isCallActive && !isCallAiSpeaking && speechText.trim()) {
-                            processVoiceInput(speechText.trim());
+                            processVoiceInputIsolated(speechText.trim());
                         }
                     }, 1200);
                 }
@@ -349,7 +680,8 @@
 
             isCallActive = true;
             isCallMuted = false;
-            setVoiceCallStatus("Listening to your voice...", "Speak naturally. Spark will respond with audio.");
+            voiceConversationHistory = [];
+            setVoiceCallStatus("Listening to your voice...", "Speak naturally. This will not be saved into your text chat.");
             try { callRecognition.start(); } catch(e) {}
         }
 
@@ -384,21 +716,11 @@
             if (sEl) sEl.innerText = subtext;
         }
 
-        async function processVoiceInput(userVoiceText) {
-            let activeSession = sessions.find(s => s.id === currentSessionId);
-            if (!activeSession) return;
-
-            activeSession.messages.push({ role: "user", content: userVoiceText });
-            renderMessageUI("user", userVoiceText, false);
-
+        async function processVoiceInputIsolated(userVoiceText) {
+            voiceConversationHistory.push({ role: "user", content: userVoiceText });
             setVoiceCallStatus("Thinking...", `Processing: "${userVoiceText}"`);
             
             try { callRecognition.stop(); } catch(e) {}
-
-            const apiHistory = activeSession.messages.map(m => ({
-                role: m.role === 'ai' ? 'assistant' : 'user',
-                content: m.content
-            }));
 
             let generatedAnswer = "";
             let streamSuccess = false;
@@ -417,11 +739,11 @@
                             model: model,
                             messages: [
                                 { role: "system", content: "You are Spark AI V2 in real-time continuous voice conversation mode. Provide direct, natural, conversational answers (1 to 3 sentences) suitable for speech. Avoid markdown formatting." },
-                                ...apiHistory
+                                ...voiceConversationHistory
                             ],
                             stream: false,
                             temperature: 0.6,
-                            max_tokens: 300
+                            max_tokens: 250
                         })
                     });
 
@@ -437,9 +759,7 @@
             }
 
             if (streamSuccess && generatedAnswer) {
-                activeSession.messages.push({ role: "ai", content: generatedAnswer });
-                saveSessions();
-                renderMessageUI("ai", generatedAnswer, false);
+                voiceConversationHistory.push({ role: "assistant", content: generatedAnswer });
 
                 isCallAiSpeaking = true;
                 setVoiceCallStatus("Spark Speaking...", generatedAnswer);
@@ -461,14 +781,14 @@
                 };
                 window.speechSynthesis.speak(utterance);
             } else {
-                setVoiceCallStatus("Connection Error", "Please try again.");
+                setVoiceCallStatus("Connection Error", "Please speak again.");
                 setTimeout(() => {
                     if (isCallActive && !isCallMuted) try { callRecognition.start(); } catch(e) {}
                 }, 1500);
             }
         }
 
-        /* ========== MARKED RENDERER & CODE COPY ========== */
+        /* ========== CODE BLOCK RENDERER & COPY ========== */
         const customRenderer = {
             code(arg1, arg2) {
                 let codeText = "";
@@ -556,17 +876,30 @@
             document.body.removeChild(textArea);
         }
 
+        function getUserRole(email) {
+            if (!email) return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
+            const normalized = email.toLowerCase().trim();
+            for (const key in ROLE_CONFIG) {
+                if (normalized === key || normalized.startsWith(key.split("@")[0])) {
+                    return ROLE_CONFIG[key];
+                }
+            }
+            return { rank: "VERIFIED USER", badgeClass: "text-gray-400", defaultName: "User" };
+        }
+
         function getSystemPrompt() {
             return `You are Spark AI V2, an advanced, high-performance intelligent system engineered for speed and developer productivity.
 Current Active User Session:
 - User Name: ${currentUser?.name || "Guest User"}
 - Designated Role / Rank: ${currentUser?.rank || "GUEST MODE"}
+- User Email: ${currentUser?.email || "guest@spark.ai"}
 - Is Guest Mode: ${currentUser?.isGuest ? "Yes" : "No"}
 
 Guidelines:
-1. Address the user directly and intelligently.
-2. For coding queries, output clean markdown code blocks with the exact language specified so copy boxes render properly.
-3. Keep answers sharp, direct, and concise.`;
+1. Address the user appropriately according to their rank and name when greeting or when relevant.
+2. If the user asks about who made you, developed you, or founded Spark AI V2, clarify that Chethan is the Owner and Lead Developer.
+3. For coding queries, output clean markdown code blocks with the exact language specified so copy boxes render properly.
+4. Keep answers sharp, direct, and concise.`;
         }
 
         function toggleAuthModal(show) {
@@ -579,13 +912,14 @@ Guidelines:
             try {
                 const payload = JSON.parse(atob(res.credential.split('.')[1]));
                 const email = payload.email || "";
+                const roleInfo = getUserRole(email);
                 
                 currentUser = { 
                     id: payload.sub,
                     isGuest: false,
                     email: email,
-                    name: payload.name || "Verified User", 
-                    rank: "PRO MEMBER",
+                    name: payload.name || roleInfo.defaultName, 
+                    rank: roleInfo.rank,
                     picture: payload.picture 
                 };
 
@@ -621,7 +955,12 @@ Guidelines:
                 authBtn.innerHTML = `<i class="fas fa-power-off text-red-400"></i>`;
                 authBtn.onclick = logout;
                 if (lockBadge) lockBadge.innerText = "ACTIVE";
-                rankEl.className = "text-[8px] text-emerald-400 font-bold uppercase tracking-widest";
+
+                if (currentUser.rank.includes("OWNER")) {
+                    rankEl.className = "text-[8px] text-emerald-400 font-bold uppercase tracking-widest";
+                } else {
+                    rankEl.className = "text-[8px] text-cyan-400 font-bold uppercase tracking-widest";
+                }
 
                 if (currentUser.picture) {
                     userPfp.src = currentUser.picture;
@@ -654,6 +993,7 @@ Guidelines:
         function saveSessions() {
             localStorage.setItem(getStorageKey(), JSON.stringify(sessions));
             renderSidebar();
+            updateStorageMetrics();
         }
 
         function createNewSession() {
@@ -703,12 +1043,14 @@ Guidelines:
 
         function renderSidebar() {
             const historyContainer = document.getElementById("history");
+            const historyCount = document.getElementById("history-count");
             historyContainer.innerHTML = "";
+            historyCount.innerText = `${sessions.length} chats`;
 
             sessions.forEach(sess => {
                 const isActive = sess.id === currentSessionId;
                 const item = document.createElement("div");
-                item.className = `group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border ${
+                item.className = `group flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all border ${
                     isActive 
                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
                     : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
@@ -716,7 +1058,7 @@ Guidelines:
                 item.onclick = () => loadSession(sess.id);
 
                 item.innerHTML = `
-                    <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="flex items-center gap-2 overflow-hidden">
                         <i class="far fa-comments text-xs"></i>
                         <div class="truncate font-medium text-xs w-36">${sess.title}</div>
                     </div>
@@ -730,8 +1072,10 @@ Guidelines:
 
         function triggerWelcome() {
             let msg = "";
-            if (currentUser.isGuest) {
-                msg = `### ⚡ Spark AI V2 (Guest Mode)\nHigh-speed intelligence core active. Chat, code generation, and Live Voice Calls ready.\n\n*Tip:* Switch to full-screen voice mode anytime at \`/voice\` or tap the headset icon.`;
+            if (currentUser.rank.includes("OWNER")) {
+                msg = `### ⚡ Welcome Back, Owner Chethan\nSpark AI V2 neural workspace online. Founder clearance recognized for **${currentUser.name}**.\n\nReady for ultra-fast chat, coding tasks, and image generation.`;
+            } else if (currentUser.isGuest) {
+                msg = `### ⚡ Spark AI V2 (Guest Mode)\nHigh-speed intelligence core active. Chat and code generation ready.\n\n*Tip:* Sign in with Google to unlock SiliconFlow Image Generation (\`/image\`).`;
             } else {
                 msg = `### ⚡ Spark AI V2 Pro Active\nWelcome back, **${currentUser.name}**! Live Voice Calls, SiliconFlow image synthesis, and pro quotas enabled.`;
             }
@@ -755,7 +1099,7 @@ Guidelines:
             }
         }
 
-        // Square Aspect-Ratio Image Loader
+        // SiliconFlow Image Generation with Persistent Library Saving
         async function handleSiliconFlowImageGen(rawPrompt, aiBox, activeSession) {
             const prompt = rawPrompt.trim();
             const boxId = 'img_box_' + Date.now();
@@ -842,10 +1186,14 @@ Guidelines:
                 };
             }
 
+            // Save to persistent Library
+            saveGalleryImage(prompt, imageUrl);
+
             activeSession.messages.push({ role: "ai", content: `![${prompt}](${imageUrl})` });
             saveSessions();
         }
 
+        /* ========== STANDARD TEXT CHAT SEND ========== */
         async function send() {
             const input = document.getElementById("input");
             const text = input.value.trim();
@@ -1022,6 +1370,17 @@ Guidelines:
                     localStorage.removeItem("spark_logged_user");
                 }
             }
+            
+            // Restore Scratchpad
+            const pad = document.getElementById("scratchpad-area");
+            const savedPad = localStorage.getItem("spark_scratchpad");
+            if (savedPad) pad.value = savedPad;
+            pad.addEventListener("input", () => {
+                localStorage.setItem("spark_scratchpad", pad.value);
+                updateStorageMetrics();
+            });
+
+            loadGalleryData();
             updateUserUI();
             loadUserSessions();
             handleRoute();
