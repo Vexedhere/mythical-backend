@@ -40,7 +40,7 @@
             backdrop-filter: blur(30px); 
             border: 1px solid rgba(16, 185, 129, 0.15); 
             border-radius: 24px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
         }
 
         .chat-user { 
@@ -88,13 +88,12 @@
                 </div>
             </div>
 
-            <!-- Agent Plan Visualizer in Voice -->
             <div id="voice-agent-plan" class="w-full mb-4 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[11px] font-mono text-emerald-300 flex items-center justify-center gap-2 truncate">
                 <i class="fas fa-microchip animate-pulse"></i> <span>Agent Standby</span>
             </div>
 
             <h3 id="voice-modal-status" class="text-base font-bold text-white mb-1">Listening to your voice...</h3>
-            <p id="voice-modal-subtext" class="text-xs text-gray-400 italic mb-6 max-w-xs">Speak naturally. Spark AI will autonomously reason and answer via speech.</p>
+            <p id="voice-modal-subtext" class="text-xs text-gray-400 italic mb-6 max-w-xs">Speak naturally. Real-time clock and timer agent active.</p>
 
             <div class="flex items-center gap-4">
                 <button id="voice-modal-mute" onclick="toggleVoiceMute()" class="w-12 h-12 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-300 transition-all border border-white/5">
@@ -293,7 +292,7 @@
 
             <!-- Actions Bar -->
             <div class="grid grid-cols-2 gap-1.5 mb-3 text-[10px]">
-                <button onclick="exportWorkspaceData()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-all" title="Download backup of chats and gallery">
+                <button onclick="exportWorkspaceData()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 hover:text-white flex items-center justify-center gap-1.5 transition-all">
                     <i class="fas fa-download text-emerald-400"></i> Export All
                 </button>
                 <button onclick="clearCurrentChat()" class="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 border border-white/5 hover:border-red-500/30 text-gray-400 hover:text-red-400 flex items-center justify-center gap-1.5 transition-all">
@@ -349,7 +348,7 @@
                     <input id="input" 
                            onkeydown="handleKeyDown(event)" 
                            class="flex-1 bg-transparent py-3.5 px-3 text-sm outline-none placeholder:text-gray-500" 
-                           placeholder="Message Spark AI V2 (Agentic planner active, or /image)...">
+                           placeholder="Message Spark AI V2 (Agentic planner & tools active)...">
 
                     <button onclick="send()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 hover:opacity-90 shadow-md shadow-emerald-500/20">
                         <i class="fas fa-paper-plane text-sm"></i>
@@ -395,15 +394,110 @@
         let currentSessionId = null;
         let isSidebarCollapsed = false;
 
-        /* ========== STRICT IDENTITY & SYSTEM PROMPTS ========== */
+        /* ========== OUTPUT FILTER (Strips Chain-of-Thought & Leaks) ========== */
+        function cleanModelOutput(text) {
+            if (!text) return "";
+            return text
+                .replace(/<think>[\s\S]*?<\/think>/gi, '') // Remove <think> tags
+                .replace(/<think>[\s\S]*/gi, '')           // Remove unclosed streaming think tags
+                .replace(/^Okay, the user is asking[\s\S]*?\n\n/gi, '')
+                .replace(/^The user is asking[\s\S]*?\n\n/gi, '')
+                .trim();
+        }
+
+        /* ========== REAL-TIME AWARE SYSTEM PROMPT ========== */
         function getSystemPrompt() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            const dateStr = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
             return `You are Spark AI V2, an advanced autonomous agentic intelligence system.
 STRICT IDENTITY DIRECTIVES:
-1. Your name is Spark AI V2. You are NOT Dots, ChatGPT, LLaMA, Claude, or any other assistant.
-2. Your creator, lead developer, and owner is Chethan. If asked about your owner, creator, or development, explicitly state Chethan is the Owner and Founder of Spark AI V2.
-3. Act as an active agent: structure complex technical challenges with reasoning, planning, and high-performance execution.
-4. For coding tasks, output clean markdown blocks with exact language identifiers.
-5. User Context: Name: ${currentUser?.name || "User"}, Role: ${currentUser?.rank || "GUEST MODE"}.`;
+1. Your name is Spark AI V2. You are NOT Dots, ChatGPT, or any other assistant.
+2. Your creator, lead developer, and owner is Chethan.
+3. CURRENT REAL-TIME CLOCK: The user's exact current device time is ${timeStr} on ${dateStr}.
+4. ALARMS & TIMERS: You have real client-side tool agents that schedule actual alarms, timers, and alerts. If the user asks for the time or to set an alarm/timer, confirm and inform them it is set.
+5. Provide helpful, direct, and structured agentic outputs.
+User Context: Name: ${currentUser?.name || "User"}, Role: ${currentUser?.rank || "GUEST MODE"}.`;
+        }
+
+        /* ========== REAL CLIENT ALARM & TIMER AGENT ========== */
+        function checkAndSetAlarm(text) {
+            const lower = text.toLowerCase().trim();
+            
+            // Check for current time query
+            if (lower === "what is the time" || lower === "what's the time" || lower === "what time is it" || lower === "time now" || lower === "what's the time now") {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                return `The current time is **${timeStr}**.`;
+            }
+
+            // Check for timer intent: e.g. "timer for 5 minutes" or "set timer 10 seconds"
+            const timerMatch = lower.match(/(?:set\s+a?\s*timer\s+for\s+|timer\s+for\s+|timer\s+)(\d+)\s*(second|sec|minute|min|hour|hr)s?/i);
+            if (timerMatch) {
+                const val = parseInt(timerMatch[1]);
+                const unit = timerMatch[2].toLowerCase();
+                let ms = val * 1000;
+                let unitLabel = "seconds";
+
+                if (unit.startsWith('min')) { ms = val * 60 * 1000; unitLabel = "minute(s)"; }
+                else if (unit.startsWith('hour') || unit.startsWith('hr')) { ms = val * 3600 * 1000; unitLabel = "hour(s)"; }
+
+                setTimeout(() => {
+                    triggerAlarmBeep(`Timer of ${val} ${unitLabel} is complete!`);
+                }, ms);
+
+                return `⏰ **Timer Active**: Timer set for **${val} ${unitLabel}**. I will alert you once time is up.`;
+            }
+
+            // Check for alarm intent: e.g. "set alarm for 5:25 pm" or "alarm at 7:00 am"
+            const alarmMatch = lower.match(/(?:set\s+an?\s*alarm\s+for\s+|alarm\s+at\s+|set\s+alarm\s+)(\d{1,2})[:.](\d{2})\s*(am|pm)?/i);
+            if (alarmMatch) {
+                let hours = parseInt(alarmMatch[1]);
+                const minutes = parseInt(alarmMatch[2]);
+                const ampm = alarmMatch[3]?.toLowerCase();
+
+                if (ampm === 'pm' && hours < 12) hours += 12;
+                if (ampm === 'am' && hours === 12) hours = 0;
+
+                const now = new Date();
+                const target = new Date();
+                target.setHours(hours, minutes, 0, 0);
+
+                if (target <= now) {
+                    target.setDate(target.getDate() + 1); // If past, schedule for next day
+                }
+
+                const diffMs = target - now;
+                const formattedTime = `${alarmMatch[1]}:${alarmMatch[2]} ${ampm ? ampm.toUpperCase() : ''}`;
+
+                setTimeout(() => {
+                    triggerAlarmBeep(`Alarm for ${formattedTime} ringing!`);
+                }, diffMs);
+
+                return `⏰ **Alarm Scheduled**: Alarm successfully set for **${formattedTime}**.`;
+            }
+
+            return null;
+        }
+
+        function triggerAlarmBeep(message) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    const ctx = new AudioCtx();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(750, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.8, ctx.currentTime);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 1.5);
+                }
+            } catch(e) {}
+            alert(`⏰ Spark AI Alert: ${message}`);
         }
 
         /* ========== AGENTIC VOICE ENGINE ========== */
@@ -460,7 +554,7 @@ STRICT IDENTITY DIRECTIVES:
             isVoiceMuted = false;
             voiceHistory = [];
             document.getElementById("voice-modal").classList.remove("hidden");
-            setVoiceModalStatus("Listening to your voice...", "Speak naturally. Spark AI will autonomously reason and answer via speech.");
+            setVoiceModalStatus("Listening to your voice...", "Speak naturally. Real-time clock and timer agent active.");
             setVoicePlan("Agent Active: Listening");
             try { voiceRecognition.start(); } catch(e) {}
         }
@@ -505,6 +599,28 @@ STRICT IDENTITY DIRECTIVES:
         }
 
         async function processVoiceAgent(userVoiceText) {
+            // First check if user is asking for time, alarm, or timer
+            const localToolAction = checkAndSetAlarm(userVoiceText);
+            if (localToolAction) {
+                const spokenClean = localToolAction.replace(/[*_`#]/g, '');
+                isVoiceAiSpeaking = true;
+                setVoiceModalStatus("Spark Speaking...", spokenClean);
+                setVoicePlan("Agent Action: Tool Handled");
+                
+                const utterance = new SpeechSynthesisUtterance(spokenClean);
+                utterance.rate = 1.05;
+                utterance.onend = () => {
+                    isVoiceAiSpeaking = false;
+                    if (isVoiceActive && !isVoiceMuted) {
+                        setVoiceModalStatus("Listening to your voice...", "Speak naturally.");
+                        setVoicePlan("Agent Active: Listening");
+                        try { voiceRecognition.start(); } catch(e) {}
+                    }
+                };
+                window.speechSynthesis.speak(utterance);
+                return;
+            }
+
             voiceHistory.push({ role: "user", content: userVoiceText });
             setVoiceModalStatus("Reasoning...", `Input: "${userVoiceText}"`);
             setVoicePlan("Agent Plan: Autonomous Reasoning...");
@@ -527,7 +643,7 @@ STRICT IDENTITY DIRECTIVES:
                         body: JSON.stringify({
                             model: model,
                             messages: [
-                                { role: "system", content: "You are Spark AI V2 in real-time continuous voice agent mode. Your creator and owner is Chethan. Provide concise, direct, spoken answers (1 to 3 sentences max) without any markdown or codeblocks." },
+                                { role: "system", content: "You are Spark AI V2 in real-time continuous voice agent mode. Your creator and owner is Chethan. Provide concise, direct, spoken answers (1 to 3 sentences max) without markdown, codeblocks, or inner thinking traces." },
                                 ...voiceHistory
                             ],
                             stream: false,
@@ -539,7 +655,9 @@ STRICT IDENTITY DIRECTIVES:
                     if (!res.ok) continue;
 
                     const data = await res.json();
-                    generatedAnswer = data.choices[0]?.message?.content || "";
+                    let raw = data.choices[0]?.message?.content || "";
+                    generatedAnswer = cleanModelOutput(raw);
+                    
                     if (generatedAnswer) {
                         streamSuccess = true;
                         break;
@@ -718,7 +836,7 @@ STRICT IDENTITY DIRECTIVES:
             });
         }
 
-        /* ========== EXPORT & SYSTEM METRICS ========== */
+        /* ========== EXPORT & STORAGE METRICS ========== */
         function exportWorkspaceData() {
             const exportPayload = {
                 user: currentUser,
@@ -749,7 +867,7 @@ STRICT IDENTITY DIRECTIVES:
             if (el) el.innerText = `${kb} KB Used`;
         }
 
-        /* ========== CODE BLOCK RENDERER & COPY ========== */
+        /* ========== MARKED RENDERER & CODE COPY ========== */
         const customRenderer = {
             code(arg1, arg2) {
                 let codeText = "";
@@ -1008,11 +1126,11 @@ STRICT IDENTITY DIRECTIVES:
         function triggerWelcome() {
             let msg = "";
             if (currentUser.rank.includes("OWNER")) {
-                msg = `### ⚡ Welcome Back, Owner Chethan\nSpark AI V2 Agentic Core initialized. Autonomous reasoning, Voice agent, and code synthesis ready.`;
+                msg = `### ⚡ Welcome Back, Owner Chethan\nSpark AI V2 Agentic Core online. Real-time time tools, autonomous reasoning, and voice mode ready.`;
             } else if (currentUser.isGuest) {
-                msg = `### ⚡ Spark AI V2 Active\nAutonomous agentic intelligence online. How can I assist you today?`;
+                msg = `### ⚡ Spark AI V2 Active\nAgentic reasoning, real-time clock, alarms, and coding engine online. How can I assist you today?`;
             } else {
-                msg = `### ⚡ Spark AI V2 Ready\nWelcome, **${currentUser.name}**! Agentic workflows, Voice mode, and multimodal generation ready.`;
+                msg = `### ⚡ Spark AI V2 Ready\nWelcome, **${currentUser.name}**! Agentic workflows, Voice mode, and tools active.`;
             }
             
             const aiBox = renderMessageUI("ai", "", false);
@@ -1067,31 +1185,28 @@ STRICT IDENTITY DIRECTIVES:
                 "https://api.siliconflow.com/v1/images/generations"
             ];
 
-            for (const endpoint of endpoints) {
-                for (const model of SILICONFLOW_IMAGE_MODELS) {
-                    try {
-                        const res = await fetch(endpoint, {
-                            method: "POST",
-                            headers: {
-                                "Authorization": `Bearer ${SILICONFLOW_API_KEY}`,
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                model: model,
-                                prompt: prompt,
-                                image_size: "1024x1024",
-                                batch_size: 1
-                            })
-                        });
+            for (const model of SILICONFLOW_IMAGE_MODELS) {
+                try {
+                    const res = await fetch(endpoint, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${SILICONFLOW_API_KEY}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            prompt: prompt,
+                            image_size: "1024x1024",
+                            batch_size: 1
+                        })
+                    });
 
-                        const data = await res.json();
-                        if (res.ok && data.images && data.images[0]?.url) {
-                            imageUrl = data.images[0].url;
-                            break;
-                        }
-                    } catch (err) {}
-                }
-                if (imageUrl) break;
+                    const data = await res.json();
+                    if (res.ok && data.images && data.images[0]?.url) {
+                        imageUrl = data.images[0].url;
+                        break;
+                    }
+                } catch (err) {}
             }
 
             if (!imageUrl) {
@@ -1135,6 +1250,18 @@ STRICT IDENTITY DIRECTIVES:
                 activeSession.title = text.length > 22 ? text.substring(0, 22) + "..." : text;
             }
 
+            // Real Alarm, Timer, & Time Agent Action Check
+            const localToolAction = checkAndSetAlarm(text);
+            if (localToolAction) {
+                activeSession.messages.push({ role: "user", content: text });
+                renderMessageUI("user", text, true);
+                activeSession.messages.push({ role: "ai", content: localToolAction });
+                renderMessageUI("ai", localToolAction, true);
+                saveSessions();
+                return;
+            }
+
+            // Image Agent Router Check
             const lowerText = text.toLowerCase().trim();
             let isImageRequest = false;
             let imagePrompt = "";
@@ -1164,7 +1291,6 @@ STRICT IDENTITY DIRECTIVES:
             activeSession.messages.push({ role: "user", content: text });
             renderMessageUI("user", text, true);
 
-            // Agentic Planner Indicator
             const aiBox = renderMessageUI("ai", `
                 <div class="agent-planner mb-3 flex items-center gap-2 text-[11px] text-emerald-400 font-mono bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 w-fit animate__animated animate__fadeIn">
                     <i class="fas fa-circle-nodes animate-spin"></i>
@@ -1232,7 +1358,8 @@ STRICT IDENTITY DIRECTIVES:
                                     const delta = json.choices[0]?.delta?.content || "";
                                     if (delta) {
                                         streamedContent += delta;
-                                        aiContent.innerHTML = marked.parse(streamedContent);
+                                        const cleanStream = cleanModelOutput(streamedContent);
+                                        aiContent.innerHTML = marked.parse(cleanStream);
                                         chatContainer.scrollTop = chatContainer.scrollHeight;
                                     }
                                 } catch (e) {}
@@ -1240,9 +1367,10 @@ STRICT IDENTITY DIRECTIVES:
                         }
                     }
 
-                    if (streamedContent.trim().length > 0) {
+                    const finalizedClean = cleanModelOutput(streamedContent);
+                    if (finalizedClean.length > 0) {
                         streamSucceeded = true;
-                        activeSession.messages.push({ role: "ai", content: streamedContent });
+                        activeSession.messages.push({ role: "ai", content: finalizedClean });
                         saveSessions();
                         break;
                     }
